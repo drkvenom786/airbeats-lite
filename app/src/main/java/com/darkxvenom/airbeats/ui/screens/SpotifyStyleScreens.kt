@@ -64,8 +64,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEachIndexed
-import com.darkxvenom.airbeats.ui.component.drawBackdropCustomShape
-import com.darkxvenom.airbeats.ui.component.layerBackdrop
 import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.hazeChild
 import androidx.core.net.toUri
@@ -243,12 +241,6 @@ fun SpotifyHomeScreen(
             )
         } // Close BoxWithConstraints
         } // Close hazeSource Box
-
-        val enableLiquidGlass by com.darkxvenom.airbeats.utils.rememberPreference(
-            com.darkxvenom.airbeats.constants.LiquidGlassKey,
-            defaultValue = false
-        )
-        val backdrop = com.darkxvenom.airbeats.ui.component.LocalBackdrop.current
 
         val isAtTop by androidx.compose.runtime.remember {
             androidx.compose.runtime.derivedStateOf {

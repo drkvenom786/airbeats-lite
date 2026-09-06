@@ -10,7 +10,6 @@ import java.time.ZoneOffset
 
 val DynamicThemeKey = booleanPreferencesKey("dynamicTheme")
 val DarkModeKey = stringPreferencesKey("darkMode")
-val LiquidGlassKey = booleanPreferencesKey("enableLiquidGlass")
 val DynamicIslandKey = booleanPreferencesKey("enableDynamicIsland")
 val DynamicIslandOffsetXKey = intPreferencesKey("dynamicIslandOffsetX")
 val DynamicIslandOffsetYKey = intPreferencesKey("dynamicIslandOffsetY")
@@ -23,7 +22,6 @@ val DynamicIslandLandscapeHeightKey = intPreferencesKey("dynamicIslandLandscapeH
 val DynamicIslandBgColorKey = intPreferencesKey("dynamicIslandBgColor")
 val DynamicIslandAccentColorKey = intPreferencesKey("dynamicIslandAccentColor")
 val DynamicIslandTextColorKey = intPreferencesKey("dynamicIslandTextColor")
-val DynamicIslandLiquidGlassKey = booleanPreferencesKey("dynamicIslandLiquidGlass")
 
 val UserNameKey = stringPreferencesKey("user_name")
 
@@ -37,8 +35,6 @@ val PlayerScreenStyleKey = stringPreferencesKey("playerScreenStyle")
 val HomeScreenStyleKey = stringPreferencesKey("homeScreenStyle")
 val NavBarStyleKey = stringPreferencesKey("navBarStyle")
 val HideVideoKey = booleanPreferencesKey("hideVideo")
-
-val ColourfullPlayerColorKey = intPreferencesKey("colourfullPlayerColor")
 
 enum class SliderStyle {
     DEFAULT,

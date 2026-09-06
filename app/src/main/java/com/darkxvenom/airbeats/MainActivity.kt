@@ -208,8 +208,6 @@ import com.darkxvenom.airbeats.constants.AppFont
 import com.darkxvenom.airbeats.constants.AppFontKey
 import com.darkxvenom.airbeats.ui.component.CurvedBottomNavigationItem
 import com.darkxvenom.airbeats.ui.component.LocalMenuState
-import com.darkxvenom.airbeats.ui.component.rememberBackdrop
-import com.darkxvenom.airbeats.ui.component.LocalBackdrop
 import com.darkxvenom.airbeats.ui.component.LiquidGlassBottomNavigationBar
 import com.darkxvenom.airbeats.ui.component.LocaleManager
 import com.darkxvenom.airbeats.ui.component.Lyrics
@@ -490,8 +488,6 @@ class MainActivity : ComponentActivity() {
                 appFont = appFont,
                 themeColor = themeColor,
             ) {
-                val backdrop = rememberBackdrop()
-
                 if (showSplash) {
                     HeadphoneSplashScreen()
                 } else {
@@ -846,7 +842,6 @@ class MainActivity : ComponentActivity() {
                                 LocalDownloadUtil provides downloadUtil,
                                 LocalShimmerTheme provides ShimmerTheme,
                                 LocalSyncUtils provides syncUtils,
-                                LocalBackdrop provides backdrop,
                             ) {
                                 var showRealNavBar by remember { mutableStateOf(false) }
                                 var playIntroAnimation by remember { mutableStateOf(true) }
