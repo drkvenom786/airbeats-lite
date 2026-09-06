@@ -1350,7 +1350,7 @@ class MainActivity : ComponentActivity() {
                                             ) searchBarScrollBehavior else topAppBarScrollBehavior,
                                             latestVersionName = latestVersionName,
                                             playerBottomSheetState = playerBottomSheetState,
-                                            onSearchClick = { onActiveChange(true) }
+                                            onSearchClick = { navController.navigate("search/") }
                                         )
                                     }
                                     }
