@@ -1328,48 +1328,19 @@ class MainActivity : ComponentActivity() {
                                                         navBackStackEntry?.destination?.hierarchy?.any { it.route == screen.route } == true
                                                     }.takeIf { it >= 0 } ?: 0
 
-                                                    var lastTapTime by remember { mutableLongStateOf(0L) }
-                                                    var lastTappedIcon by remember { mutableStateOf<Int?>(null) }
-                                                    var navigateToExplore by remember { mutableStateOf(false) }
-
                                                     val onItemSelectedAction: (Int) -> Unit = { index ->
-                                                         val screen = navigationItems[index]
-                                                         val isSelected = index == selectedIndex
+                                                        val screen = navigationItems[index]
+                                                        val isSelected = index == selectedIndex
 
-                                                         val currentTapTime = System.currentTimeMillis()
-                                                         val timeSinceLastTap = currentTapTime - lastTapTime
-                                                         val isDoubleTap =
-                                                             screen.titleId == R.string.explore &&
-                                                                     lastTappedIcon == R.string.explore &&
-                                                                     timeSinceLastTap < 300L
-
-                                                         lastTapTime = currentTapTime
-                                                         lastTappedIcon = screen.titleId
-
-                                                         if (screen.titleId == R.string.explore) {
-                                                             if (isDoubleTap) {
-                                                                 onActiveChange(true)
-                                                                 navigateToExplore = false
-                                                             } else {
-                                                                 navigateToExplore = true
-                                                                 coroutineScope.launch {
-                                                                     delay(300L)
-                                                                     if (navigateToExplore) {
-                                                                         navigateToScreen(navController, screen)
-                                                                     }
-                                                                 }
-                                                             }
-                                                         } else {
-                                                             if (isSelected) {
-                                                                 navController.currentBackStackEntry?.savedStateHandle?.set("scrollToTop", true)
-                                                                 coroutineScope.launch {
-                                                                     searchBarScrollBehavior.state.resetHeightOffset()
-                                                                 }
-                                                             } else {
-                                                                 navigateToScreen(navController, screen)
-                                                             }
-                                                         }
-                                                     }
+                                                        if (isSelected) {
+                                                            navController.currentBackStackEntry?.savedStateHandle?.set("scrollToTop", true)
+                                                            coroutineScope.launch {
+                                                                searchBarScrollBehavior.state.resetHeightOffset()
+                                                            }
+                                                        } else {
+                                                            navigateToScreen(navController, screen)
+                                                        }
+                                                    }
 
                                                     LiquidGlassBottomNavigationBar(
                                                         items = curvedItems,
@@ -1394,28 +1365,6 @@ class MainActivity : ComponentActivity() {
                                             .fillMaxSize()
                                             .layerBackdrop(backdrop)
                                     ) {
-                                        var transitionDirection =
-                                        AnimatedContentTransitionScope.SlideDirection.Left
-
-                                    if (navigationItems.fastAny { it.route == navBackStackEntry?.destination?.route }) {
-                                        if (navigationItems.fastAny { it.route == previousTab }) {
-                                            val curIndex = navigationItems.indexOf(
-                                                navigationItems.fastFirstOrNull {
-                                                    it.route == navBackStackEntry?.destination?.route
-                                                }
-                                            )
-                                            val prevIndex = navigationItems.indexOf(
-                                                navigationItems.fastFirstOrNull {
-                                                    it.route == previousTab
-                                                }
-                                            )
-                                            if (prevIndex > curIndex)
-                                                AnimatedContentTransitionScope.SlideDirection.Right.also {
-                                                    transitionDirection = it
-                                                }
-                                        }
-                                    }
-
                                     NavHost(
                                         navController = navController,
                                         startDestination = when (tabOpenedFromShortcut ?: defaultOpenTab) {
@@ -1428,12 +1377,12 @@ class MainActivity : ComponentActivity() {
                                             if (initialState.destination.route in topLevelScreens &&
                                                 targetState.destination.route in topLevelScreens
                                             ) {
-                                                fadeIn(spring(dampingRatio = Spring.DampingRatioNoBouncy))
+                                                fadeIn(animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing))
                                             } else {
-                                                fadeIn(spring(dampingRatio = Spring.DampingRatioMediumBouncy)) +
+                                                fadeIn(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
                                                         slideInHorizontally(
                                                             initialOffsetX = { it },
-                                                            animationSpec = spring(stiffness = Spring.StiffnessLow)
+                                                            animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
                                                         )
                                             }
                                         },
@@ -1442,9 +1391,9 @@ class MainActivity : ComponentActivity() {
                                             if (initialState.destination.route in topLevelScreens &&
                                                 targetState.destination.route in topLevelScreens
                                             ) {
-                                                fadeOut(spring(dampingRatio = Spring.DampingRatioNoBouncy))
+                                                fadeOut(animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing))
                                             } else {
-                                                fadeOut(spring(dampingRatio = Spring.DampingRatioLowBouncy)) +
+                                                fadeOut(animationSpec = tween(180, easing = FastOutSlowInEasing)) +
                                                         slideOutHorizontally(
                                                             targetOffsetX = { -it / 5 },
                                                             animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
@@ -1457,12 +1406,12 @@ class MainActivity : ComponentActivity() {
                                                         initialState.destination.route?.startsWith("search/") == true) &&
                                                 targetState.destination.route in topLevelScreens
                                             ) {
-                                                fadeIn(spring(dampingRatio = Spring.DampingRatioNoBouncy))
+                                                fadeIn(animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing))
                                             } else {
-                                                fadeIn(spring(dampingRatio = Spring.DampingRatioMediumBouncy)) +
+                                                fadeIn(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
                                                         slideInHorizontally(
                                                             initialOffsetX = { -it },
-                                                            animationSpec = spring(stiffness = Spring.StiffnessLow)
+                                                            animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
                                                         )
                                             }
                                         },
@@ -1472,9 +1421,9 @@ class MainActivity : ComponentActivity() {
                                                         initialState.destination.route?.startsWith("search/") == true) &&
                                                 targetState.destination.route in topLevelScreens
                                             ) {
-                                                fadeOut(spring(dampingRatio = Spring.DampingRatioNoBouncy))
+                                                fadeOut(animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing))
                                             } else {
-                                                fadeOut(spring(dampingRatio = Spring.DampingRatioLowBouncy)) +
+                                                fadeOut(animationSpec = tween(180, easing = FastOutSlowInEasing)) +
                                                         slideOutHorizontally(
                                                             targetOffsetX = { it },
                                                             animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
