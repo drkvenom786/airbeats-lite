@@ -81,8 +81,6 @@ import androidx.media3.common.Player
 import coil.compose.AsyncImage
 import com.darkxvenom.airbeats.LocalPlayerConnection
 import com.darkxvenom.airbeats.R
-import com.darkxvenom.airbeats.ui.component.LocalBackdrop
-import com.darkxvenom.airbeats.ui.component.drawBackdropCustomShape
 import com.darkxvenom.airbeats.extensions.togglePlayPause
 import com.darkxvenom.airbeats.models.MediaMetadata
 import com.darkxvenom.airbeats.ui.utils.highQualityThumbnail
@@ -107,10 +105,6 @@ fun AppleMiniPlayer(
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
     val canSkipNext by playerConnection.canSkipNext.collectAsState()
     val canSkipPrevious by playerConnection.canSkipPrevious.collectAsState()
-    
-    val backdrop = LocalBackdrop.current
-    val layer = rememberGraphicsLayer()
-    val luminanceAnimation = remember { Animatable(0.3f) }
 
     val themeContrastColor by animateColorAsState(
         targetValue = Color.White,
@@ -192,22 +186,8 @@ fun AppleMiniPlayer(
             modifier = Modifier
                 .fillMaxSize()
                 .offset { IntOffset(offsetXAnimatable.value.roundToInt(), 0) }
-                .then(
-                    if (backdrop != null) {
-                        Modifier
-                            .clip(RoundedCornerShape(32.dp))
-                            .drawBackdropCustomShape(
-                                backdrop = backdrop,
-                                layer = layer,
-                                luminanceAnimation = luminanceAnimation.value,
-                                shape = RoundedCornerShape(32.dp)
-                            )
-                    } else {
-                        Modifier
-                            .clip(RoundedCornerShape(32.dp))
-                            .background(MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.95f))
-                    }
-                )
+                .clip(RoundedCornerShape(24.dp))
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
         ) {
             if (duration > 0) {
                 LinearProgressIndicator(

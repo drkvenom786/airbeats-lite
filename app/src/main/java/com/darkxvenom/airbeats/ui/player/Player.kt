@@ -716,20 +716,6 @@ fun BottomSheetPlayer(
         getPlayPauseShape(playPauseShapeState.value)
     }
 
-    val infiniteTransition = rememberInfiniteTransition(label = "play_pause_rotation")
-    val playPauseRotation by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = 9000, // 9 seconds for a full rotation
-                easing = LinearEasing
-            ),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "rotation"
-    )
-
     // Forma dinámica: cuando está reproduciendo usa la forma seleccionada
     // Cuando está en pausa usa Square
     val currentPlayPauseShape = remember(isPlaying, playPauseShape) {
@@ -748,12 +734,12 @@ fun BottomSheetPlayer(
             .background(textButtonColor)
     }
 
-    LaunchedEffect(playbackState) {
+    LaunchedEffect(playbackState, state.isExpanded) {
         if (playbackState == STATE_READY) {
             while (isActive) {
-                delay(100)
                 position = playerConnection.player.currentPosition
                 duration = playerConnection.player.duration
+                delay(if (state.isExpanded) 250L else 1000L)
             }
         }
     }

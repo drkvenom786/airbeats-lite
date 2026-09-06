@@ -160,10 +160,6 @@ fun AppearanceSettings(
     )
 
     val (slimNav, onSlimNavChange) = rememberPreference(SlimNavBarKey, defaultValue = false)
-    val (enableLiquidGlass, onEnableLiquidGlassChange) = rememberPreference(
-        LiquidGlassKey,
-        defaultValue = false
-    )
     val (enableDynamicIsland, onEnableDynamicIslandChange) = rememberPreference(
         DynamicIslandKey,
         defaultValue = false
@@ -178,11 +174,9 @@ fun AppearanceSettings(
 
     val isSystemInDarkTheme = isSystemInDarkTheme()
     val useDarkTheme =
-        remember(darkMode, isSystemInDarkTheme, enableLiquidGlass, isPlayful) {
+        remember(darkMode, isSystemInDarkTheme, isPlayful) {
             if (isPlayful) {
                 false
-            } else if (enableLiquidGlass) {
-                true
             } else {
                 if (darkMode == DarkMode.AUTO) isSystemInDarkTheme else darkMode == DarkMode.ON
             }
@@ -520,12 +514,10 @@ fun AppearanceSettings(
                         {EnumListPreference(
                             title = { Text(stringResource(R.string.dark_theme)) },
                             icon = { Icon(painterResource(R.drawable.dark_mode), null) },
-                            selectedValue = if (enableLiquidGlass) DarkMode.ON else if (isPlayful) DarkMode.OFF else darkMode,
+                            selectedValue = if (isPlayful) DarkMode.OFF else darkMode,
                             onValueSelected = onDarkModeChange,
                             valueText = {
-                                if (enableLiquidGlass) {
-                                    stringResource(R.string.dark_theme_on)
-                                } else if (isPlayful) {
+                                if (isPlayful) {
                                     stringResource(R.string.dark_theme_off)
                                 } else {
                                     when (it) {
@@ -535,42 +527,29 @@ fun AppearanceSettings(
                                     }
                                 }
                             },
-                            isEnabled = !enableLiquidGlass && !isPlayful
+                            isEnabled = !isPlayful
                         )},
                         {
                             PreferenceEntry(
                                 title = { Text("Dynamic Island") },
-                                description = "Position, fluid size, landscape settings, liquid glass & colors",
+                                description = "Position, fluid size, landscape settings & colors",
                                 icon = { Icon(painterResource(R.drawable.music_note), null) },
                                 onClick = {
                                     navController.navigate("settings/dynamic_island")
                                 }
                             )
                         },
-                        {SwitchPreference(
-                            title = { Text(stringResource(R.string.enable_liquid_glass)) },
-                            description = stringResource(R.string.enable_liquid_glass_desc),
-                            icon = { Icon(painterResource(R.drawable.palette), null) },
-                            checked = enableLiquidGlass && !isPlayful,
-                            onCheckedChange = { newValue ->
-                                onEnableLiquidGlassChange(newValue)
-                                if (newValue) {
-                                    onDarkModeChange(DarkMode.ON)
-                                }
-                            },
-                            isEnabled = !isPlayful
-                        )},
                         {AnimatedVisibility(useDarkTheme) {
                             SwitchPreference(
                                 title = { Text(stringResource(R.string.pure_black)) },
                                 icon = { Icon(painterResource(R.drawable.contrast), null) },
-                                checked = pureBlack && useDarkTheme && !enableLiquidGlass,
+                                checked = pureBlack && useDarkTheme,
                                 onCheckedChange = { newValue ->
-                                    if (useDarkTheme && !enableLiquidGlass) {
+                                    if (useDarkTheme) {
                                         onPureBlackChange(newValue)
                                     }
                                 },
-                                isEnabled = useDarkTheme && !enableLiquidGlass
+                                isEnabled = useDarkTheme
                             )
                         }},
                         { PreferenceEntry(

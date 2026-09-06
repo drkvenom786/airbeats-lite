@@ -23,11 +23,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.graphics.rememberGraphicsLayer
-import com.darkxvenom.airbeats.constants.LiquidGlassKey
-import com.darkxvenom.airbeats.utils.rememberPreference
-import androidx.compose.animation.core.Animatable
-import androidx.compose.runtime.remember
 
 val LocalMenuState = compositionLocalOf { MenuState() }
 
@@ -56,13 +51,9 @@ class MenuState(
 fun BottomSheetMenu(
     modifier: Modifier = Modifier,
     state: MenuState,
-    background: Color = MaterialTheme.colorScheme.surface,
+    background: Color = MaterialTheme.colorScheme.surfaceContainerLow,
 ) {
     val focusManager = LocalFocusManager.current
-    val (enableLiquidGlass) = rememberPreference(LiquidGlassKey, false)
-    val backdrop = LocalBackdrop.current
-    val layer = rememberGraphicsLayer()
-    val luminanceAnimation = remember { Animatable(0.3f) }
 
     if (state.isVisible) {
         ModalBottomSheet(
@@ -70,8 +61,9 @@ fun BottomSheetMenu(
                 focusManager.clearFocus()
                 state.isVisible = false
             },
-            containerColor = if (enableLiquidGlass && backdrop != null) Color.Transparent else background,
+            containerColor = background,
             contentColor = MaterialTheme.colorScheme.onSurface,
+            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
             dragHandle = {
                 Box(
                     modifier = Modifier
@@ -81,7 +73,7 @@ fun BottomSheetMenu(
                         .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f))
                 )
             },
-            modifier = modifier.fillMaxHeight().then(if (enableLiquidGlass && backdrop != null) { Modifier.drawBackdropCustomShape(backdrop = backdrop, layer = layer, luminanceAnimation = luminanceAnimation.value, shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)) } else Modifier)
+            modifier = modifier.fillMaxHeight()
         ) {
             Column(
                 modifier = Modifier

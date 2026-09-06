@@ -3,6 +3,7 @@ package com.darkxvenom.airbeats.ui.component
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,7 +20,9 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.draw.clip
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -40,22 +43,10 @@ fun AppleNavigationBar(
     items: List<CurvedBottomNavigationItem>,
     selectedIndex: Int,
     onItemSelected: (Int) -> Unit,
-    backdrop: PlatformBackdrop
+    backdrop: PlatformBackdrop? = null
 ) {
-    val layer = rememberGraphicsLayer()
-    val luminanceAnimation = remember { Animatable(0.3f) }
-
-    val themeContrastColor by animateColorAsState(
-        targetValue = Color.White,
-        animationSpec = tween(500),
-        label = "ContrastColor"
-    )
-
-    val itemBgColor by animateColorAsState(
-        targetValue = Color.White.copy(alpha = 0.2f),
-        animationSpec = tween(500),
-        label = "ItemBgColor"
-    )
+    val themeContrastColor = MaterialTheme.colorScheme.onSurface
+    val itemBgColor = MaterialTheme.colorScheme.secondaryContainer
 
     Row(
         modifier = modifier
@@ -65,12 +56,8 @@ fun AppleNavigationBar(
     ) {
         HorizontalFloatingToolbar(
             modifier = Modifier
-                .drawBackdropCustomShape(
-                    backdrop = backdrop,
-                    layer = layer,
-                    luminanceAnimation = luminanceAnimation.value,
-                    shape = CircleShape
-                )
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                 .wrapContentSize(),
             colors = androidx.compose.material3.FloatingToolbarDefaults.standardFloatingToolbarColors()
                 .copy(toolbarContainerColor = Color.Transparent),
@@ -94,21 +81,23 @@ fun AppleNavigationBar(
                     shape = CircleShape,
                     colors = ButtonDefaults.buttonColors().copy(
                         containerColor = if (isSelected) itemBgColor else Color.Transparent,
-                        contentColor = if (isSelected) Color(0xFFFA233B) else themeContrastColor
+                        contentColor = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer else themeContrastColor
                     ),
                     modifier = Modifier.padding(horizontal = 0.dp),
                     contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 2.dp, vertical = 4.dp)
                 ) {
-                    androidx.compose.foundation.layout.Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    androidx.compose.foundation.layout.Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
                         Icon(
                             painter = painterResource(id = if (isSelected) item.iconActive else item.iconInactive),
                             contentDescription = null,
                             modifier = Modifier.size(24.dp)
                         )
-                        androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(2.dp))
                         androidx.compose.material3.Text(
                             text = androidx.compose.ui.res.stringResource(id = item.titleId),
-                            style = androidx.compose.material3.MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                            fontSize = 10.sp,
                             maxLines = 1
                         )
                     }
@@ -126,15 +115,12 @@ fun AppleNavigationBar(
 
         FloatingActionButton(
             modifier = Modifier
-                .drawBackdropCustomShape(
-                    backdrop = backdrop,
-                    layer = layer,
-                    luminanceAnimation = luminanceAnimation.value,
-                    shape = CircleShape
-                ),
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh),
             onClick = { onItemSelected(fabItemIndex) },
             shape = CircleShape,
-            containerColor = Color.Transparent,
+            containerColor = if (isFabSelected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = if (isFabSelected) MaterialTheme.colorScheme.onSecondaryContainer else themeContrastColor,
             elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp)
         ) {
             androidx.compose.foundation.layout.Column(
