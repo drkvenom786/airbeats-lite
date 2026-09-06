@@ -71,6 +71,7 @@ import com.darkxvenom.airbeats.viewmodels.LibrarySongsViewModel
 fun LibrarySongsScreen(
     navController: NavController,
     onDeselect: () -> Unit,
+    filterContent: (@Composable () -> Unit)? = null,
     viewModel: LibrarySongsViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -130,34 +131,55 @@ fun LibrarySongsScreen(
                 key = "filter",
                 contentType = CONTENT_TYPE_HEADER,
             ) {
-                Row {
-                    Spacer(Modifier.width(12.dp))
-                    FilterChip(
-                        label = { Text(stringResource(R.string.songs)) },
-                        selected = true,
-                        colors = FilterChipDefaults.filterChipColors(containerColor = MaterialTheme.colorScheme.surface),
-                        onClick = onDeselect,
-                        shape = RoundedCornerShape(16.dp),
-                        leadingIcon = {
-                            Icon(
-                                painter = painterResource(R.drawable.close),
-                                contentDescription = ""
+                if (filterContent != null) {
+                    androidx.compose.foundation.layout.Column {
+                        filterContent()
+                        Row(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
+                            ChipsRow(
+                                chips =
+                                    listOf(
+                                        SongFilter.LIKED to stringResource(R.string.filter_liked),
+                                        SongFilter.LIBRARY to stringResource(R.string.filter_library),
+                                        SongFilter.DOWNLOADED to stringResource(R.string.filter_downloaded),
+                                    ),
+                                currentValue = filter,
+                                onValueUpdate = {
+                                    filter = it
+                                },
+                                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                             )
-                        },
-                    )
-                    ChipsRow(
-                        chips =
-                            listOf(
-                                SongFilter.LIKED to stringResource(R.string.filter_liked),
-                                SongFilter.LIBRARY to stringResource(R.string.filter_library),
-                                SongFilter.DOWNLOADED to stringResource(R.string.filter_downloaded),
-                            ),
-                        currentValue = filter,
-                        onValueUpdate = {
-                            filter = it
-                        },
-                        modifier = Modifier.weight(1f),
-                    )
+                        }
+                    }
+                } else {
+                    Row {
+                        Spacer(Modifier.width(12.dp))
+                        FilterChip(
+                            label = { Text(stringResource(R.string.songs)) },
+                            selected = true,
+                            colors = FilterChipDefaults.filterChipColors(containerColor = MaterialTheme.colorScheme.surface),
+                            onClick = onDeselect,
+                            shape = RoundedCornerShape(16.dp),
+                            leadingIcon = {
+                                Icon(
+                                    painter = painterResource(R.drawable.close),
+                                    contentDescription = ""
+                                )
+                            },
+                        )
+                        ChipsRow(
+                            chips =
+                                listOf(
+                                    SongFilter.LIKED to stringResource(R.string.filter_liked),
+                                    SongFilter.LIBRARY to stringResource(R.string.filter_library),
+                                    SongFilter.DOWNLOADED to stringResource(R.string.filter_downloaded),
+                                ),
+                            currentValue = filter,
+                            onValueUpdate = {
+                                filter = it
+                            },
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
                 }
             }
 

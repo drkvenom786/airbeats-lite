@@ -45,6 +45,7 @@ import com.darkxvenom.airbeats.viewmodels.LocalSongsViewModel
 @Composable
 fun LocalSongsScreen(
     navController: NavController,
+    filterContent: (@Composable () -> Unit)? = null,
     viewModel: LocalSongsViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -82,74 +83,46 @@ fun LocalSongsScreen(
 
     val listState = rememberLazyListState()
 
-    // ── Blur background same as other screens ─────────────────────────────────
-    val mediaMetadata by playerConnection?.mediaMetadata?.collectAsState()
-        ?: remember { mutableStateOf(null) }
-
     Box(modifier = Modifier.fillMaxSize()) {
-
-        mediaMetadata?.thumbnailUrl?.let { imageUrl ->
-            com.darkxvenom.airbeats.ui.component.BlurredBackground(
-                model = imageUrl
-            )
-            val isDark = MaterialTheme.colorScheme.background.luminance() < 0.5f
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        if (isDark) Brush.verticalGradient(
-                            listOf(
-                                Color.Black.copy(alpha = 0.2f),
-                                Color.Black.copy(alpha = 0.5f),
-                                Color.Black.copy(alpha = 0.85f)
-                            )
-                        ) else Brush.verticalGradient(
-                            listOf(
-                                MaterialTheme.colorScheme.surface.copy(alpha = 0.25f),
-                                MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
-                                MaterialTheme.colorScheme.background.copy(alpha = 0.85f)
-                            )
-                        )
-                    )
-            )
-        }
-
         // ── Main content ──────────────────────────────────────────────────────
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .statusBarsPadding()
+                .then(if (filterContent == null) Modifier.statusBarsPadding() else Modifier)
         ) {
-
-            // Header
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 16.dp)
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Local Songs",
-                        style = MaterialTheme.typography.headlineLarge,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    if (songs.isNotEmpty()) {
+            if (filterContent != null) {
+                filterContent()
+            } else {
+                // Header when opened standalone
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 16.dp)
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "${songs.size} songs",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            text = "Local Songs",
+                            style = MaterialTheme.typography.headlineLarge,
+                            fontWeight = FontWeight.Bold,
                         )
+                        if (songs.isNotEmpty()) {
+                            Text(
+                                text = "${songs.size} songs",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            )
+                        }
                     }
-                }
-                // Refresh button
-                if (hasPermission) {
-                    IconButton(onClick = { viewModel.loadSongs() }) {
-                        Icon(
-                            painter = painterResource(R.drawable.refresh),
-                            contentDescription = "Refresh",
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
+                    // Refresh button
+                    if (hasPermission) {
+                        IconButton(onClick = { viewModel.loadSongs() }) {
+                            Icon(
+                                painter = painterResource(R.drawable.refresh),
+                                contentDescription = "Refresh",
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                     }
                 }
             }
