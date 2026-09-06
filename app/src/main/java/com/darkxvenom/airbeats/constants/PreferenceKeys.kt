@@ -55,21 +55,9 @@ enum class NavBarStyle {
 }
 
 enum class PlayerScreenStyle {
-    PAPER,
+    IOS_STYLED,
     CLASSIC,
-    MODERN,
-    SPOTIFY,
-    LIQUID,
-    CLOUDGLOW,
-    FROST,
-    FOLD,
-    GROOVE,
-    POPSY,
-    MINIMAL,
-    COLOURFULL,
-    APPLE,
-    GALAXY,
-    IOS_STYLED
+    MODERN
 }
 
 const val SYSTEM_DEFAULT = "SYSTEM_DEFAULT"

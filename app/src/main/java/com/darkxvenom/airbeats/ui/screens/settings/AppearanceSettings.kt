@@ -547,37 +547,6 @@ fun AppearanceSettings(
                 SettingsGeneralCategory(
                     title = stringResource(R.string.theme),
                     items = listOf(
-                        {EnumListPreference(
-                            title = { Text(stringResource(R.string.home_screen_style)) },
-                            icon = { Icon(painterResource(R.drawable.home), null) },
-                            selectedValue = homeScreenStyle,
-                            onValueSelected = onHomeScreenStyleChange,
-                            valueText = {
-                                when (it) {
-                                    HomeScreenStyle.CLASSIC -> "Classic"
-                                    HomeScreenStyle.PLAYFUL -> "Playful"
-                                    HomeScreenStyle.NEON -> "Neon"
-                                    HomeScreenStyle.SPOTIFY -> "Spotify"
-                                    HomeScreenStyle.APPLE -> "Apple"
-                                }
-                            },
-                        )},
-                        {EnumListPreference(
-                            title = { Text(stringResource(R.string.navigation_bar_style)) },
-                            icon = { Icon(painterResource(R.drawable.nav_bar), null) },
-                            selectedValue = navBarStyle,
-                            onValueSelected = onNavBarStyleChange,
-                            valueText = {
-                                when (it) {
-                                    NavBarStyle.CLASSIC -> "Classic"
-                                    NavBarStyle.LIQUID_GLASS -> "Liquid Glass"
-                                    NavBarStyle.SPOTIFY -> "Spotify"
-                                    NavBarStyle.APPLE -> "Apple"
-                                    NavBarStyle.NEON -> "Neon"
-                                    NavBarStyle.NEW_CLASSIC -> "New Classic"
-                                }
-                            },
-                        )},
                         {SwitchPreference(
                             title = { Text(stringResource(R.string.enable_dynamic_theme)) },
                             icon = { Icon(painterResource(R.drawable.palette), null) },
@@ -637,7 +606,7 @@ fun AppearanceSettings(
                                         onPureBlackChange(newValue)
                                     }
                                 },
-                                isEnabled = useDarkTheme && !enableLiquidGlass
+                                enabled = useDarkTheme && !enableLiquidGlass
                             )
                         }},
                         { PreferenceEntry(
@@ -747,35 +716,13 @@ fun AppearanceSettings(
                             onValueSelected = onPlayerScreenStyleChange,
                             valueText = {
                                 when (it) {
-                                    PlayerScreenStyle.PAPER -> stringResource(R.string.paper_player)
+                                    PlayerScreenStyle.IOS_STYLED -> "iOS Styled"
                                     PlayerScreenStyle.CLASSIC -> stringResource(R.string.classic_player)
                                     PlayerScreenStyle.MODERN -> stringResource(R.string.modern_player)
-                                    PlayerScreenStyle.SPOTIFY -> stringResource(R.string.spotify_player)
-                                    PlayerScreenStyle.LIQUID -> stringResource(R.string.liquid_player)
-                                    PlayerScreenStyle.CLOUDGLOW -> "CloudGlow"
-                                    PlayerScreenStyle.FROST -> "Frost"
-                                    PlayerScreenStyle.FOLD -> "Fold"
-                                    PlayerScreenStyle.GROOVE -> "Groove"
-                                    PlayerScreenStyle.POPSY -> "Popsy"
-                                    PlayerScreenStyle.MINIMAL -> "Minimal"
-                                    PlayerScreenStyle.COLOURFULL -> "Colourfull"
-                                    PlayerScreenStyle.APPLE -> "Apple"
-                                    PlayerScreenStyle.GALAXY -> "Galaxy"
-                                    PlayerScreenStyle.IOS_STYLED -> "IOS Styled"
                                 }
                             },
+                            values = listOf(PlayerScreenStyle.IOS_STYLED, PlayerScreenStyle.CLASSIC, PlayerScreenStyle.MODERN)
                         )},
-
-                        *(if (playerScreenStyle == PlayerScreenStyle.COLOURFULL || playerScreenStyle == PlayerScreenStyle.APPLE || playerScreenStyle == PlayerScreenStyle.GALAXY) arrayOf(
-                            { PreferenceEntry(
-                                title = { Text(stringResource(R.string.player_colour)) },
-                                description = "Choose a custom background color",
-                                icon = { Icon(painterResource(R.drawable.palette), null) },
-                                onClick = {
-                                    showColorPickerOptionDialog = true
-                                }
-                            ) }
-                        ) else emptyArray()),
 
                         {EnumListPreference(
                             title = { Text(stringResource(R.string.player_background_style)) },
@@ -843,22 +790,6 @@ fun AppearanceSettings(
                                 showSliderOptionDialog = true
                             },
                         )},
-
-                        *(if (playerScreenStyle == PlayerScreenStyle.GALAXY) arrayOf(
-                            {
-                                val (showGalaxySlider, onShowGalaxySliderChange) = rememberPreference(
-                                    ShowGalaxySliderKey,
-                                    defaultValue = true
-                                )
-                                SwitchPreference(
-                                    title = { Text(stringResource(R.string.show_galaxy_slider)) },
-                                    description = stringResource(R.string.show_galaxy_slider_desc),
-                                    icon = { Icon(painterResource(R.drawable.sliders), null) },
-                                    checked = showGalaxySlider,
-                                    onCheckedChange = onShowGalaxySliderChange
-                                )
-                            }
-                        ) else emptyArray()),
 
                         {SwitchPreference(
                             title = { Text(stringResource(R.string.enable_swipe_thumbnail)) },
