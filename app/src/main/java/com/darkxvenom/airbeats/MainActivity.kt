@@ -540,7 +540,6 @@ class MainActivity : ComponentActivity() {
                                     Screens.Home.route,
                                     Screens.Explore.route,
                                     Screens.Library.route,
-                                    "settings",
                                 )
 
                             val (query, onQueryChange) =
@@ -719,7 +718,7 @@ class MainActivity : ComponentActivity() {
 
                             LaunchedEffect(navBackStackEntry) {
                                 shouldShowTopBar =
-                                    !active && navBackStackEntry?.destination?.route in topLevelScreens && navBackStackEntry?.destination?.route != "settings"
+                                    !active && navBackStackEntry?.destination?.route in topLevelScreens
                             }
 
                             val coroutineScope = rememberCoroutineScope()
@@ -1292,12 +1291,12 @@ class MainActivity : ComponentActivity() {
                                             if (initialState.destination.route in topLevelScreens &&
                                                 targetState.destination.route in topLevelScreens
                                             ) {
-                                                fadeIn(animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing))
+                                                fadeIn(animationSpec = tween(durationMillis = 240, easing = FastOutSlowInEasing))
                                             } else {
-                                                fadeIn(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
+                                                fadeIn(animationSpec = tween(durationMillis = 300, easing = LinearOutSlowInEasing)) +
                                                         slideInHorizontally(
-                                                            initialOffsetX = { it },
-                                                            animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
+                                                            initialOffsetX = { (it * 0.28f).toInt() },
+                                                            animationSpec = tween(durationMillis = 320, easing = FastOutSlowInEasing)
                                                         )
                                             }
                                         },
@@ -1306,12 +1305,12 @@ class MainActivity : ComponentActivity() {
                                             if (initialState.destination.route in topLevelScreens &&
                                                 targetState.destination.route in topLevelScreens
                                             ) {
-                                                fadeOut(animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing))
+                                                fadeOut(animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing))
                                             } else {
-                                                fadeOut(animationSpec = tween(180, easing = FastOutSlowInEasing)) +
+                                                fadeOut(animationSpec = tween(durationMillis = 260, easing = FastOutLinearInEasing)) +
                                                         slideOutHorizontally(
-                                                            targetOffsetX = { -it / 5 },
-                                                            animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
+                                                            targetOffsetX = { (-it * 0.20f).toInt() },
+                                                            animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
                                                         )
                                             }
                                         },
@@ -1321,12 +1320,12 @@ class MainActivity : ComponentActivity() {
                                                         initialState.destination.route?.startsWith("search/") == true) &&
                                                 targetState.destination.route in topLevelScreens
                                             ) {
-                                                fadeIn(animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing))
+                                                fadeIn(animationSpec = tween(durationMillis = 240, easing = FastOutSlowInEasing))
                                             } else {
-                                                fadeIn(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
+                                                fadeIn(animationSpec = tween(durationMillis = 300, easing = LinearOutSlowInEasing)) +
                                                         slideInHorizontally(
-                                                            initialOffsetX = { -it },
-                                                            animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
+                                                            initialOffsetX = { (-it * 0.20f).toInt() },
+                                                            animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
                                                         )
                                             }
                                         },
@@ -1336,12 +1335,12 @@ class MainActivity : ComponentActivity() {
                                                         initialState.destination.route?.startsWith("search/") == true) &&
                                                 targetState.destination.route in topLevelScreens
                                             ) {
-                                                fadeOut(animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing))
+                                                fadeOut(animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing))
                                             } else {
-                                                fadeOut(animationSpec = tween(180, easing = FastOutSlowInEasing)) +
+                                                fadeOut(animationSpec = tween(durationMillis = 260, easing = FastOutLinearInEasing)) +
                                                         slideOutHorizontally(
-                                                            targetOffsetX = { it },
-                                                            animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
+                                                            targetOffsetX = { (it * 0.28f).toInt() },
+                                                            animationSpec = tween(durationMillis = 320, easing = FastOutSlowInEasing)
                                                         )
                                             }
                                         },

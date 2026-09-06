@@ -1116,16 +1116,6 @@ fun SettingsScreen(
                                     )
                                 },
                                 onClick = { showChangelogSheet = true }
-                            ),
-                            SettingsCategoryItem(
-                                icon = painterResource(R.drawable.telegram),
-                                title = {
-                                    Text(
-                                        "Telegram Bot",
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                },
-                                onClick = { uriHandler.openUri("https://t.me/Stormxmusicrobot") }
                             )
                         )
                     )
