@@ -462,30 +462,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            val settingsEmail by rememberPreference(com.darkxvenom.airbeats.constants.AccountEmailKey, "")
-            val managerEmail by namePreferenceManager.accountEmail.collectAsState(initial = "")
-            val effectiveEmail = settingsEmail.ifBlank { managerEmail }
-            val (_, setLastBackupTimestamp) = rememberPreference(com.darkxvenom.airbeats.constants.LastBackupTimestampKey, 0L)
-            val backupViewModel = com.darkxvenom.airbeats.ui.utils.safeHiltViewModel<com.darkxvenom.airbeats.viewmodels.BackupRestoreViewModel>()
-            val context = androidx.compose.ui.platform.LocalContext.current
-            val userName by namePreferenceManager.userName.collectAsState(initial = "AirBeats User")
-            
-            LaunchedEffect(effectiveEmail, userName) {
-                val automaticCloudBackupEnabled = context
-                    .getSharedPreferences("backup_settings", android.content.Context.MODE_PRIVATE)
-                    .getBoolean("enable_cloud_upload", true)
-
-                if (automaticCloudBackupEnabled && effectiveEmail.isNotBlank() && backupViewModel != null) {
-                    val now = System.currentTimeMillis()
-                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                        val result = backupViewModel.backupToDrive(context, effectiveEmail, userName)
-                        if (result is com.darkxvenom.airbeats.utils.DriveResult.Success) {
-                            setLastBackupTimestamp(now)
-                        }
-                    }
-                }
-            }
-
             var showFullscreenLyrics by remember { mutableStateOf(false) }
 
             val playerScreenStyle by rememberEnumPreference<PlayerScreenStyle>(PlayerScreenStyleKey, defaultValue = PlayerScreenStyle.IOS_STYLED)
@@ -1249,14 +1225,7 @@ class MainActivity : ComponentActivity() {
                                                     ?: return@BottomSheet
 
                                                 if (mediaMetadata != null) {
-                                                    if (playerScreenStyle == PlayerScreenStyle.SPOTIFY) {
-                                                        SpotifyLyrics(
-                                                            onNavigateBack = {
-                                                                lyricsBottomSheetState.collapseSoft()
-                                                            },
-                                                            modifier = Modifier.fillMaxSize()
-                                                        )
-                                                    } else if (enableNewLyricsScreen && playerScreenStyle != PlayerScreenStyle.GALAXY) {
+                                                    if (enableNewLyricsScreen) {
                                                         com.darkxvenom.airbeats.ui.player.AirBeatsLyricsScreen(
                                                             mediaMetadata = mediaMetadata!!,
                                                             navController = navController,
@@ -1402,75 +1371,16 @@ class MainActivity : ComponentActivity() {
                                                          }
                                                      }
 
-                                                     if (navBarStyle == NavBarStyle.NEW_CLASSIC) {
-                                                         com.darkxvenom.airbeats.ui.component.NewClassicBottomNavigationBar(
-                                                             items = curvedItems,
-                                                             selectedIndex = selectedIndex,
-                                                             onItemSelected = onItemSelectedAction,
-                                                             onNavigateRoute = { route -> navController.navigate(route) },
-                                                             modifier = Modifier
-                                                                 .fillMaxSize()
-                                                                 .offset(y = offsetY)
-                                                                 .scale(scale)
-                                                                 .alpha(alpha)
-                                                         )
-                                                     } else if (navBarStyle == NavBarStyle.NEON) {
-                                                         com.darkxvenom.airbeats.ui.component.NeonBottomNavigationBar(
-                                                             items = curvedItems,
-                                                             selectedIndex = selectedIndex,
-                                                             onItemSelected = onItemSelectedAction,
-                                                             modifier = Modifier
-                                                                 .fillMaxSize()
-                                                                 .offset(y = offsetY)
-                                                                 .scale(scale)
-                                                                 .alpha(alpha)
-                                                         )
-                                                     } else if (navBarStyle == NavBarStyle.SPOTIFY) {
-                                                         com.darkxvenom.airbeats.ui.component.SpotifyBottomNavigationBar(
-                                                             items = curvedItems,
-                                                             selectedIndex = selectedIndex,
-                                                             onItemSelected = onItemSelectedAction,
-                                                             modifier = Modifier
-                                                                 .fillMaxSize()
-                                                                 .offset(y = offsetY)
-                                                                 .scale(scale)
-                                                                 .alpha(alpha)
-                                                         )
-                                                     } else if (navBarStyle == NavBarStyle.APPLE) {
-                                                         com.darkxvenom.airbeats.ui.component.AppleNavigationBar(
-                                                             items = curvedItems,
-                                                             selectedIndex = selectedIndex,
-                                                             onItemSelected = onItemSelectedAction,
-                                                             backdrop = backdrop,
-                                                             modifier = Modifier
-                                                                 .fillMaxSize()
-                                                                 .offset(y = offsetY)
-                                                                 .scale(scale)
-                                                                 .alpha(alpha)
-                                                         )
-                                                     } else if (navBarStyle == NavBarStyle.LIQUID_GLASS || enableLiquidGlass) {
-                                                         LiquidGlassBottomNavigationBar(
-                                                             items = curvedItems,
-                                                             selectedIndex = selectedIndex,
-                                                             onItemSelected = onItemSelectedAction,
-                                                             backdrop = backdrop,
-                                                             modifier = Modifier
-                                                                 .offset(y = offsetY)
-                                                                 .scale(scale)
-                                                                 .alpha(alpha)
-                                                         )
-                                                     } else {
-                                                         CurvedBottomNavigationBar(
-                                                             items = curvedItems,
-                                                             selectedIndex = selectedIndex,
-                                                             onItemSelected = onItemSelectedAction,
-                                                             modifier = Modifier
-                                                                 .fillMaxSize()
-                                                                 .offset(y = offsetY)
-                                                                 .scale(scale)
-                                                                 .alpha(alpha)
-                                                         )
-                                                     }
+                                                    LiquidGlassBottomNavigationBar(
+                                                        items = curvedItems,
+                                                        selectedIndex = selectedIndex,
+                                                        onItemSelected = onItemSelectedAction,
+                                                        backdrop = backdrop,
+                                                        modifier = Modifier
+                                                            .offset(y = offsetY)
+                                                            .scale(scale)
+                                                            .alpha(alpha)
+                                                    )
                                                 }
 
                                             } else {
@@ -1508,7 +1418,7 @@ class MainActivity : ComponentActivity() {
 
                                     NavHost(
                                         navController = navController,
-                                        startDestination = if (isNameSet == false) "onboarding" else when (tabOpenedFromShortcut ?: defaultOpenTab) {
+                                        startDestination = when (tabOpenedFromShortcut ?: defaultOpenTab) {
                                             NavigationTab.HOME -> Screens.Home
                                             NavigationTab.EXPLORE -> Screens.Explore
                                             NavigationTab.LIBRARY -> Screens.Library

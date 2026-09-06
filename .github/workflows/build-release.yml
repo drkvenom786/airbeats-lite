@@ -1,4 +1,4 @@
-name: Build Debug APK
+﻿name: Build Signed Release APK
 
 on:
   push:
@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    name: Build Debug APK
+    name: Build Signed Release APK
     runs-on: ubuntu-latest
 
     steps:
@@ -55,17 +55,11 @@ jobs:
           
           touch local.properties
 
-      - name: Build Signed APKs
-        run: ./gradlew assembleRelease assembleDebug
+      - name: Build Signed Release APK
+        run: ./gradlew assembleRelease
 
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
           name: AirBeats-Release-APK
           path: app/build/outputs/apk/release/*.apk
-
-      - name: Upload Debug APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: AirBeats-Debug-APK
-          path: app/build/outputs/apk/debug/*.apk
