@@ -4,8 +4,6 @@ import android.Manifest
 import com.darkxvenom.airbeats.ui.component.LocalUserName
 import android.annotation.SuppressLint
 import androidx.compose.animation.core.LinearEasing
-import androidx.core.app.ActivityCompat
-import com.google.firebase.messaging.FirebaseMessaging
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -272,12 +270,6 @@ import java.net.URLEncoder
 import javax.inject.Inject
 import kotlin.math.absoluteValue
 import kotlin.time.Duration.Companion.days
-import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.darkxvenom.airbeats.ui.component.RankPreferenceManager
-import com.darkxvenom.airbeats.ui.component.RankUpPopup
-import com.darkxvenom.airbeats.ui.component.AirBeatsRank
-import com.darkxvenom.airbeats.ui.component.RankBadge
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.darkxvenom.airbeats.viewmodels.StatsViewModel
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -383,42 +375,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
-
-        // 🔔 Notification permission
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-                1
-            )
-        }
-
-        // 🔥 Get FCM token
-        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                Log.d("FCM_TOKEN", "Token obtained")
-            } else {
-                Log.e("FCM_TOKEN", "Token failed")
-            }
-        }
-
-        // 🔥 Subscribe all users
-        FirebaseMessaging.getInstance().subscribeToTopic("all_users")
-            .addOnCompleteListener {
-                if (it.isSuccessful) {
-                    Log.d("FCM", "Subscribed to all_users")
-                } else {
-                    Log.e("FCM", "Subscription failed")
-                }
-            }
-
-        val versionName = BuildConfig.VERSION_NAME
-        FirebaseMessaging.getInstance().subscribeToTopic(versionName)
-            .addOnCompleteListener {
-                if (it.isSuccessful) {
-                    Log.d("FCM", "Subscribed to $versionName")
-                }
-            }
 
         window.decorView.layoutDirection = View.LAYOUT_DIRECTION_LTR
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -536,34 +492,6 @@ class MainActivity : ComponentActivity() {
                 appFont = appFont,
                 themeColor = themeColor,
             ) {
-                val rankPrefMgr = remember { RankPreferenceManager(this@MainActivity) }
-                val lastSeenRank by rankPrefMgr.lastSeenRank.collectAsState(initial = null)
-                val statsViewModel = com.darkxvenom.airbeats.ui.utils.safeHiltViewModel<StatsViewModel>()
-                val totalHours by (statsViewModel?.totalListenHours ?: kotlinx.coroutines.flow.flowOf(0.0)).collectAsState(initial = 0.0)
-                val currentRank = remember(totalHours) {
-                    if (totalHours >= 1.0) AirBeatsRank.fromHours(totalHours.toInt()) else null
-                }
-                var activeRankUpPopup by remember { mutableStateOf<AirBeatsRank?>(null) }
-
-                LaunchedEffect(currentRank, lastSeenRank) {
-                    if (currentRank != null && lastSeenRank != currentRank) {
-                        activeRankUpPopup = currentRank
-                    }
-                }
-
-                activeRankUpPopup?.let { rank ->
-                    val popupScope = rememberCoroutineScope()
-                    RankUpPopup(
-                        newRank = rank,
-                        onDismiss = {
-                            popupScope.launch {
-                                rankPrefMgr.saveLastSeenRank(rank)
-                            }
-                            activeRankUpPopup = null
-                        }
-                    )
-                }
-
                 val backdrop = rememberBackdrop()
 
                 if (showSplash) {
@@ -590,15 +518,8 @@ class MainActivity : ComponentActivity() {
                             val navBackStackEntry by navController.currentBackStackEntryAsState()
                             val (previousTab) = rememberSaveable { mutableStateOf("home") }
 
-                            val navigationItems = remember(homeScreenStyle, navBarStyle, enableLiquidGlass) { 
-                                when (navBarStyle) {
-                                    NavBarStyle.CLASSIC -> listOf(Screens.Home, Screens.Explore, Screens.Library)
-                                    NavBarStyle.LIQUID_GLASS -> listOf(Screens.Home, Screens.Explore, Screens.Library)
-                                    NavBarStyle.SPOTIFY -> listOf(Screens.Home, Screens.Search, Screens.Explore, Screens.Library)
-                                    NavBarStyle.APPLE -> listOf(Screens.Home, Screens.Stats, Screens.Explore, Screens.Library, Screens.Search)
-                                    NavBarStyle.NEW_CLASSIC -> listOf(Screens.Home, Screens.Search, Screens.Explore, Screens.Library)
-                                    else -> listOf(Screens.Home, Screens.Explore, Screens.Library)
-                                }
+                            val navigationItems = remember { 
+                                listOf(Screens.Home, Screens.Explore, Screens.Library)
                             }
                             val (slimNav) = rememberPreference(SlimNavBarKey, defaultValue = false)
                             val defaultOpenTab by rememberEnumPreference(
@@ -1080,12 +1001,6 @@ class MainActivity : ComponentActivity() {
                                                                     ),
                                                                 )
                                                             }
-                                                        }
-                                                        IconButton(onClick = { navController.navigate(com.darkxvenom.airbeats.ui.screens.musicrecognition.MusicRecognitionRoute) }) {
-                                                            Icon(
-                                                                painter = painterResource(R.drawable.mic),
-                                                                contentDescription = "Music Recognition"
-                                                            )
                                                         }
                                                     }
                                                 },
@@ -1943,18 +1858,6 @@ fun ModernHomeTopBar(
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Bold
                         )
-                        val statsViewModel = com.darkxvenom.airbeats.ui.utils.safeHiltViewModel<StatsViewModel>()
-                        val totalHours by (statsViewModel?.totalListenHours ?: kotlinx.coroutines.flow.flowOf(0.0)).collectAsState(initial = 0.0)
-                        val currentRank = remember(totalHours) {
-                            if (totalHours >= 1.0) AirBeatsRank.fromHours(totalHours.toInt()) else null
-                        }
-                        val rankPrefMgr = remember { RankPreferenceManager(context) }
-                        val displayedRank by rankPrefMgr.displayedRank.collectAsState(initial = null)
-
-                        currentRank?.let { rank ->
-                            Spacer(modifier = Modifier.width(8.dp))
-                            RankBadge(rank = rank, displayedRank = displayedRank, size = 26.dp)
-                        }
                     }
                 }
 

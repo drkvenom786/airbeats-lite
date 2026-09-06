@@ -297,8 +297,7 @@ fun LibraryMixScreen(
                                     .fillMaxWidth()
                                     .clickable {
                                         navController.navigate("auto_playlist/liked")
-                                    }
-                                    .animateItem(),
+                                    },
                         )
                     }
 
@@ -314,8 +313,7 @@ fun LibraryMixScreen(
                                     .fillMaxWidth()
                                     .clickable {
                                         navController.navigate("auto_playlist/downloaded")
-                                    }
-                                    .animateItem(),
+                                    },
                         )
                     }
 
@@ -331,8 +329,7 @@ fun LibraryMixScreen(
                                     .fillMaxWidth()
                                     .clickable {
                                         navController.navigate("top_playlist/$topSize")
-                                    }
-                                    .animateItem(),
+                                    },
                         )
                     }
                     item(
@@ -347,8 +344,7 @@ fun LibraryMixScreen(
                                     .fillMaxWidth()
                                     .clickable {
                                         navController.navigate("cache_playlist/cached")
-                                    }
-                                    .animateItem(),
+                                    },
                         )
                     }
 
@@ -364,8 +360,7 @@ fun LibraryMixScreen(
                                     .fillMaxWidth()
                                     .clickable {
                                         onLocalClick()
-                                    }
-                                    .animateItem(),
+                                    },
                         )
                     }
 
@@ -385,8 +380,7 @@ fun LibraryMixScreen(
                                         } else {
                                             showSpotifyImportDialog = true
                                         }
-                                    }
-                                    .animateItem(),
+                                    },
                         )
                     }
 
@@ -435,8 +429,7 @@ fun LibraryMixScreen(
                                                         )
                                                     }
                                                 },
-                                            )
-                                            .animateItem(),
+                                            ),
                                 )
                             }
 
@@ -478,8 +471,7 @@ fun LibraryMixScreen(
                                                         )
                                                     }
                                                 },
-                                            )
-                                            .animateItem(),
+                                            ),
                                 )
                             }
 
@@ -523,8 +515,7 @@ fun LibraryMixScreen(
                                                         )
                                                     }
                                                 },
-                                            )
-                                            .animateItem(),
+                                            ),
                                 )
                             }
 
@@ -573,8 +564,7 @@ fun LibraryMixScreen(
                                         onClick = {
                                             navController.navigate("auto_playlist/liked")
                                         },
-                                    )
-                                    .animateItem(),
+                                    ),
                             context = LocalContext.current // Pasamos el contexto actual para obtener la URI de la miniatura
                         )
                     }
@@ -594,8 +584,7 @@ fun LibraryMixScreen(
                                         onClick = {
                                             navController.navigate("auto_playlist/downloaded")
                                         },
-                                    )
-                                    .animateItem(),
+                                    ),
                             context = LocalContext.current // Pasamos el contexto actual para obtener la URI de la miniatura
                         )
                     }
@@ -615,8 +604,7 @@ fun LibraryMixScreen(
                                         onClick = {
                                             navController.navigate("top_playlist/$topSize")
                                         },
-                                    )
-                                    .animateItem(),
+                                    ),
                             context = LocalContext.current // Pasamos el contexto actual para obtener la URI de la miniatura
                         )
                     }
@@ -635,8 +623,7 @@ fun LibraryMixScreen(
                                         onClick = {
                                             navController.navigate("cache_playlist/cached")
                                         },
-                                    )
-                                    .animateItem(),
+                                    ),
                             context = LocalContext.current // Pasamos el contexto actual para obtener la URI de la miniatura
                         )
                     }
@@ -656,8 +643,7 @@ fun LibraryMixScreen(
                                         onClick = {
                                             onLocalClick()
                                         },
-                                    )
-                                    .animateItem(),
+                                    ),
                             context = LocalContext.current // Pasamos el contexto actual para obtener la URI de la miniatura
                         )
                     }
@@ -681,8 +667,7 @@ fun LibraryMixScreen(
                                                 showSpotifyImportDialog = true
                                             }
                                         },
-                                    )
-                                    .animateItem(),
+                                    ),
                             context = LocalContext.current // Pasamos el contexto actual para obtener la URI de la miniatura
                         )
                     }
@@ -715,8 +700,7 @@ fun LibraryMixScreen(
                                                         )
                                                     }
                                                 },
-                                            )
-                                            .animateItem(),
+                                            ),
                                     context = LocalContext.current // Pasamos el contexto actual para obtener la URI de la miniatura
                                 )
                             }
@@ -742,8 +726,7 @@ fun LibraryMixScreen(
                                                         )
                                                     }
                                                 },
-                                            )
-                                            .animateItem(),
+                                            ),
                                 )
                             }
 
@@ -771,8 +754,7 @@ fun LibraryMixScreen(
                                                         )
                                                     }
                                                 },
-                                            )
-                                            .animateItem(),
+                                            ),
                                 )
                             }
 

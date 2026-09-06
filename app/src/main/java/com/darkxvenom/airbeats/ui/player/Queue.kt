@@ -529,8 +529,7 @@ fun Queue(
                                                     )
                                                 }
                                             },
-                                        )
-                                        .animateItem(),
+                                        ),
                             )
                         }
                     }
