@@ -4,6 +4,9 @@ import android.Manifest
 import com.darkxvenom.airbeats.ui.component.LocalUserName
 import android.annotation.SuppressLint
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
