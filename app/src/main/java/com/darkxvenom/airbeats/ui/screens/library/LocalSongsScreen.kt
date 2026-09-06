@@ -88,7 +88,7 @@ fun LocalSongsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .then(if (filterContent == null) Modifier.statusBarsPadding() else Modifier)
+                .statusBarsPadding()
         ) {
             if (filterContent != null) {
                 filterContent()

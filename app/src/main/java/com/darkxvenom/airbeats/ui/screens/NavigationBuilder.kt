@@ -3,6 +3,9 @@ package com.darkxvenom.airbeats.ui.screens
 import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -68,10 +71,70 @@ fun NavGraphBuilder.navigationBuilder(
     composable(Screens.Explore.route) {
         ExploreScreen(navController, scrollBehavior)
     }
-    composable(Screens.Search.route) {
+    composable(
+        route = Screens.Search.route,
+        enterTransition = {
+            fadeIn(tween(300, easing = LinearOutSlowInEasing)) +
+                slideInHorizontally(
+                    initialOffsetX = { (it * 0.28f).toInt() },
+                    animationSpec = tween(320, easing = FastOutSlowInEasing)
+                )
+        },
+        exitTransition = {
+            fadeOut(tween(260, easing = FastOutLinearInEasing)) +
+                slideOutHorizontally(
+                    targetOffsetX = { (-it * 0.20f).toInt() },
+                    animationSpec = tween(300, easing = FastOutSlowInEasing)
+                )
+        },
+        popEnterTransition = {
+            fadeIn(tween(300, easing = LinearOutSlowInEasing)) +
+                slideInHorizontally(
+                    initialOffsetX = { (-it * 0.20f).toInt() },
+                    animationSpec = tween(300, easing = FastOutSlowInEasing)
+                )
+        },
+        popExitTransition = {
+            fadeOut(tween(260, easing = FastOutLinearInEasing)) +
+                slideOutHorizontally(
+                    targetOffsetX = { (it * 0.28f).toInt() },
+                    animationSpec = tween(320, easing = FastOutSlowInEasing)
+                )
+        }
+    ) {
         SpotifySearchScreen(navController = navController)
     }
-    composable("search/") {
+    composable(
+        route = "search/",
+        enterTransition = {
+            fadeIn(tween(300, easing = LinearOutSlowInEasing)) +
+                slideInHorizontally(
+                    initialOffsetX = { (it * 0.28f).toInt() },
+                    animationSpec = tween(320, easing = FastOutSlowInEasing)
+                )
+        },
+        exitTransition = {
+            fadeOut(tween(260, easing = FastOutLinearInEasing)) +
+                slideOutHorizontally(
+                    targetOffsetX = { (-it * 0.20f).toInt() },
+                    animationSpec = tween(300, easing = FastOutSlowInEasing)
+                )
+        },
+        popEnterTransition = {
+            fadeIn(tween(300, easing = LinearOutSlowInEasing)) +
+                slideInHorizontally(
+                    initialOffsetX = { (-it * 0.20f).toInt() },
+                    animationSpec = tween(300, easing = FastOutSlowInEasing)
+                )
+        },
+        popExitTransition = {
+            fadeOut(tween(260, easing = FastOutLinearInEasing)) +
+                slideOutHorizontally(
+                    targetOffsetX = { (it * 0.28f).toInt() },
+                    animationSpec = tween(320, easing = FastOutSlowInEasing)
+                )
+        }
+    ) {
         SpotifySearchScreen(navController = navController)
     }
     composable("history") {
@@ -114,11 +177,6 @@ fun NavGraphBuilder.navigationBuilder(
         com.darkxvenom.airbeats.ui.screens.musicrecognition.MusicRecognitionScreen(navController)
     }
 
-
-
-
-
-
     composable(
         route = "search/{query}",
         arguments =
@@ -128,24 +186,32 @@ fun NavGraphBuilder.navigationBuilder(
                 },
             ),
         enterTransition = {
-            fadeIn(tween(250))
+            fadeIn(tween(300, easing = LinearOutSlowInEasing)) +
+                slideInHorizontally(
+                    initialOffsetX = { (it * 0.28f).toInt() },
+                    animationSpec = tween(320, easing = FastOutSlowInEasing)
+                )
         },
         exitTransition = {
-            if (targetState.destination.route?.startsWith("search/") == true) {
-                fadeOut(tween(200))
-            } else {
-                fadeOut(tween(200)) + slideOutHorizontally { -it / 2 }
-            }
+            fadeOut(tween(260, easing = FastOutLinearInEasing)) +
+                slideOutHorizontally(
+                    targetOffsetX = { (-it * 0.20f).toInt() },
+                    animationSpec = tween(300, easing = FastOutSlowInEasing)
+                )
         },
         popEnterTransition = {
-            if (initialState.destination.route?.startsWith("search/") == true) {
-                fadeIn(tween(250))
-            } else {
-                fadeIn(tween(250)) + slideInHorizontally { -it / 2 }
-            }
+            fadeIn(tween(300, easing = LinearOutSlowInEasing)) +
+                slideInHorizontally(
+                    initialOffsetX = { (-it * 0.20f).toInt() },
+                    animationSpec = tween(300, easing = FastOutSlowInEasing)
+                )
         },
         popExitTransition = {
-            fadeOut(tween(200))
+            fadeOut(tween(260, easing = FastOutLinearInEasing)) +
+                slideOutHorizontally(
+                    targetOffsetX = { (it * 0.28f).toInt() },
+                    animationSpec = tween(320, easing = FastOutSlowInEasing)
+                )
         },
     ) {
         OnlineSearchResult(navController)

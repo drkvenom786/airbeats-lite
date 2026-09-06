@@ -203,14 +203,12 @@ import com.darkxvenom.airbeats.ui.component.BottomSheet
 import com.darkxvenom.airbeats.ui.component.BottomSheetMenu
 import com.darkxvenom.airbeats.ui.component.IconButton
 import com.darkxvenom.airbeats.ui.component.CurvedBottomNavigationBar
-import com.darkxvenom.airbeats.constants.LiquidGlassKey
 import com.darkxvenom.airbeats.constants.UseSystemFontKey
 import com.darkxvenom.airbeats.constants.AppFont
 import com.darkxvenom.airbeats.constants.AppFontKey
 import com.darkxvenom.airbeats.ui.component.CurvedBottomNavigationItem
 import com.darkxvenom.airbeats.ui.component.LocalMenuState
 import com.darkxvenom.airbeats.ui.component.rememberBackdrop
-import com.darkxvenom.airbeats.ui.component.layerBackdrop
 import com.darkxvenom.airbeats.ui.component.LocalBackdrop
 import com.darkxvenom.airbeats.ui.component.LiquidGlassBottomNavigationBar
 import com.darkxvenom.airbeats.ui.component.LocaleManager
@@ -430,7 +428,6 @@ class MainActivity : ComponentActivity() {
 
             val enableDynamicTheme by rememberPreference(DynamicThemeKey, defaultValue = true)
             val darkTheme by rememberEnumPreference(DarkModeKey, defaultValue = DarkMode.AUTO)
-            val enableLiquidGlass by rememberPreference(LiquidGlassKey, defaultValue = false)
 
             val pureBlack by rememberPreference(PureBlackKey, defaultValue = false)
             val appFontKey by rememberPreference(AppFontKey, defaultValue = AppFont.LINOTTE.key)
@@ -438,11 +435,9 @@ class MainActivity : ComponentActivity() {
             val isPlayful = homeScreenStyle == HomeScreenStyle.PLAYFUL
             val isSystemInDarkTheme = isSystemInDarkTheme()
             val useDarkTheme =
-                remember(darkTheme, isSystemInDarkTheme, enableLiquidGlass, isPlayful) {
+                remember(darkTheme, isSystemInDarkTheme, isPlayful) {
                     if (isPlayful) {
                         false
-                    } else if (enableLiquidGlass) {
-                        true
                     } else {
                         if (darkTheme == DarkMode.AUTO) isSystemInDarkTheme else darkTheme == DarkMode.ON
                     }
@@ -491,7 +486,7 @@ class MainActivity : ComponentActivity() {
 
             AirBeatsTheme(
                 darkTheme = useDarkTheme,
-                pureBlack = pureBlack && !enableLiquidGlass && !isPlayful,
+                pureBlack = pureBlack && !isPlayful,
                 appFont = appFont,
                 themeColor = themeColor,
             ) {
@@ -1263,7 +1258,6 @@ class MainActivity : ComponentActivity() {
                                                         items = curvedItems,
                                                         selectedIndex = selectedIndex,
                                                         onItemSelected = onItemSelectedAction,
-                                                        backdrop = backdrop,
                                                         modifier = Modifier
                                                             .offset(y = offsetY)
                                                             .scale(scale)
@@ -1278,9 +1272,7 @@ class MainActivity : ComponentActivity() {
                                     },
                                 ) { paddingValues ->
                                     Box(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .layerBackdrop(backdrop)
+                                        modifier = Modifier.fillMaxSize()
                                     ) {
                                     NavHost(
                                         navController = navController,
@@ -1319,8 +1311,7 @@ class MainActivity : ComponentActivity() {
                                         },
 
                                         popEnterTransition = {
-                                            if ((initialState.destination.route in topLevelScreens ||
-                                                        initialState.destination.route?.startsWith("search/") == true) &&
+                                            if (initialState.destination.route in topLevelScreens &&
                                                 targetState.destination.route in topLevelScreens
                                             ) {
                                                 fadeIn(animationSpec = tween(durationMillis = 240, easing = FastOutSlowInEasing))
@@ -1334,8 +1325,7 @@ class MainActivity : ComponentActivity() {
                                         },
 
                                         popExitTransition = {
-                                            if ((initialState.destination.route in topLevelScreens ||
-                                                        initialState.destination.route?.startsWith("search/") == true) &&
+                                            if (initialState.destination.route in topLevelScreens &&
                                                 targetState.destination.route in topLevelScreens
                                             ) {
                                                 fadeOut(animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing))

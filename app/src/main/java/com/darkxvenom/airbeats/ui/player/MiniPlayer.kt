@@ -96,9 +96,6 @@ import com.darkxvenom.airbeats.constants.PlayerScreenStyle
 import com.darkxvenom.airbeats.constants.PlayerScreenStyleKey
 import com.darkxvenom.airbeats.constants.PureBlackKey
 import com.darkxvenom.airbeats.constants.ThumbnailCornerRadius
-import com.darkxvenom.airbeats.constants.LiquidGlassKey
-import com.darkxvenom.airbeats.ui.component.LocalBackdrop
-import com.darkxvenom.airbeats.ui.component.drawBackdropCustomShape
 import com.darkxvenom.airbeats.extensions.togglePlayPause
 import com.darkxvenom.airbeats.models.MediaMetadata
 import com.darkxvenom.airbeats.ui.screens.settings.DarkMode
@@ -138,31 +135,9 @@ fun MiniPlayer(
     val isSystemInDarkTheme = isSystemInDarkTheme()
     val darkTheme by rememberEnumPreference(DarkModeKey, defaultValue = DarkMode.AUTO)
     val pureBlack by rememberPreference(PureBlackKey, defaultValue = false)
-    val enableLiquidGlass by rememberPreference(LiquidGlassKey, defaultValue = false)
-    val backdrop = LocalBackdrop.current
 
-    val layer = rememberGraphicsLayer()
-    val luminanceAnimation = remember { Animatable(0.3f) }
-
-    val themeContrastColor by animateColorAsState(
-        targetValue = if (enableLiquidGlass && backdrop != null) {
-            Color.White
-        } else {
-            MaterialTheme.colorScheme.onSurface
-        },
-        animationSpec = tween(500),
-        label = "ContrastColor"
-    )
-
-    val themeContrastSecondaryColor by animateColorAsState(
-        targetValue = if (enableLiquidGlass && backdrop != null) {
-            Color.White.copy(alpha = 0.7f)
-        } else {
-            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-        },
-        animationSpec = tween(500),
-        label = "ContrastSecondaryColor"
-    )
+    val themeContrastColor = MaterialTheme.colorScheme.onSurface
+    val themeContrastSecondaryColor = MaterialTheme.colorScheme.onSurfaceVariant
 
     val useDarkTheme = remember(darkTheme, isSystemInDarkTheme) {
         if (darkTheme == DarkMode.AUTO) isSystemInDarkTheme else darkTheme == DarkMode.ON
@@ -182,9 +157,8 @@ fun MiniPlayer(
     }
 
     val miniPlayerBackgroundColor = when {
-        enableLiquidGlass && backdrop != null -> Color.Transparent
-        useDarkTheme && pureBlack -> Color.Black.copy(alpha = 0.95f)
-        else -> MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.95f)
+        useDarkTheme && pureBlack -> Color.Black
+        else -> MaterialTheme.colorScheme.surfaceContainerHigh
     }
 
     val currentView = LocalView.current
@@ -208,20 +182,6 @@ fun MiniPlayer(
         targetValue = if (isPlaying) 0.0f else 0.4f,
         label = "overlay_alpha",
         animationSpec = animationSpec
-    )
-
-    val infiniteTransition = rememberInfiniteTransition(label = "thumbnail_rotation")
-    val thumbnailRotation by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = 8000,
-                easing = LinearEasing
-            ),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "rotation"
     )
 
     val currentThumbnailShape = remember(isPlaying, miniPlayerThumbnailShape) {
@@ -257,30 +217,15 @@ fun MiniPlayer(
                     }
                 )
                 .height(64.dp)
-                .offset { IntOffset(offsetXAnimatable.value.roundToInt(), 0) }
-                .then(
-                    if (enableLiquidGlass && backdrop != null) {
-                        Modifier
-                            .clip(RoundedCornerShape(32.dp))
-                            .drawBackdropCustomShape(
-                                backdrop = backdrop,
-                                layer = layer,
-                                luminanceAnimation = luminanceAnimation.value,
-                                shape = RoundedCornerShape(32.dp)
-                            )
-                    } else {
-                        Modifier
-                    }
-                ),
-            tonalElevation = 2.dp,
-            shadowElevation = 0.dp,
-            shape = RoundedCornerShape(32.dp),
-            color = Color.Transparent
+                .offset { IntOffset(offsetXAnimatable.value.roundToInt(), 0) },
+            tonalElevation = 3.dp,
+            shadowElevation = 6.dp,
+            shape = RoundedCornerShape(24.dp),
+            color = miniPlayerBackgroundColor
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(miniPlayerBackgroundColor)
                     .bottomSheetDraggable(state)
                     .pointerInput(Unit) {
                         detectHorizontalDragGestures(
@@ -366,7 +311,6 @@ fun MiniPlayer(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
                                 .size(40.dp)
-                                .rotate(if (isPlaying) thumbnailRotation else 0f)
                                 .clip(currentThumbnailShape)
                                 .border(
                                     width = 1.dp,
@@ -609,11 +553,6 @@ fun ModernMiniPlayer(
     val isSystemInDarkTheme = isSystemInDarkTheme()
     val darkTheme by rememberEnumPreference(DarkModeKey, defaultValue = DarkMode.AUTO)
     val pureBlack by rememberPreference(PureBlackKey, defaultValue = false)
-    val enableLiquidGlass by rememberPreference(LiquidGlassKey, defaultValue = false)
-    val backdrop = LocalBackdrop.current
-
-    val layer = rememberGraphicsLayer()
-    val luminanceAnimation = remember { Animatable(0.3f) }
 
     val (homeScreenStyle, _) = com.darkxvenom.airbeats.utils.rememberEnumPreference(
         com.darkxvenom.airbeats.constants.HomeScreenStyleKey,
@@ -621,41 +560,18 @@ fun ModernMiniPlayer(
     )
     val isPlayful = homeScreenStyle == com.darkxvenom.airbeats.constants.HomeScreenStyle.PLAYFUL
 
-    val themeContrastColor by animateColorAsState(
-        targetValue = if (enableLiquidGlass && backdrop != null) {
-            Color.White
-        } else if (isPlayful) {
-            Color.Black
-        } else {
-            MaterialTheme.colorScheme.onSurface
-        },
-        animationSpec = tween(500),
-        label = "ContrastColor"
-    )
-
-    val themeContrastVariantColor by animateColorAsState(
-        targetValue = if (enableLiquidGlass && backdrop != null) {
-            Color.White.copy(alpha = 0.7f)
-        } else if (isPlayful) {
-            Color.Black.copy(alpha = 0.6f)
-        } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
-        },
-        animationSpec = tween(500),
-        label = "ContrastVariantColor"
-    )
+    val themeContrastColor = if (isPlayful) Color.Black else MaterialTheme.colorScheme.onSurface
+    val themeContrastVariantColor = if (isPlayful) Color.Black.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurfaceVariant
 
     val useDarkTheme = remember(darkTheme, isSystemInDarkTheme) {
         if (darkTheme == DarkMode.AUTO) isSystemInDarkTheme else darkTheme == DarkMode.ON
     }
-    val backgroundColor = if (enableLiquidGlass && backdrop != null) {
-        Color.Transparent
-    } else if (isPlayful) {
+    val backgroundColor = if (isPlayful) {
         Color.White
     } else if (useDarkTheme && pureBlack) {
-        Color.Black.copy(alpha = 0.96f)
+        Color.Black
     } else {
-        MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.96f)
+        MaterialTheme.colorScheme.surfaceContainerHigh
     }
 
     val layoutDirection = LocalLayoutDirection.current
@@ -725,22 +641,8 @@ fun ModernMiniPlayer(
             modifier = Modifier
                 .fillMaxSize()
                 .offset { IntOffset(offsetXAnimatable.value.roundToInt(), 0) }
-                .then(
-                    if (enableLiquidGlass && backdrop != null) {
-                        Modifier
-                            .clip(RoundedCornerShape(32.dp))
-                            .drawBackdropCustomShape(
-                                backdrop = backdrop,
-                                layer = layer,
-                                luminanceAnimation = luminanceAnimation.value,
-                                shape = RoundedCornerShape(32.dp)
-                            )
-                    } else {
-                        Modifier
-                            .clip(RoundedCornerShape(32.dp))
-                            .background(backgroundColor)
-                    }
-                )
+                .clip(RoundedCornerShape(24.dp))
+                .background(backgroundColor)
         ) {
             if (duration > 0) {
                 LinearProgressIndicator(
