@@ -42,8 +42,7 @@ fun AppleNavigationBar(
     modifier: Modifier = Modifier,
     items: List<CurvedBottomNavigationItem>,
     selectedIndex: Int,
-    onItemSelected: (Int) -> Unit,
-    backdrop: PlatformBackdrop? = null
+    onItemSelected: (Int) -> Unit
 ) {
     val themeContrastColor = MaterialTheme.colorScheme.onSurface
     val itemBgColor = MaterialTheme.colorScheme.secondaryContainer
