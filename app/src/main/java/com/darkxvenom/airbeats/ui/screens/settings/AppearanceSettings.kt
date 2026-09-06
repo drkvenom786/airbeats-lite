@@ -606,7 +606,7 @@ fun AppearanceSettings(
                                         onPureBlackChange(newValue)
                                     }
                                 },
-                                enabled = useDarkTheme && !enableLiquidGlass
+                                isEnabled = useDarkTheme && !enableLiquidGlass
                             )
                         }},
                         { PreferenceEntry(
