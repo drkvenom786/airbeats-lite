@@ -2,6 +2,7 @@ package com.darkxvenom.airbeats.ui.screens.library
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.asPaddingValues
@@ -71,6 +72,7 @@ import kotlinx.coroutines.withContext
 fun LibraryArtistsScreen(
     navController: NavController,
     onDeselect: () -> Unit,
+    filterContent: (@Composable () -> Unit)? = null,
     viewModel: LibraryArtistsViewModel = hiltViewModel(),
 ) {
     val menuState = LocalMenuState.current
@@ -87,31 +89,50 @@ fun LibraryArtistsScreen(
 
     val (ytmSync) = rememberPreference(YtmSyncKey, true)
 
-    val filterContent = @Composable {
-        Row {
-            Spacer(Modifier.width(12.dp))
-            FilterChip(
-                label = { Text(stringResource(R.string.artists)) },
-                selected = true,
-                colors = FilterChipDefaults.filterChipColors(containerColor = MaterialTheme.colorScheme.surface),
-                onClick = onDeselect,
-                shape = RoundedCornerShape(16.dp),
-                leadingIcon = {
-                    Icon(painter = painterResource(R.drawable.close), contentDescription = "")
-                },
-            )
-            ChipsRow(
-                chips =
-                    listOf(
-                        ArtistFilter.LIKED to stringResource(R.string.filter_liked),
-                        ArtistFilter.LIBRARY to stringResource(R.string.filter_library)
-                    ),
-                currentValue = filter,
-                onValueUpdate = {
-                    filter = it
-                },
-                modifier = Modifier.weight(1f),
-            )
+    val artistsFilterContent = @Composable {
+        if (filterContent != null) {
+            Column {
+                filterContent()
+                Row(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
+                    ChipsRow(
+                        chips = listOf(
+                            ArtistFilter.LIKED to stringResource(R.string.filter_liked),
+                            ArtistFilter.LIBRARY to stringResource(R.string.filter_library)
+                        ),
+                        currentValue = filter,
+                        onValueUpdate = {
+                            filter = it
+                        },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+        } else {
+            Row {
+                Spacer(Modifier.width(12.dp))
+                FilterChip(
+                    label = { Text(stringResource(R.string.artists)) },
+                    selected = true,
+                    colors = FilterChipDefaults.filterChipColors(containerColor = MaterialTheme.colorScheme.surface),
+                    onClick = onDeselect,
+                    shape = RoundedCornerShape(16.dp),
+                    leadingIcon = {
+                        Icon(painter = painterResource(R.drawable.close), contentDescription = "")
+                    },
+                )
+                ChipsRow(
+                    chips =
+                        listOf(
+                            ArtistFilter.LIKED to stringResource(R.string.filter_liked),
+                            ArtistFilter.LIBRARY to stringResource(R.string.filter_library)
+                        ),
+                    currentValue = filter,
+                    onValueUpdate = {
+                        filter = it
+                    },
+                    modifier = Modifier.weight(1f),
+                )
+            }
         }
     }
 
@@ -196,7 +217,7 @@ fun LibraryArtistsScreen(
                         key = "filter",
                         contentType = CONTENT_TYPE_HEADER,
                     ) {
-                        filterContent()
+                        artistsFilterContent()
                     }
 
                     item(
@@ -245,7 +266,7 @@ fun LibraryArtistsScreen(
                         span = { GridItemSpan(maxLineSpan) },
                         contentType = CONTENT_TYPE_HEADER,
                     ) {
-                        filterContent()
+                        artistsFilterContent()
                     }
 
                     item(

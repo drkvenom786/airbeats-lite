@@ -355,44 +355,8 @@ fun HomeScreen(
         }
     }
 
-    // Main container Box that holds everything (same pattern as ExploreScreen)
+    // Main container Box that holds everything
     Box(modifier = Modifier.fillMaxSize()) {
-
-        // Blur background
-        val artworkUrl = mediaMetadata?.thumbnailUrl
-
-        artworkUrl?.let { imageUrl ->
-            com.darkxvenom.airbeats.ui.component.BlurredBackground(
-                model = imageUrl.highQualityThumbnail()
-            )
-
-            val isDarkTheme =
-                MaterialTheme.colorScheme.background.luminance() < 0.5f
-
-            val overlayBrush = if (isDarkTheme) {
-                Brush.verticalGradient(
-                    listOf(
-                        Color.Black.copy(alpha = 0.2f),
-                        Color.Black.copy(alpha = 0.5f),
-                        Color.Black.copy(alpha = 0.85f)
-                    )
-                )
-            } else {
-                Brush.verticalGradient(
-                    listOf(
-                        MaterialTheme.colorScheme.surface.copy(alpha = 0.25f),
-                        MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
-                        MaterialTheme.colorScheme.background.copy(alpha = 0.85f)
-                    )
-                )
-            }
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(overlayBrush)
-            )
-        }
 
         // Content
         BoxWithConstraints(
