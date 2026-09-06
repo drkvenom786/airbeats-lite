@@ -38,8 +38,7 @@ fun LiquidGlassBottomNavigationBar(
     modifier: Modifier = Modifier,
     items: List<CurvedBottomNavigationItem>,
     selectedIndex: Int,
-    onItemSelected: (Int) -> Unit,
-    backdrop: PlatformBackdrop? = null
+    onItemSelected: (Int) -> Unit
 ) {
     val activeIndicatorColor = MaterialTheme.colorScheme.secondaryContainer
     val activeIconColor = MaterialTheme.colorScheme.onSecondaryContainer
