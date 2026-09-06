@@ -3,6 +3,9 @@ package com.darkxvenom.airbeats.ui.screens
 import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -11,6 +14,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.navigation.NavBackStackEntry
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.getValue
@@ -51,6 +55,38 @@ import com.darkxvenom.airbeats.ui.screens.settings.PrivacySettings
 import com.darkxvenom.airbeats.ui.screens.settings.SettingsScreen
 import com.darkxvenom.airbeats.ui.screens.settings.StorageSettings
 
+private val slideEnterTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition) = {
+    fadeIn(tween(300, easing = LinearOutSlowInEasing)) +
+        slideInHorizontally(
+            initialOffsetX = { (it * 0.28f).toInt() },
+            animationSpec = tween(320, easing = FastOutSlowInEasing)
+        )
+}
+
+private val slideExitTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition) = {
+    fadeOut(tween(260, easing = FastOutLinearInEasing)) +
+        slideOutHorizontally(
+            targetOffsetX = { (-it * 0.20f).toInt() },
+            animationSpec = tween(300, easing = FastOutSlowInEasing)
+        )
+}
+
+private val slidePopEnterTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition) = {
+    fadeIn(tween(300, easing = LinearOutSlowInEasing)) +
+        slideInHorizontally(
+            initialOffsetX = { (-it * 0.20f).toInt() },
+            animationSpec = tween(300, easing = FastOutSlowInEasing)
+        )
+}
+
+private val slidePopExitTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition) = {
+    fadeOut(tween(260, easing = FastOutLinearInEasing)) +
+        slideOutHorizontally(
+            targetOffsetX = { (it * 0.28f).toInt() },
+            animationSpec = tween(320, easing = FastOutSlowInEasing)
+        )
+}
+
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,67 +109,19 @@ fun NavGraphBuilder.navigationBuilder(
     }
     composable(
         route = Screens.Search.route,
-        enterTransition = {
-            fadeIn(tween(300, easing = LinearOutSlowInEasing)) +
-                slideInHorizontally(
-                    initialOffsetX = { (it * 0.28f).toInt() },
-                    animationSpec = tween(320, easing = FastOutSlowInEasing)
-                )
-        },
-        exitTransition = {
-            fadeOut(tween(260, easing = FastOutLinearInEasing)) +
-                slideOutHorizontally(
-                    targetOffsetX = { (-it * 0.20f).toInt() },
-                    animationSpec = tween(300, easing = FastOutSlowInEasing)
-                )
-        },
-        popEnterTransition = {
-            fadeIn(tween(300, easing = LinearOutSlowInEasing)) +
-                slideInHorizontally(
-                    initialOffsetX = { (-it * 0.20f).toInt() },
-                    animationSpec = tween(300, easing = FastOutSlowInEasing)
-                )
-        },
-        popExitTransition = {
-            fadeOut(tween(260, easing = FastOutLinearInEasing)) +
-                slideOutHorizontally(
-                    targetOffsetX = { (it * 0.28f).toInt() },
-                    animationSpec = tween(320, easing = FastOutSlowInEasing)
-                )
-        }
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
     ) {
         SpotifySearchScreen(navController = navController)
     }
     composable(
         route = "search/",
-        enterTransition = {
-            fadeIn(tween(300, easing = LinearOutSlowInEasing)) +
-                slideInHorizontally(
-                    initialOffsetX = { (it * 0.28f).toInt() },
-                    animationSpec = tween(320, easing = FastOutSlowInEasing)
-                )
-        },
-        exitTransition = {
-            fadeOut(tween(260, easing = FastOutLinearInEasing)) +
-                slideOutHorizontally(
-                    targetOffsetX = { (-it * 0.20f).toInt() },
-                    animationSpec = tween(300, easing = FastOutSlowInEasing)
-                )
-        },
-        popEnterTransition = {
-            fadeIn(tween(300, easing = LinearOutSlowInEasing)) +
-                slideInHorizontally(
-                    initialOffsetX = { (-it * 0.20f).toInt() },
-                    animationSpec = tween(300, easing = FastOutSlowInEasing)
-                )
-        },
-        popExitTransition = {
-            fadeOut(tween(260, easing = FastOutLinearInEasing)) +
-                slideOutHorizontally(
-                    targetOffsetX = { (it * 0.28f).toInt() },
-                    animationSpec = tween(320, easing = FastOutSlowInEasing)
-                )
-        }
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
     ) {
         SpotifySearchScreen(navController = navController)
     }
@@ -161,7 +149,13 @@ fun NavGraphBuilder.navigationBuilder(
     composable("spotify_account") {
         com.darkxvenom.airbeats.ui.screens.settings.SpotifyAccountScreen(navController)
     }
-    composable("new_release") {
+    composable(
+        route = "new_release",
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
         NewReleaseScreen(navController, scrollBehavior)
     }
     composable("insight") {
@@ -185,36 +179,12 @@ fun NavGraphBuilder.navigationBuilder(
                     type = NavType.StringType
                 },
             ),
-        enterTransition = {
-            fadeIn(tween(300, easing = LinearOutSlowInEasing)) +
-                slideInHorizontally(
-                    initialOffsetX = { (it * 0.28f).toInt() },
-                    animationSpec = tween(320, easing = FastOutSlowInEasing)
-                )
-        },
-        exitTransition = {
-            fadeOut(tween(260, easing = FastOutLinearInEasing)) +
-                slideOutHorizontally(
-                    targetOffsetX = { (-it * 0.20f).toInt() },
-                    animationSpec = tween(300, easing = FastOutSlowInEasing)
-                )
-        },
-        popEnterTransition = {
-            fadeIn(tween(300, easing = LinearOutSlowInEasing)) +
-                slideInHorizontally(
-                    initialOffsetX = { (-it * 0.20f).toInt() },
-                    animationSpec = tween(300, easing = FastOutSlowInEasing)
-                )
-        },
-        popExitTransition = {
-            fadeOut(tween(260, easing = FastOutLinearInEasing)) +
-                slideOutHorizontally(
-                    targetOffsetX = { (it * 0.28f).toInt() },
-                    animationSpec = tween(320, easing = FastOutSlowInEasing)
-                )
-        },
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
     ) {
-        OnlineSearchResult(navController)
+        OnlineSearchResult(navController = navController)
     }
     composable(
         route = "album/{albumId}",
@@ -349,56 +319,113 @@ fun NavGraphBuilder.navigationBuilder(
     }
 
 
-    composable("settings") {
+    composable(
+        route = "settings",
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
         val latestVersion by mutableLongStateOf(BuildConfig.VERSION_CODE.toLong())
         SettingsScreen(latestVersion, navController, scrollBehavior)
     }
-    composable("settings/appearance") {
+    composable(
+        route = "settings/appearance",
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
         AppearanceSettings(navController, scrollBehavior)
     }
-    composable("settings/dynamic_island") {
+    composable(
+        route = "settings/dynamic_island",
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
         com.darkxvenom.airbeats.ui.screens.settings.DynamicIslandSettings(navController, scrollBehavior)
     }
-    composable("settings/always_on_display") {
+    composable(
+        route = "settings/always_on_display",
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
         AODSettings(navController, scrollBehavior)
     }
-    composable("settings/account") {
+    composable(
+        route = "settings/account",
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
         AccountSettings(navController, scrollBehavior)
     }
-    composable("settings/content") {
+    composable(
+        route = "settings/content",
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
         ContentSettings(navController, scrollBehavior)
     }
-    composable("settings/player") {
+    composable(
+        route = "settings/player",
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
         PlayerSettings(navController, scrollBehavior)
     }
-    composable("settings/storage") {
+    composable(
+        route = "settings/storage",
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
         StorageSettings(navController, scrollBehavior)
     }
-    composable("settings/privacy") {
+    composable(
+        route = "settings/privacy",
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
         PrivacySettings(navController, scrollBehavior)
     }
-    composable("settings/backup_restore") {
+    composable(
+        route = "settings/backup_restore",
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
         BackupAndRestore(navController, scrollBehavior)
     }
-    composable("settings/discord") {
+    composable(
+        route = "settings/discord",
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
         DiscordSettings(navController, scrollBehavior)
     }
-    composable("settings/experimental") {
-            com.darkxvenom.airbeats.ui.screens.settings.DebugSettings(navController)
-        }
-        composable("settings/voice_assistant") {
-            com.darkxvenom.airbeats.ui.screens.settings.VoiceAssistantSettings(navController, scrollBehavior)
-        }
-    composable("settings/discord/login") {
-        DiscordLoginScreen(navController)
-    }
-    composable("settings/android_auto") {
-        com.darkxvenom.airbeats.ui.screens.settings.AndroidAutoSettings(
-            navController,
-            scrollBehavior
-        )
-    }
-    composable("settings/about") {
+    composable(
+        route = "settings/about",
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
         AboutScreen(navController, scrollBehavior)
     }
     composable("login") {

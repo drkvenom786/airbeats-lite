@@ -735,11 +735,11 @@ fun BottomSheetPlayer(
     }
 
     LaunchedEffect(playbackState, state.isExpanded) {
-        if (playbackState == STATE_READY) {
+        if (playbackState == STATE_READY && state.isExpanded) {
             while (isActive) {
                 position = playerConnection.player.currentPosition
                 duration = playerConnection.player.duration
-                delay(if (state.isExpanded) 250L else 1000L)
+                delay(250L)
             }
         }
     }

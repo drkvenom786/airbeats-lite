@@ -38,7 +38,6 @@ fun LibraryScreen(navController: NavController) {
     val filterContent: @Composable () -> Unit = {
         Column(
             modifier = Modifier
-                .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
         ) {
@@ -46,7 +45,7 @@ fun LibraryScreen(navController: NavController) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 0.dp, bottom = 8.dp),
+                    .padding(top = 0.dp, bottom = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
