@@ -458,7 +458,6 @@ fun CachePlaylistScreen(
                                     }
                                 }
                             )
-                            .animateItem()
                     )
                 }
             }

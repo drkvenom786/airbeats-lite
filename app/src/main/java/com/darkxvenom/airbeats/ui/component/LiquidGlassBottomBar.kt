@@ -134,7 +134,9 @@ fun LiquidGlassBottomNavigationBar(
             // Animated sliding pill indicator
             Box(
                 modifier = Modifier
-                    .offset(x = animatedOffset.dp)
+                    .graphicsLayer {
+                        translationX = animatedOffset.dp.toPx()
+                    }
                     .size(width = itemWidth, height = maxHeight)
                     .padding(2.dp)
                     .clip(CircleShape)

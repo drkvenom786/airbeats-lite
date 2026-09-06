@@ -309,8 +309,7 @@ fun LibrarySongsScreen(
                                     } // Clear previous selections
                                     songWrapper.isSelected = true // Select current item
                                 },
-                            )
-                            .animateItem(),
+                            ),
                 )
             }
         }

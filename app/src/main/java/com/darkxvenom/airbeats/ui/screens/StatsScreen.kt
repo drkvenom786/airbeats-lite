@@ -360,7 +360,6 @@ fun StatsScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp)
-                            .animateItem()
                     )
                     Spacer(modifier = Modifier.size(16.dp))
                 }
@@ -368,13 +367,10 @@ fun StatsScreen(
 
             item(key = "mostPlayedSongs") {
                 NavigationTitle(
-                    title = "${mostPlayedSongsStats.size} ${stringResource(id = R.string.songs)}",
-                    modifier = Modifier.animateItem(),
+                    title = "${mostPlayedSongsStats.size} ${stringResource(id = R.string.songs)}"
                 )
 
-                LazyRow(
-                    modifier = Modifier.animateItem(),
-                ) {
+                LazyRow {
                     itemsIndexed(
                         items = mostPlayedSongsStats,
                         key = { _, song -> song.id },
@@ -419,8 +415,7 @@ fun StatsScreen(
                                                 )
                                             }
                                         },
-                                    )
-                                    .animateItem(),
+                                    ),
                         )
                     }
                 }
@@ -428,13 +423,10 @@ fun StatsScreen(
 
             item(key = "mostPlayedArtists") {
                 NavigationTitle(
-                    title = "${mostPlayedArtists.size} ${stringResource(id = R.string.artists)}",
-                    modifier = Modifier.animateItem(),
+                    title = "${mostPlayedArtists.size} ${stringResource(id = R.string.artists)}"
                 )
 
-                LazyRow(
-                    modifier = Modifier.animateItem(),
-                ) {
+                LazyRow {
                     itemsIndexed(
                         items = mostPlayedArtists,
                         key = { _, artist -> artist.id },
@@ -467,8 +459,7 @@ fun StatsScreen(
                                                 )
                                             }
                                         },
-                                    )
-                                    .animateItem(),
+                                    ),
                         )
                     }
                 }
@@ -476,14 +467,11 @@ fun StatsScreen(
 
             item(key = "mostPlayedAlbums") {
                 NavigationTitle(
-                    title = "${mostPlayedAlbums.size} ${stringResource(id = R.string.albums)}",
-                    modifier = Modifier.animateItem(),
+                    title = "${mostPlayedAlbums.size} ${stringResource(id = R.string.albums)}"
                 )
 
                 if (mostPlayedAlbums.isNotEmpty()) {
-                    LazyRow(
-                        modifier = Modifier.animateItem(),
-                    ) {
+                    LazyRow {
                         itemsIndexed(
                             items = mostPlayedAlbums,
                             key = { _, album -> album.id },
@@ -519,8 +507,7 @@ fun StatsScreen(
                                                     )
                                                 }
                                             },
-                                        )
-                                        .animateItem(),
+                                        ),
                             )
                         }
                     }

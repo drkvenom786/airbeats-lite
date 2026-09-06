@@ -113,7 +113,6 @@ fun OnlineSearchScreen(
                 onFillTextField = {
                     onQueryChange(TextFieldValue(history.query, TextRange(history.query.length)))
                 },
-                modifier = Modifier.animateItem(),
                 pureBlack = pureBlack
             )
         }
@@ -129,7 +128,6 @@ fun OnlineSearchScreen(
                 onFillTextField = {
                     onQueryChange(TextFieldValue(query, TextRange(query.length)))
                 },
-                modifier = Modifier.animateItem(),
                 pureBlack = pureBlack
             )
         }
@@ -281,7 +279,6 @@ fun OnlineSearchScreen(
                             }
                         }
                     )
-                    .animateItem()
             )
         }
     }

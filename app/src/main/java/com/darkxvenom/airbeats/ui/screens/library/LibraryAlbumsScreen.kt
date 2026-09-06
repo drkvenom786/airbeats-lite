@@ -219,8 +219,7 @@ fun LibraryAlbumsScreen(
                             item {
                                 EmptyPlaceholder(
                                     icon = R.drawable.album,
-                                    text = stringResource(R.string.library_album_empty),
-                                    modifier = Modifier.animateItem()
+                                    text = stringResource(R.string.library_album_empty)
                                 )
                             }
                         }
@@ -235,8 +234,7 @@ fun LibraryAlbumsScreen(
                                 menuState = menuState,
                                 album = album,
                                 isActive = album.id == mediaMetadata?.album?.id,
-                                isPlaying = isPlaying,
-                                modifier = Modifier.animateItem()
+                                isPlaying = isPlaying
                             )
                         }
                     }
@@ -272,8 +270,7 @@ fun LibraryAlbumsScreen(
                             item(span = { GridItemSpan(maxLineSpan) }) {
                                 EmptyPlaceholder(
                                     icon = R.drawable.album,
-                                    text = stringResource(R.string.library_album_empty),
-                                    modifier = Modifier.animateItem()
+                                    text = stringResource(R.string.library_album_empty)
                                 )
                             }
                         }
@@ -289,8 +286,7 @@ fun LibraryAlbumsScreen(
                                 coroutineScope = coroutineScope,
                                 album = album,
                                 isActive = album.id == mediaMetadata?.album?.id,
-                                isPlaying = isPlaying,
-                                modifier = Modifier.animateItem()
+                                isPlaying = isPlaying
                             )
                         }
                     }

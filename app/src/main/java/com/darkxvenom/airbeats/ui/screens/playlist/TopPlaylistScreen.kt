@@ -508,7 +508,6 @@ fun TopPlaylistScreen(
                                             songWrapper.isSelected = true
                                         },
                                     )
-                                    .animateItem()
                         )
                     }
                 }

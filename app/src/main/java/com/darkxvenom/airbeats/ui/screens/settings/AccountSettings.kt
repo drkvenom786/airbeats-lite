@@ -436,77 +436,6 @@ fun AccountSettings(
                             )
                         },
 
-                        // 🔹 CLOUD BACKUP ACCOUNT
-                        {
-                            if (isLoggedIn) {
-                                // Google Cloud Account (Legacy/Existing)
-                                PreferenceEntry(
-                                    title = {
-                                        Text(
-                                            if (currentGoogleEmail.isNotBlank()) currentGoogleEmail 
-                                            else stringResource(R.string.login_with_google)
-                                        )
-                                    },
-                                    description = if (currentGoogleEmail.isNotBlank()) {
-                                        stringResource(R.string.cloud_backup_stats_linked)
-                                    } else {
-                                        stringResource(R.string.link_account_for_cloud_backups)
-                                    },
-                                    icon = { Icon(painterResource(R.drawable.google), null, tint = androidx.compose.ui.graphics.Color.Unspecified) },
-                                    trailingContent = {
-                                        if (currentGoogleEmail.isNotBlank()) {
-                                            OutlinedButton(onClick = {
-                                                scope.launch {
-                                                    nameManager.saveAccountEmail("")
-                                                    Toast.makeText(context, context.getString(R.string.google_account_unlinked), Toast.LENGTH_SHORT).show()
-                                                }
-                                            }) {
-                                                Text(stringResource(R.string.logout))
-                                            }
-                                        }
-                                    },
-                                    onClick = {
-                                        if (currentGoogleEmail.isBlank()) {
-                                            requestGoogleSignIn()
-                                        }
-                                    }
-                                )
-                            } else {
-                                // Email Cloud Account (New)
-                                PreferenceEntry(
-                                    title = {
-                                        Text(
-                                            if (currentGoogleEmail.isNotBlank()) currentGoogleEmail 
-                                            else "Login with Email"
-                                        )
-                                    },
-                                    description = if (currentGoogleEmail.isNotBlank()) {
-                                        stringResource(R.string.cloud_backup_stats_linked)
-                                    } else {
-                                        "Link account for cloud backups"
-                                    },
-                                    icon = { Icon(painterResource(R.drawable.person), null) },
-                                    trailingContent = {
-                                        if (currentGoogleEmail.isNotBlank()) {
-                                            OutlinedButton(onClick = {
-                                                scope.launch {
-                                                    nameManager.saveAccountEmail("")
-                                                    Toast.makeText(context, "Account unlinked", Toast.LENGTH_SHORT).show()
-                                                }
-                                            }) {
-                                                Text(stringResource(R.string.logout))
-                                            }
-                                        }
-                                    },
-                                    onClick = {
-                                        if (currentGoogleEmail.isBlank()) {
-                                            navController.navigate("youtube_login")
-                                        }
-                                    }
-                                )
-                            }
-                        },
-
                         // 🔹 ADVANCED LOGIN
                         {
                             PreferenceEntry(
@@ -571,41 +500,6 @@ fun AccountSettings(
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
-                
-                // Spotify Group
-                val hasSpotifyCookie by context.dataStore.data.map { it.contains(com.darkxvenom.airbeats.constants.SpotifyCookieKey) }.collectAsState(initial = false)
-                SettingsGeneralCategory(
-                    title = "Spotify",
-                    items = listOf(
-                        {
-                            PreferenceEntry(
-                                title = { Text(if (hasSpotifyCookie) "Connected" else "Login to Spotify") },
-                                description = if (hasSpotifyCookie) "Connected to Spotify account" else "Sign in to see your feed and playlists",
-                                icon = { Icon(painterResource(R.drawable.music_note), null) },
-                                trailingContent = {
-                                    if (hasSpotifyCookie) {
-                                        OutlinedButton(onClick = {
-                                            scope.launch {
-                                                context.dataStore.edit { it.remove(com.darkxvenom.airbeats.constants.SpotifyCookieKey) }
-                                            }
-                                        }) {
-                                            Text(stringResource(R.string.logout))
-                                        }
-                                    }
-                                },
-                                onClick = {
-                                    if (!hasSpotifyCookie) {
-                                        navController.navigate("spotify_login")
-                                    } else {
-                                        navController.navigate("spotify_account")
-                                    }
-                                }
-                            )
-                        }
-                    )
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
 
                 // 🔥 AVATAR SELECTOR
                 GlassCard(
@@ -614,17 +508,6 @@ fun AccountSettings(
                         .padding(vertical = 8.dp)
                 ) {
                     AvatarSelector(modifier = Modifier.padding(vertical = 8.dp))
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // 🔥 RANK BADGE SELECTOR
-                GlassCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                ) {
-                    RankBadgeSelector(modifier = Modifier.padding(vertical = 12.dp, horizontal = 16.dp))
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))

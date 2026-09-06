@@ -279,7 +279,6 @@ fun HistoryScreen(
                                         }
                                     }
                                 )
-                                .animateItem()
                         )
                     }
                 }
@@ -358,7 +357,6 @@ fun HistoryScreen(
                                         }
                                     }
                                 )
-                                .animateItem()
                         )
                     }
                 }

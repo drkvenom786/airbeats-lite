@@ -60,16 +60,13 @@ import com.darkxvenom.airbeats.utils.dataStore
 import com.darkxvenom.airbeats.viewmodels.AccountViewModel
 import kotlinx.coroutines.flow.map
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountScreen(
     navController: NavController,
     scrollBehavior: TopAppBarScrollBehavior,
     viewModel: AccountViewModel = hiltViewModel(),
 ) {
-    var selectedTabIndex by remember { mutableStateOf(0) }
-    val tabs = listOf("YouTube", "Spotify")
-
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
             title = { Text(stringResource(R.string.account)) },
@@ -87,181 +84,8 @@ fun AccountScreen(
             scrollBehavior = scrollBehavior
         )
 
-        TabRow(selectedTabIndex = selectedTabIndex) {
-            tabs.forEachIndexed { index, title ->
-                Tab(
-                    selected = selectedTabIndex == index,
-                    onClick = { selectedTabIndex = index },
-                    text = { Text(title) }
-                )
-            }
-        }
-
         Box(modifier = Modifier.fillMaxSize()) {
-            when (selectedTabIndex) {
-                0 -> YouTubeAccountContent(navController, viewModel)
-                1 -> SpotifyAccountContent(navController, viewModel)
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun YouTubeAccountContent(
-    navController: NavController,
-    viewModel: AccountViewModel
-) {
-    val menuState = LocalMenuState.current
-    val haptic = LocalHapticFeedback.current
-    val coroutineScope = rememberCoroutineScope()
-
-    val playlists by viewModel.playlists.collectAsState()
-    val albums by viewModel.albums.collectAsState()
-    val artists by viewModel.artists.collectAsState()
-
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = GridThumbnailHeight + 24.dp),
-        contentPadding = LocalPlayerAwareWindowInsets.current.asPaddingValues(),
-    ) {
-        items(items = playlists.orEmpty(), key = { it.id }) { item ->
-            YouTubeGridItem(
-                item = item,
-                fillMaxWidth = true,
-                modifier = Modifier.combinedClickable(
-                    onClick = { navController.navigate("online_playlist/${item.id}") },
-                    onLongClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        menuState.show {
-                            YouTubePlaylistMenu(
-                                playlist = item,
-                                coroutineScope = coroutineScope,
-                                onDismiss = menuState::dismiss,
-                            )
-                        }
-                    },
-                ),
-            )
-        }
-
-        items(items = albums.orEmpty(), key = { it.id }) { item ->
-            YouTubeGridItem(
-                item = item,
-                fillMaxWidth = true,
-                modifier = Modifier.combinedClickable(
-                    onClick = { navController.navigate("album/${item.id}") },
-                    onLongClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        menuState.show {
-                            YouTubeAlbumMenu(
-                                albumItem = item,
-                                navController = navController,
-                                onDismiss = menuState::dismiss
-                            )
-                        }
-                    }
-                )
-            )
-        }
-
-        items(items = artists.orEmpty(), key = { it.id }) { item ->
-            YouTubeGridItem(
-                item = item,
-                fillMaxWidth = true,
-                modifier = Modifier.combinedClickable(
-                    onClick = { navController.navigate("artist/${item.id}") },
-                    onLongClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        menuState.show {
-                            YouTubeArtistMenu(
-                                artist = item,
-                                onDismiss = menuState::dismiss
-                            )
-                        }
-                    }
-                )
-            )
-        }
-
-        if (playlists == null) {
-            items(8) {
-                ShimmerHost { GridItemPlaceHolder(fillMaxWidth = true) }
-            }
-        }
-    }
-}
-
-@Composable
-fun SpotifyAccountContent(
-    navController: NavController,
-    viewModel: AccountViewModel
-) {
-    val context = LocalContext.current
-    val hasSpotifyCookie by remember {
-        context.dataStore.data.map { it.contains(SpotifyCookieKey) }
-    }.collectAsState(initial = false)
-
-    val spotifyUser by viewModel.spotifyUser.collectAsState()
-    val spotifyFeed by viewModel.spotifyFeed.collectAsState()
-    val isSpotifyLoading by viewModel.isSpotifyLoading.collectAsState()
-
-    LaunchedEffect(hasSpotifyCookie) {
-        if (hasSpotifyCookie) {
-            viewModel.loadSpotifyData()
-        }
-    }
-
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        if (!hasSpotifyCookie) {
-            Button(onClick = { navController.navigate("spotify_login") }) {
-                Text("Connect to Spotify")
-            }
-        } else if (isSpotifyLoading) {
-            CircularProgressIndicator()
-        } else {
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = GridThumbnailHeight + 24.dp),
-                contentPadding = LocalPlayerAwareWindowInsets.current.asPaddingValues(),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                if (spotifyUser != null) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        Text(
-                            text = "Welcome back, ${spotifyUser!!.displayName}!",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 24.sp,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                    }
-                }
-                
-                spotifyFeed?.sections?.forEach { section ->
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        Text(
-                            text = section.title ?: "Recommended",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp,
-                            modifier = Modifier.padding(start = 16.dp, top = 24.dp, bottom = 8.dp)
-                        )
-                    }
-                    
-                    items(items = section.items, key = { it.uri }) { item ->
-                        SpotifyGridItem(
-                            item = item,
-                            fillMaxWidth = true,
-                            modifier = Modifier.combinedClickable(
-                                onClick = {
-                                    when (item) {
-                                        is SpotifyHomeFeedItem.Playlist -> navController.navigate("online_playlist/sp:${item.id}")
-                                        is SpotifyHomeFeedItem.Album -> navController.navigate("album/sp:${item.id}")
-                                        is SpotifyHomeFeedItem.Artist -> navController.navigate("artist/sp:${item.id}")
-                                    }
-                                }
-                            )
-                        )
-                    }
-                }
-            }
+            YouTubeAccountContent(navController, viewModel)
         }
     }
 }

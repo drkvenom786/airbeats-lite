@@ -173,8 +173,7 @@ fun YouTubeBrowseScreen(
                                                                 ),
                                                             )
                                                         }
-                                                    }
-                                                    .animateItem(),
+                                                    },
                                         )
                                     }
                                 }
@@ -254,8 +253,7 @@ fun YouTubeBrowseScreen(
                                                             }
                                                         }
                                                     },
-                                                )
-                                                .animateItem(),
+                                                ),
                                     )
                                 }
                             }
