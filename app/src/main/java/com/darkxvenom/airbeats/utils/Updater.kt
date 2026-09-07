@@ -9,7 +9,7 @@ import org.json.JSONObject
 data class UpdateInfo(
     val versionName: String,
     val releaseNotes: String = "",
-    val releaseUrl: String = "https://github.com/d0x-dev/AirBeats/releases/latest",
+    val releaseUrl: String = "https://github.com/drkvenom786/airbeats-lite/releases/latest",
     val apkDownloadUrl: String = ""
 )
 
@@ -46,27 +46,27 @@ object Updater {
 
         // Direct download fallback URL based on build type & tag
         return if (com.darkxvenom.airbeats.BuildConfig.IS_NIGHTLY) {
-            "https://github.com/d0x-dev/AirBeats/releases/download/v${versionName}-nightly/Airbeats-v${versionName}-Nightly.apk"
+            "https://github.com/drkvenom786/airbeats-lite/releases/download/v${versionName}-nightly/Airbeats-v${versionName}-Nightly.apk"
         } else {
-            "https://github.com/d0x-dev/AirBeats/releases/download/v$versionName/AirBeats_v${versionName}_signed.apk"
+            "https://github.com/drkvenom786/airbeats-lite/releases/download/v$versionName/AirBeats-Lite-v${versionName}.apk"
         }
     }
 
     suspend fun getLatestUpdateInfo(): Result<UpdateInfo> =
         runCatching {
             if (com.darkxvenom.airbeats.BuildConfig.IS_NIGHTLY) {
-                val response = client.get("https://api.github.com/repos/d0x-dev/AirBeats/releases").bodyAsText()
+                val response = client.get("https://api.github.com/repos/drkvenom786/airbeats-lite/releases").bodyAsText()
                 val jsonArray = JSONArray(response)
                 var versionName = ""
                 var releaseNotes = ""
-                var releaseUrl = "https://github.com/d0x-dev/AirBeats/releases"
+                var releaseUrl = "https://github.com/drkvenom786/airbeats-lite/releases"
                 var apkDownloadUrl = ""
                 for (i in 0 until jsonArray.length()) {
                     val release = jsonArray.getJSONObject(i)
                     if (release.getBoolean("prerelease")) {
                         versionName = release.getString("tag_name").removePrefix("v").removeSuffix("-nightly").trim()
                         releaseNotes = release.optString("body", "").trim()
-                        releaseUrl = release.optString("html_url", "https://github.com/d0x-dev/AirBeats/releases")
+                        releaseUrl = release.optString("html_url", "https://github.com/drkvenom786/airbeats-lite/releases")
                         apkDownloadUrl = extractApkUrl(release, versionName)
                         break
                     }
@@ -74,11 +74,11 @@ object Updater {
                 lastCheckTime = System.currentTimeMillis()
                 UpdateInfo(versionName, releaseNotes, releaseUrl, apkDownloadUrl)
             } else {
-                val response = client.get("https://api.github.com/repos/d0x-dev/AirBeats/releases/latest").bodyAsText()
+                val response = client.get("https://api.github.com/repos/drkvenom786/airbeats-lite/releases/latest").bodyAsText()
                 val json = JSONObject(response)
                 val versionName = json.getString("tag_name").removePrefix("v").trim()
                 val releaseNotes = json.optString("body", "").trim()
-                val releaseUrl = json.optString("html_url", "https://github.com/d0x-dev/AirBeats/releases/latest")
+                val releaseUrl = json.optString("html_url", "https://github.com/drkvenom786/airbeats-lite/releases/latest")
                 val apkDownloadUrl = extractApkUrl(json, versionName)
                 lastCheckTime = System.currentTimeMillis()
                 UpdateInfo(versionName, releaseNotes, releaseUrl, apkDownloadUrl)

@@ -599,8 +599,4 @@ val AodShowClockKey = booleanPreferencesKey("aod_show_clock")
 val AodClockFormatKey = booleanPreferencesKey("aod_clock_24h")
 val DisableBlurKey = booleanPreferencesKey("disableBlur")
 
-val EnableVoiceAssistantKey = booleanPreferencesKey("enable_voice_assistant")
-val VoiceAssistantAutoStartOnBootKey = booleanPreferencesKey("voice_auto_start_boot")
-val VoiceAssistantDirectCommandsKey = booleanPreferencesKey("voice_direct_commands")
-val VoiceAssistantTtsFeedbackKey = booleanPreferencesKey("voice_tts_feedback")
 

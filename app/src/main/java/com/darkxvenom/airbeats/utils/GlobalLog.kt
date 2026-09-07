@@ -47,7 +47,7 @@ object GlobalLog {
 }
 
 /** Timber Tree that forwards logs to GlobalLog */
-class GlobalLogTree : Timber.Tree() {
+class GlobalLogTree : Timber.DebugTree() {
     override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
         try {
             val final = if (t != null) "$message\n$t" else message

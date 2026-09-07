@@ -557,7 +557,7 @@ enum class DownloadStatus {
 suspend fun checkForUpdates(): String? = withContext(Dispatchers.IO) {
     try {
         if (com.darkxvenom.airbeats.BuildConfig.IS_NIGHTLY) {
-            val url = java.net.URL("https://api.github.com/repos/d0x-dev/AirBeats/releases")
+            val url = java.net.URL("https://api.github.com/repos/drkvenom786/airbeats-lite/releases")
             val connection = url.openConnection()
             connection.connect()
             val json = connection.getInputStream().bufferedReader().use { it.readText() }
@@ -571,7 +571,7 @@ suspend fun checkForUpdates(): String? = withContext(Dispatchers.IO) {
             }
             return@withContext null
         } else {
-            val url = java.net.URL("https://api.github.com/repos/d0x-dev/AirBeats/releases/latest")
+            val url = java.net.URL("https://api.github.com/repos/drkvenom786/airbeats-lite/releases/latest")
             val connection = url.openConnection()
             connection.connect()
             val json = connection.getInputStream().bufferedReader().use { it.readText() }

@@ -443,14 +443,6 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(useDarkTheme) {
                 setSystemBarAppearance(useDarkTheme)
             }
-            val (isVoiceAssistantEnabled) = rememberPreference(com.darkxvenom.airbeats.constants.EnableVoiceAssistantKey, defaultValue = false)
-            LaunchedEffect(isVoiceAssistantEnabled) {
-                if (isVoiceAssistantEnabled) {
-                    com.darkxvenom.airbeats.voice.VoiceAssistantService.start(this@MainActivity)
-                } else {
-                    com.darkxvenom.airbeats.voice.VoiceAssistantService.stop(this@MainActivity)
-                }
-            }
             var themeColor by rememberSaveable(stateSaver = ColorSaver) {
                 mutableStateOf(DefaultThemeColor)
             }
@@ -1540,7 +1532,7 @@ private fun openNotificationSettings(context: Context) {
 
 suspend fun checkForUpdates(): String? = withContext(Dispatchers.IO) {
     try {
-        val url = URL("https://api.github.com/repos/d0x-dev/airbeats/releases/latest")
+        val url = URL("https://api.github.com/repos/drkvenom786/airbeats-lite/releases/latest")
         val connection = url.openConnection()
         connection.connect()
         val json = connection.getInputStream().bufferedReader().use { it.readText() }

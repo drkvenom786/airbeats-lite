@@ -342,7 +342,7 @@ fun UpdateAvailableDialog(
                         onClick = {
                             val directApkUrl = updateInfo.apkDownloadUrl.ifBlank {
                                 updateInfo.releaseUrl.ifBlank {
-                                    "https://github.com/d0x-dev/AirBeats/releases/latest"
+                                    "https://github.com/drkvenom786/airbeats-lite/releases/latest"
                                 }
                             }
                             try {

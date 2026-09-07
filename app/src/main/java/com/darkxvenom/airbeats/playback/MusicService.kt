@@ -605,32 +605,19 @@ class MusicService :
 
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
                 hasAudioFocus = false
-                val isVoiceAssistantRunning = com.darkxvenom.airbeats.voice.VoiceAssistantService.instance != null
-                if (!isVoiceAssistantRunning) {
-                    wasPlayingBeforeAudioFocusLoss = player.isPlaying
-                    if (player.isPlaying) {
-                        player.pause()
-                    }
-                } else {
-                    // Voice assistant is listening in background; do NOT pause music
-                    wasPlayingBeforeAudioFocusLoss = false
+                wasPlayingBeforeAudioFocusLoss = player.isPlaying
+                if (player.isPlaying) {
+                    player.pause()
                 }
-
                 lastAudioFocusState = focusChange
             }
 
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
                 hasAudioFocus = false
-                val isVoiceAssistantRunning = com.darkxvenom.airbeats.voice.VoiceAssistantService.instance != null
-                if (!isVoiceAssistantRunning) {
-                    wasPlayingBeforeAudioFocusLoss = player.isPlaying
-                    if (player.isPlaying) {
-                        player.volume = (playerVolume.value * 0.2f)
-                    }
-                } else {
-                    wasPlayingBeforeAudioFocusLoss = false
+                wasPlayingBeforeAudioFocusLoss = player.isPlaying
+                if (player.isPlaying) {
+                    player.volume = (playerVolume.value * 0.2f)
                 }
-
                 lastAudioFocusState = focusChange
             }
 
