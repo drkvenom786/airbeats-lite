@@ -409,66 +409,73 @@ private fun LogEntryItem(
     val levelColor = when (entry.level) {
         Log.ERROR -> MaterialTheme.colorScheme.error
         Log.WARN -> androidx.compose.ui.graphics.Color(0xFFFFA000)
-        Log.INFO -> MaterialTheme.colorScheme.primary
-        Log.DEBUG -> MaterialTheme.colorScheme.secondary
+        Log.INFO -> androidx.compose.ui.graphics.Color(0xFF4CAF50)
+        Log.DEBUG -> androidx.compose.ui.graphics.Color(0xFF2196F3)
+        Log.VERBOSE -> androidx.compose.ui.graphics.Color(0xFF9E9E9E)
         else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
 
-    var showCopiedFeedback by remember { mutableStateOf(false) }
+    val levelChar = when (entry.level) {
+        Log.VERBOSE -> "V"
+        Log.DEBUG -> "D"
+        Log.INFO -> "I"
+        Log.WARN -> "W"
+        Log.ERROR -> "E"
+        else -> "?"
+    }
+
+    val timeString = remember(entry.time) {
+        runCatching {
+            java.text.SimpleDateFormat("HH:mm:ss.SSS", java.util.Locale.getDefault()).format(java.util.Date(entry.time))
+        }.getOrDefault("")
+    }
+
+    val formattedLine = remember(entry) { GlobalLog.format(entry) }
 
     Surface(
-        shape = RoundedCornerShape(8.dp),
-        color = if (showCopiedFeedback) 
-            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
-        else 
-            MaterialTheme.colorScheme.surface,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        androidx.compose.foundation.layout.Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            verticalAlignment = Alignment.Top,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(8.dp)
-                    .padding(top = 6.dp)
-                    .background(levelColor, androidx.compose.foundation.shape.CircleShape)
-            )
-
-            Column {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    val timeString = runCatching {
-                        java.text.SimpleDateFormat("HH:mm:ss.SSS", java.util.Locale.getDefault()).format(java.util.Date(entry.time))
-                    }.getOrDefault("")
-                    
-                    Text(
-                        text = entry.tag ?: "Unknown",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = levelColor,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = timeString,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontFamily = FontFamily.Monospace
-                    )
-                }
-                Text(
-                    text = entry.message,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontFamily = FontFamily.Monospace,
-                    lineHeight = 14.sp
-                )
+        shape = RoundedCornerShape(6.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.5f),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                clipboard.setText(AnnotatedString(formattedLine))
             }
-        }
+    ) {
+        Text(
+            text = buildAnnotatedString {
+                withStyle(
+                    SpanStyle(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 12.sp
+                    )
+                ) {
+                    append("[$timeString] ")
+                }
+                withStyle(
+                    SpanStyle(
+                        color = levelColor,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp
+                    )
+                ) {
+                    val tag = entry.tag ?: ""
+                    append("$levelChar/$tag: ")
+                }
+                withStyle(
+                    SpanStyle(
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 12.sp
+                    )
+                ) {
+                    append(entry.message)
+                }
+            },
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            lineHeight = 16.sp
+        )
     }
 }
 
