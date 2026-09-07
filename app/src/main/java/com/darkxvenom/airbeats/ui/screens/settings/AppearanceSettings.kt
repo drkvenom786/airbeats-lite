@@ -156,7 +156,6 @@ fun AppearanceSettings(
         defaultValue = DefaultMiniPlayerThumbnailShape
     )
 
-    val (slimNav, onSlimNavChange) = rememberPreference(SlimNavBarKey, defaultValue = false)
     val (enableDynamicIsland, onEnableDynamicIslandChange) = rememberPreference(
         DynamicIslandKey,
         defaultValue = false
@@ -741,13 +740,6 @@ fun AppearanceSettings(
                                 }
                             },
                             onValueSelected = onDefaultChipChange,
-                        )},
-
-                        {SwitchPreference(
-                            title = { Text(stringResource(R.string.slim_navbar)) },
-                            icon = { Icon(painterResource(R.drawable.nav_bar), null) },
-                            checked = slimNav,
-                            onCheckedChange = onSlimNavChange
                         )},
 
                         {EnumListPreference(

@@ -162,42 +162,7 @@ fun OnboardingScreen(
                 )
             }
 
-            if (isNewSignup) {
-                // New user sign up -> Skip checking backup, immediately create initial backup!
-                syncState = SyncState.CREATING_BACKUP
-                backupViewModel.backupToDrive(context, email, name)
-                syncState = SyncState.NEW_USER
-            } else {
-                // Existing user login -> Check if backup exists first
-                syncState = SyncState.CHECKING
-                val backupClient = com.darkxvenom.airbeats.utils.CloudBackupClient()
-                if (backupClient.checkBackupExists(email)) {
-                    syncState = SyncState.RESTORING
-                    when (backupViewModel.restoreFromDrive(context, email)) {
-                        is com.darkxvenom.airbeats.utils.DriveResult.Success -> {
-                            syncState = SyncState.RESTORED
-                            delay(1500)
-                            context.stopService(android.content.Intent(context, com.darkxvenom.airbeats.playback.MusicService::class.java))
-                            context.startActivity(
-                                android.content.Intent(context, com.darkxvenom.airbeats.MainActivity::class.java).apply {
-                                    addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                                }
-                            )
-                            Runtime.getRuntime().exit(0)
-                        }
-                        else -> {
-                            Toast.makeText(context, "Cloud restore failed. Creating a fresh backup.", Toast.LENGTH_SHORT).show()
-                            syncState = SyncState.CREATING_BACKUP
-                            backupViewModel.backupToDrive(context, email, name)
-                            syncState = SyncState.NEW_USER
-                        }
-                    }
-                } else {
-                    syncState = SyncState.CREATING_BACKUP
-                    backupViewModel.backupToDrive(context, email, name)
-                    syncState = SyncState.NEW_USER
-                }
-            }
+            syncState = SyncState.NEW_USER
         }
     }
 
