@@ -408,18 +408,9 @@ class MainActivity : ComponentActivity() {
             }
 
             val isNameSet by namePreferenceManager.isNameSet.collectAsState(initial = null)
-            var showSplash by remember { mutableStateOf(true) }
-
-            LaunchedEffect(isNameSet) {
-                if (isNameSet != null) {
-                    delay(1500)
-                    showSplash = false
-                }
-            }
-
             var showFullscreenLyrics by remember { mutableStateOf(false) }
 
-            val playerScreenStyle by rememberEnumPreference<PlayerScreenStyle>(PlayerScreenStyleKey, defaultValue = PlayerScreenStyle.IOS_STYLED)
+            val playerScreenStyle by rememberEnumPreference<PlayerScreenStyle>(PlayerScreenStyleKey, defaultValue = PlayerScreenStyle.CLASSIC)
             val homeScreenStyle by rememberEnumPreference(HomeScreenStyleKey, defaultValue = HomeScreenStyle.CLASSIC)
             val navBarStyle by rememberEnumPreference(NavBarStyleKey, defaultValue = NavBarStyle.APPLE)
             val enableNewLyricsScreen by rememberPreference(com.darkxvenom.airbeats.constants.EnableNewLyricsScreenKey, defaultValue = true)
@@ -488,13 +479,9 @@ class MainActivity : ComponentActivity() {
                 appFont = appFont,
                 themeColor = themeColor,
             ) {
-                if (showSplash) {
-                    HeadphoneSplashScreen()
-                } else {
-
-                    NameProvider(
-                        namePreferenceManager = namePreferenceManager
-                    ) {
+                NameProvider(
+                    namePreferenceManager = namePreferenceManager
+                ) {
                         BoxWithConstraints(
                             modifier =
                                 Modifier
@@ -1271,22 +1258,26 @@ class MainActivity : ComponentActivity() {
                                     ) {
                                     NavHost(
                                         navController = navController,
-                                        startDestination = when (tabOpenedFromShortcut ?: defaultOpenTab) {
-                                            NavigationTab.HOME -> Screens.Home
-                                            NavigationTab.EXPLORE -> Screens.Explore
-                                            NavigationTab.LIBRARY -> Screens.Library
-                                        }.route,
+                                        startDestination = if (isNameSet == false) {
+                                            "guest_profile_setup"
+                                        } else {
+                                            when (tabOpenedFromShortcut ?: defaultOpenTab) {
+                                                NavigationTab.HOME -> Screens.Home
+                                                NavigationTab.EXPLORE -> Screens.Explore
+                                                NavigationTab.LIBRARY -> Screens.Library
+                                            }.route
+                                        },
 
                                         enterTransition = {
                                             if (initialState.destination.route in topLevelScreens &&
                                                 targetState.destination.route in topLevelScreens
                                             ) {
-                                                fadeIn(animationSpec = tween(durationMillis = 240, easing = FastOutSlowInEasing))
+                                                fadeIn(animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing))
                                             } else {
-                                                fadeIn(animationSpec = tween(durationMillis = 300, easing = LinearOutSlowInEasing)) +
+                                                fadeIn(animationSpec = tween(durationMillis = 220, easing = LinearOutSlowInEasing)) +
                                                         slideInHorizontally(
-                                                            initialOffsetX = { (it * 0.28f).toInt() },
-                                                            animationSpec = tween(durationMillis = 320, easing = FastOutSlowInEasing)
+                                                            initialOffsetX = { (it * 0.12f).toInt() },
+                                                            animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing)
                                                         )
                                             }
                                         },
@@ -1295,12 +1286,12 @@ class MainActivity : ComponentActivity() {
                                             if (initialState.destination.route in topLevelScreens &&
                                                 targetState.destination.route in topLevelScreens
                                             ) {
-                                                fadeOut(animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing))
+                                                fadeOut(animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing))
                                             } else {
-                                                fadeOut(animationSpec = tween(durationMillis = 260, easing = FastOutLinearInEasing)) +
+                                                fadeOut(animationSpec = tween(durationMillis = 180, easing = FastOutLinearInEasing)) +
                                                         slideOutHorizontally(
-                                                            targetOffsetX = { (-it * 0.20f).toInt() },
-                                                            animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
+                                                            targetOffsetX = { (-it * 0.08f).toInt() },
+                                                            animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
                                                         )
                                             }
                                         },
@@ -1309,12 +1300,12 @@ class MainActivity : ComponentActivity() {
                                             if (initialState.destination.route in topLevelScreens &&
                                                 targetState.destination.route in topLevelScreens
                                             ) {
-                                                fadeIn(animationSpec = tween(durationMillis = 240, easing = FastOutSlowInEasing))
+                                                fadeIn(animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing))
                                             } else {
-                                                fadeIn(animationSpec = tween(durationMillis = 300, easing = LinearOutSlowInEasing)) +
+                                                fadeIn(animationSpec = tween(durationMillis = 220, easing = LinearOutSlowInEasing)) +
                                                         slideInHorizontally(
-                                                            initialOffsetX = { (-it * 0.20f).toInt() },
-                                                            animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
+                                                            initialOffsetX = { (-it * 0.08f).toInt() },
+                                                            animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing)
                                                         )
                                             }
                                         },
@@ -1323,12 +1314,12 @@ class MainActivity : ComponentActivity() {
                                             if (initialState.destination.route in topLevelScreens &&
                                                 targetState.destination.route in topLevelScreens
                                             ) {
-                                                fadeOut(animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing))
+                                                fadeOut(animationSpec = tween(durationMillis = 180, easing = FastOutSlowInEasing))
                                             } else {
-                                                fadeOut(animationSpec = tween(durationMillis = 260, easing = FastOutLinearInEasing)) +
+                                                fadeOut(animationSpec = tween(durationMillis = 180, easing = FastOutLinearInEasing)) +
                                                         slideOutHorizontally(
-                                                            targetOffsetX = { (it * 0.28f).toInt() },
-                                                            animationSpec = tween(durationMillis = 320, easing = FastOutSlowInEasing)
+                                                            targetOffsetX = { (it * 0.12f).toInt() },
+                                                            animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
                                                         )
                                             }
                                         },
@@ -1411,7 +1402,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
 
     private fun navigateToScreen(
         navController: NavHostController,
@@ -1857,114 +1847,7 @@ fun ModernHomeTopBar(
     }
 }
 
-@Composable
-fun HeadphoneSplashScreen() {
 
-    val infiniteTransition = rememberInfiniteTransition(label = "bg_anim")
-
-    val shift by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1000f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(6000, easing = LinearEasing)
-        ),
-        label = "shift"
-    )
-
-    val colors = MaterialTheme.colorScheme
-
-    val animatedBackground = Brush.radialGradient(
-        colors = listOf(
-            Color(0x228E2DE2),
-            Color(0x224A00E0),
-            Color(0x22FF00C8),
-            colors.background
-        ),
-        center = Offset(shift % 600f, shift % 900f),
-        radius = 1200f
-    )
-
-    var startAnimation by remember { mutableStateOf(false) }
-
-    val scale by animateFloatAsState(
-        targetValue = if (startAnimation) 1f else 0.9f,
-        animationSpec = tween(900, easing = FastOutSlowInEasing),
-        label = "scale"
-    )
-
-    val alpha by animateFloatAsState(
-        targetValue = if (startAnimation) 1f else 0f,
-        animationSpec = tween(900),
-        label = "alpha"
-    )
-
-    LaunchedEffect(Unit) {
-        startAnimation = true
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(animatedBackground),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-                this.alpha = alpha
-            }
-        ) {
-            Box(
-                modifier = Modifier
-                    .width(220.dp)
-                    .height(145.dp)
-                    .clipToBounds()
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.airbeats_logo),
-                    contentDescription = null,
-                    modifier = Modifier.size(220.dp)
-                )
-            }
-
-            Text(
-                text = "AirBeats Lite",
-                fontSize = 42.sp,
-                fontWeight = FontWeight.ExtraBold,
-                letterSpacing = 2.sp,
-                style = TextStyle(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            Color(0xFFE91E63),
-                            Color(0xFFFFC107),
-                            Color(0xFF2196F3)
-                        )
-                    )
-                )
-            )
-        }
-    }
-}
-
-@Composable
-fun AnimatedBar(
-    heightMultiplier: Float,
-    brush: Brush
-) {
-    Box(
-        modifier = Modifier
-            .width(16.dp)
-            .height((120 * heightMultiplier).dp)
-            .clip(RoundedCornerShape(50))
-            .background(brush)
-            .shadow(
-                elevation = 25.dp,
-                shape = RoundedCornerShape(50)
-            )
-    )
-}
 
 
 

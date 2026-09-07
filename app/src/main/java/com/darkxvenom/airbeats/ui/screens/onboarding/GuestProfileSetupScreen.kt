@@ -186,6 +186,7 @@ fun GuestProfileSetupScreen(navController: NavController) {
                                     coroutineScope.launch {
                                         namePrefManager.saveUserName(trimmedName)
                                         navController.navigate("home") {
+                                            popUpTo("guest_profile_setup") { inclusive = true }
                                             popUpTo("onboarding") { inclusive = true }
                                         }
                                     }
@@ -217,6 +218,7 @@ fun GuestProfileSetupScreen(navController: NavController) {
                                 coroutineScope.launch {
                                     namePrefManager.saveUserName(trimmedName)
                                     navController.navigate("home") {
+                                        popUpTo("guest_profile_setup") { inclusive = true }
                                         popUpTo("onboarding") { inclusive = true }
                                     }
                                 }
