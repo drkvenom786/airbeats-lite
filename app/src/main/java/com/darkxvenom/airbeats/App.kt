@@ -71,7 +71,6 @@ class App : LocaleAwareApplication(), ImageLoaderFactory {
             runCatching { dataStore.initializeCache() }
         }
         Timber.plant(com.darkxvenom.airbeats.utils.GlobalLogTree())
-        com.darkxvenom.airbeats.utils.GlobalLog.startRealtimeLogcat()
 
         try {
             Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
