@@ -91,7 +91,7 @@ fun AppearanceSettings(
     val (playerScreenStyle, onPlayerScreenStyleChange) =
         rememberEnumPreference<PlayerScreenStyle>(
             PlayerScreenStyleKey,
-            defaultValue = PlayerScreenStyle.IOS_STYLED,
+            defaultValue = PlayerScreenStyle.CLASSIC,
         )
     val (homeScreenStyle, onHomeScreenStyleChange) =
         rememberEnumPreference(

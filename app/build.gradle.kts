@@ -34,7 +34,7 @@ android {
 
     defaultConfig {
         applicationId = "com.darkxvenom.airbeatslite"
-        minSdk = 26
+        minSdk = 24
         targetSdk = 35
         versionCode = 190
         versionName = "6.1.0"

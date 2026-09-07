@@ -248,7 +248,7 @@ fun BottomSheetPlayer(
 
     val playerScreenStyle by rememberEnumPreference<PlayerScreenStyle>(
         PlayerScreenStyleKey,
-        PlayerScreenStyle.IOS_STYLED
+        PlayerScreenStyle.CLASSIC
     )
 
     val playerBackground by rememberEnumPreference(
