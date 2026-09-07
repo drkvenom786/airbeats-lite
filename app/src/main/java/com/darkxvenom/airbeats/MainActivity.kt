@@ -8,10 +8,6 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.foundation.Image
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -856,13 +852,7 @@ class MainActivity : ComponentActivity() {
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
-                                        .background(MaterialTheme.colorScheme.surface)
-                                        .pointerInput(Unit) {
-                                            awaitEachGesture {
-                                                awaitPointerEvent()
-                                                resetAodTimer()
-                                            }
-                                        },
+                                        .background(MaterialTheme.colorScheme.surface),
                                     containerColor = Color.Transparent,
                                     topBar = {
                                         val isSearchRoute =
