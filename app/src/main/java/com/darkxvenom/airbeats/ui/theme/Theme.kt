@@ -26,6 +26,9 @@ import androidx.compose.runtime.saveable.Saver
 import com.darkxvenom.airbeats.constants.AppFont
 
 val DefaultThemeColor = Color(0xFF4285F4)
+val NeonPurple = Color(0xFFA259FF)
+val NeonDarkBg = Color(0xFF0F0F14)
+val NeonCardBg = Color(0xFF1C1C24)
 
 val ColorSaver = Saver<Color, Int>(
     save = { it.toArgb() },
