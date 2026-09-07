@@ -1387,6 +1387,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+}
 
     private fun navigateToScreen(
         navController: NavHostController,
