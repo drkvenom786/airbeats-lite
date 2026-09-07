@@ -624,14 +624,8 @@ fun AboutScreen(
                     LaunchedEffect(Unit) {
                         try {
                             val liteContributors = client.getContributors("drkvenom786", "airbeats-lite")
-                            val upstreamContributors = runCatching { client.getContributors("d0x-dev", "AirBeats") }.getOrDefault(emptyList())
-                            val combinedCommits = mutableMapOf<String, Int>()
-                            upstreamContributors.forEach { combinedCommits[it.login] = it.contributions }
-                            liteContributors.forEach { combinedCommits[it.login] = maxOf(combinedCommits[it.login] ?: 0, it.contributions) }
-                            founderCommits = combinedCommits
-                            contributors = (liteContributors + upstreamContributors)
-                                .distinctBy { it.login }
-                                .filter { it.login != "d0x-dev" && it.login != "drkvenom786" }
+                            founderCommits = liteContributors.associate { it.login to it.contributions }
+                            contributors = liteContributors.filter { it.login != "d0x-dev" && it.login != "drkvenom786" }
                         } catch (e: Exception) {
                             e.printStackTrace()
                         } finally {
