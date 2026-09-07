@@ -165,7 +165,7 @@ fun ChangelogScreen(viewModel: ChangelogViewModel = viewModel()) {
     var selectedTab by remember { mutableStateOf(ChangelogTab.RELEASES) }
 
     LaunchedEffect(Unit) {
-        viewModel.loadChangelog("d0x-dev", "AirBeats")
+        viewModel.loadChangelog("drkvenom786", "airbeats-lite")
     }
 
     Column(
@@ -194,7 +194,7 @@ fun ChangelogScreen(viewModel: ChangelogViewModel = viewModel()) {
                     isLoading = uiState.isLoadingReleases,
                     error = uiState.releasesError,
                     lastUpdated = uiState.lastUpdated,
-                    onRetry = { viewModel.loadChangelog("d0x-dev", "AirBeats") }
+                    onRetry = { viewModel.loadChangelog("drkvenom786", "airbeats-lite") }
                 )
             }
 
@@ -204,7 +204,7 @@ fun ChangelogScreen(viewModel: ChangelogViewModel = viewModel()) {
                     isLoading = uiState.isLoadingCommits,
                     error = uiState.commitsError,
                     lastUpdated = uiState.lastUpdated,
-                    onRetry = { viewModel.loadChangelog("d0x-dev", "AirBeats") }
+                    onRetry = { viewModel.loadChangelog("drkvenom786", "airbeats-lite") }
                 )
             }
         }

@@ -71,7 +71,10 @@ fun ContributorProfileScreen(
         launch { profile = client.getUserProfile(username) }
         launch { repos = client.getUserRepos(username) }
         launch { events = client.getUserEvents(username) }
-        launch { commits = client.getRepoCommits("d0x-dev", "AirBeats", username) }
+        launch {
+            val liteCommits = runCatching { client.getRepoCommits("drkvenom786", "airbeats-lite", username) }.getOrDefault(emptyList())
+            commits = if (liteCommits.isNotEmpty()) liteCommits else runCatching { client.getRepoCommits("d0x-dev", "AirBeats", username) }.getOrDefault(emptyList())
+        }
         launch { readme = client.getProfileReadme(username) }
         isLoading = false
     }

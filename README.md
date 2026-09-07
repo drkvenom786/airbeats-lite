@@ -34,11 +34,21 @@
 
 ---
 
-## 👥 Authors & Credits
+## 👥 Meet the Talented Team
 
-### 💻 Developer & UI/UX Specialist
+### 💻 Lead Developer & Founder
+
+- <img src="https://avatars.githubusercontent.com/u/218248866?s=400&u=7d12b7d4c3f4cbb804fd5080d26623e7c94f6821&v=4" width="60" style="border-radius: 50%; margin-top: 10px;"/>
+**Darkboy** - Full-Stack Android Developer
+- 🔗 [GitHub](https://github.com/d0x-dev)
+- 🌐 [Website](https://darkboy.pro)
+- 📱 [Telegram](https://t.me/songpy)
+- 📸 [Instagram](https://instagram.com/dark__336)
+
+### 🎨 UI/UX Specialist & Designer
+
 - <img src="https://avatars.githubusercontent.com/u/241423835" width="60" style="border-radius: 50%; margin-top: 10px;"/>
-**Venom** - Lead Developer & UI/UX Designer
+**Venom** - Creative Design Visionary & UI/UX Specialist
 - 🔗 [GitHub](https://github.com/drkvenom786)
 - 🌐 [Website](http://venomx.pro)
 - 🎨 [Portfolio](https://drkvenom786.github.io/webpage/)
