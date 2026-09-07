@@ -89,14 +89,13 @@ import java.net.URL
 @Composable
 fun SettingsDivider(
     modifier: Modifier = Modifier,
-    color: Color = Color.White.copy(alpha = 0.1f),
+    color: Color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
     thickness: Dp = 0.5.dp
 ) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(thickness)
-            .background(color)
+    HorizontalDivider(
+        modifier = modifier.fillMaxWidth(),
+        thickness = thickness,
+        color = color
     )
 }
 
@@ -123,19 +122,19 @@ fun SettingsCategory(
                 fontWeight = FontWeight.SemiBold,
                 letterSpacing = 0.5.sp
             ),
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
+            color = MaterialTheme.colorScheme.primary
         )
 
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(28.dp),
+            shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.8f)
+                containerColor = MaterialTheme.colorScheme.surfaceContainer
             ),
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
             Column(
-                modifier = Modifier.padding(vertical = 8.dp)
+                modifier = Modifier.padding(vertical = 4.dp)
             ) {
                 items.forEachIndexed { index, item ->
                     SettingsCategoryItemContent(
@@ -153,227 +152,58 @@ fun SettingsCategoryItemContent(
     item: SettingsCategoryItem,
     isLast: Boolean
 ) {
-    var isPressed by remember { mutableStateOf(false) }
-
-    Box(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .scale(if (isPressed) 0.98f else 1f)
             .clip(RoundedCornerShape(16.dp))
-            .then(
-                if (isPressed) {
-                    Modifier.background(
-                        brush = Brush.horizontalGradient(
-                            colors = listOf(
-                                Color.White.copy(alpha = 0.1f),
-                                Color.White.copy(alpha = 0.05f)
-                            )
-                        )
-                    )
-                } else Modifier
-            )
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null
-            ) {
-                isPressed = true
-                item.onClick()
-                isPressed = false
-            }
-            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .clickable(onClick = item.onClick)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+        // Icon container
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(
+                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
+                ),
+            contentAlignment = Alignment.Center
         ) {
-            // Icon container
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                    )
-                    .border(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                        shape = CircleShape
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painter = item.icon,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
+            Icon(
+                painter = item.icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp)
+            )
+        }
 
-            Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(16.dp))
 
-            // Title
-            Box(modifier = Modifier.weight(1f)) {
-                item.title()
-            }
+        // Title
+        Box(modifier = Modifier.weight(1f)) {
+            item.title()
+        }
 
-            // Trailing content
-            if (item.trailingContent != null) {
-                item.trailingContent()
-            } else {
-                Icon(
-                    painter = painterResource(R.drawable.arrow_forward),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                    modifier = Modifier.size(18.dp)
-                )
-            }
+        // Trailing content
+        if (item.trailingContent != null) {
+            item.trailingContent()
+        } else {
+            Icon(
+                painter = painterResource(R.drawable.arrow_forward),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                modifier = Modifier.size(18.dp)
+            )
         }
     }
 
     if (!isLast) {
-        SettingsDivider(
-            modifier = Modifier.padding(start = 72.dp, end = 16.dp)
+        HorizontalDivider(
+            modifier = Modifier.padding(start = 72.dp, end = 16.dp),
+            thickness = 0.5.dp,
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
         )
-    }
-}
-
-// ==================== GLASS CARD COMPONENT ====================
-
-@Composable
-fun GlassCard(
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
-) {
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.8f)
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        content()
-    }
-}
-
-// ==================== WATER DROP BUTTON COMPONENTS ====================
-
-@Composable
-fun WaterDropButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    icon: @Composable (() -> Unit)? = null,
-    text: String? = null,
-    colors: List<Color> = listOf(
-        Color(0xFF6C5CE7),
-        Color(0xFFA463F5),
-        Color(0xFFC45AF0)
-    )
-) {
-    var isPressed by remember { mutableStateOf(false) }
-
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(30.dp))
-            .scale(if (isPressed) 0.95f else 1f)
-            .shadow(
-                elevation = if (isPressed) 2.dp else 8.dp,
-                shape = RoundedCornerShape(30.dp),
-                clip = false
-            )
-            .background(
-                brush = Brush.linearGradient(
-                    colors = colors,
-                    start = Offset(0f, 0f),
-                    end = Offset(100f, 100f)
-                ),
-                shape = RoundedCornerShape(30.dp)
-            )
-            .drawBehind {
-                // Water drop effect - bottom highlight
-                drawRect(
-                    color = Color.White.copy(alpha = 0.2f),
-                    topLeft = Offset(size.width * 0.2f, size.height * 0.7f),
-                    size = Size(size.width * 0.6f, size.height * 0.3f),
-                    blendMode = BlendMode.Screen
-                )
-                // Top highlight
-                drawCircle(
-                    color = Color.White.copy(alpha = 0.3f),
-                    radius = size.minDimension * 0.15f,
-                    center = Offset(size.width * 0.3f, size.height * 0.3f),
-                    blendMode = BlendMode.Screen
-                )
-            }
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null
-            ) {
-                isPressed = true
-                onClick()
-                isPressed = false
-            },
-        contentAlignment = Alignment.Center
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (icon != null) {
-                icon()
-                if (text != null) Spacer(modifier = Modifier.width(8.dp))
-            }
-            if (text != null) {
-                Text(
-                    text = text,
-                    color = Color.White,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 16.sp
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun WaterDropIconButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    icon: @Composable () -> Unit
-) {
-    var isPressed by remember { mutableStateOf(false) }
-
-    Box(
-        modifier = modifier
-            .size(48.dp)
-            .clip(CircleShape)
-            .scale(if (isPressed) 0.9f else 1f)
-            .shadow(
-                elevation = if (isPressed) 2.dp else 6.dp,
-                shape = CircleShape,
-                clip = false
-            )
-            .background(
-                MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.8f),
-                CircleShape
-            )
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                shape = CircleShape
-            )
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null
-            ) {
-                isPressed = true
-                onClick()
-                isPressed = false
-            },
-        contentAlignment = Alignment.Center
-    ) {
-        icon()
     }
 }
 
@@ -412,19 +242,24 @@ fun VersionCard(uriHandler: UriHandler) {
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         Text(
             text = stringResource(R.string.app_info),
-            modifier = Modifier.padding(start = 4.dp, bottom = 8.dp),
+            modifier = Modifier.padding(start = 20.dp, bottom = 8.dp),
             style = MaterialTheme.typography.titleSmall.copy(
                 fontWeight = FontWeight.SemiBold,
                 letterSpacing = 0.5.sp
             ),
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
+            color = MaterialTheme.colorScheme.primary
         )
 
-        GlassCard(
-            modifier = Modifier.fillMaxWidth()
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainer
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
             Column(
-                modifier = Modifier.padding(vertical = 8.dp)
+                modifier = Modifier.padding(vertical = 4.dp)
             ) {
                 // Version item
                 SettingsCategoryItemContent(
@@ -433,12 +268,13 @@ fun VersionCard(uriHandler: UriHandler) {
                         title = {
                             Column {
                                 Text(
-                                    text = stringResource(R.string.Version),
+                                    text = "AirBeats Lite",
                                     style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    fontWeight = FontWeight.SemiBold
                                 )
                                 Text(
-                                    text = appVersion,
+                                    text = "v$appVersion",
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     fontFamily = FontFamily.Monospace
@@ -446,29 +282,17 @@ fun VersionCard(uriHandler: UriHandler) {
                             }
                         },
                         trailingContent = {
-                            Box(
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .clip(CircleShape)
-                                    .background(
-                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.arrow_forward),
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
+                            Icon(
+                                painter = painterResource(R.drawable.arrow_forward),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                modifier = Modifier.size(18.dp)
+                            )
                         },
-                        onClick = { uriHandler.openUri("https://github.com/d0x-dev/AirBeats/releases/latest") }
+                        onClick = { uriHandler.openUri("https://github.com/drkvenom786/airbeats-lite/releases/latest") }
                     ),
                     isLast = false
                 )
-
-                SettingsDivider(modifier = Modifier.padding(start = 72.dp, end = 16.dp))
 
                 // Website item
                 SettingsCategoryItemContent(
@@ -482,22 +306,12 @@ fun VersionCard(uriHandler: UriHandler) {
                             )
                         },
                         trailingContent = {
-                            Box(
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .clip(CircleShape)
-                                    .background(
-                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.arrow_forward),
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
+                            Icon(
+                                painter = painterResource(R.drawable.arrow_forward),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                modifier = Modifier.size(18.dp)
+                            )
                         },
                         onClick = { uriHandler.openUri("https://airbeats.app") }
                     ),
@@ -552,43 +366,34 @@ fun UpdateCard(latestVersion: String = "") {
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
         ) {
-            GlassCard(
-                modifier = Modifier.fillMaxWidth()
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f)
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .clip(RoundedCornerShape(24.dp))
                         .clickable { showDownloadDialog = true }
                         .padding(20.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Update icon with animation
-                    val infiniteTransition = rememberInfiniteTransition(label = "update")
-                    val scale by infiniteTransition.animateFloat(
-                        initialValue = 1f,
-                        targetValue = 1.1f,
-                        animationSpec = infiniteRepeatable(
-                            animation = tween(1000, easing = FastOutSlowInEasing),
-                            repeatMode = RepeatMode.Reverse
-                        ),
-                        label = "scale"
-                    )
-
                     Box(
                         modifier = Modifier
-                            .size(48.dp)
-                            .scale(scale)
+                            .size(44.dp)
                             .clip(CircleShape)
-                            .background(
-                                MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
-                            ),
+                            .background(MaterialTheme.colorScheme.secondaryContainer),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.update),
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier.size(28.dp)
+                            modifier = Modifier.size(24.dp)
                         )
                     }
 
@@ -602,7 +407,7 @@ fun UpdateCard(latestVersion: String = "") {
                             fontWeight = FontWeight.Bold
                         )
 
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(2.dp))
 
                         Text(
                             text = stringResource(R.string.tap_to_update),
@@ -615,7 +420,7 @@ fun UpdateCard(latestVersion: String = "") {
                         painter = painterResource(R.drawable.download),
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(22.dp)
                     )
                 }
             }
@@ -636,14 +441,17 @@ fun UpdateDownloadDialog(
             onDismiss()
         }
     }) {
-        GlassCard(
+        Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
+            shape = RoundedCornerShape(28.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainer
+            )
         ) {
             Column(
-                modifier = Modifier
-                    .padding(24.dp),
+                modifier = Modifier.padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -667,37 +475,29 @@ fun UpdateDownloadDialog(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            WaterDropButton(
+                            OutlinedButton(
                                 onClick = onDismiss,
-                                modifier = Modifier.weight(1f),
-                                text = stringResource(R.string.cancel),
-                                colors = listOf(
-                                    Color(0xFF2A2A2A),
-                                    Color(0xFF3A3A3A),
-                                    Color(0xFF2A2A2A)
-                                )
-                            )
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(stringResource(R.string.cancel))
+                            }
 
-                            WaterDropButton(
+                            Button(
                                 onClick = {
                                     downloadStatus = DownloadStatus.REDIRECTING
                                     val downloadUrl = if (com.darkxvenom.airbeats.BuildConfig.IS_NIGHTLY) {
-                                        "https://github.com/d0x-dev/AirBeats/releases/download/v${latestVersion}-nightly/Airbeats-v${latestVersion}-Nightly.apk"
+                                        "https://github.com/drkvenom786/airbeats-lite/releases/download/v${latestVersion}-nightly/Airbeats-v${latestVersion}-Nightly.apk"
                                     } else {
-                                        "https://github.com/d0x-dev/AirBeats/releases/download/v$latestVersion/AirBeats_v${latestVersion}_signed.apk"
+                                        "https://github.com/drkvenom786/airbeats-lite/releases/download/v$latestVersion/AirBeats-Lite-v${latestVersion}.apk"
                                     }
                                     uriHandler.openUri(downloadUrl)
                                     downloadStatus = DownloadStatus.COMPLETED
                                     onDismiss()
                                 },
-                                modifier = Modifier.weight(1f),
-                                text = stringResource(R.string.download),
-                                colors = listOf(
-                                    Color(0xFF6C5CE7),
-                                    Color(0xFFA463F5),
-                                    Color(0xFFC45AF0)
-                                )
-                            )
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(stringResource(R.string.download))
+                            }
                         }
                     }
 
@@ -720,11 +520,12 @@ fun UpdateDownloadDialog(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(modifier = Modifier.height(16.dp))
-                        WaterDropButton(
+                        Button(
                             onClick = onDismiss,
-                            text = stringResource(R.string.close),
                             modifier = Modifier.fillMaxWidth()
-                        )
+                        ) {
+                            Text(stringResource(R.string.close))
+                        }
                     }
 
                     DownloadStatus.ERROR -> {
@@ -733,16 +534,12 @@ fun UpdateDownloadDialog(
                             color = MaterialTheme.colorScheme.error
                         )
                         Spacer(modifier = Modifier.height(16.dp))
-                        WaterDropButton(
+                        Button(
                             onClick = onDismiss,
-                            text = stringResource(R.string.close),
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = listOf(
-                                Color(0xFFCF6679),
-                                Color(0xFFB0003A),
-                                Color(0xFFCF6679)
-                            )
-                        )
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(stringResource(R.string.close))
+                        }
                     }
                 }
             }
@@ -1066,10 +863,14 @@ fun SettingsScreen(
         // Dialogs and Bottom Sheets
         if (showTranslateDialog) {
             Dialog(onDismissRequest = { showTranslateDialog = false }) {
-                GlassCard(
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp)
+                        .padding(16.dp),
+                    shape = RoundedCornerShape(28.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer
+                    )
                 ) {
                     Column(
                         modifier = Modifier.padding(24.dp),
@@ -1095,30 +896,22 @@ fun SettingsScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            WaterDropButton(
+                            OutlinedButton(
                                 onClick = { showTranslateDialog = false },
-                                modifier = Modifier.weight(1f),
-                                text = stringResource(R.string.cancel),
-                                colors = listOf(
-                                    Color(0xFF2A2A2A),
-                                    Color(0xFF3A3A3A),
-                                    Color(0xFF2A2A2A)
-                                )
-                            )
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(stringResource(R.string.cancel))
+                            }
 
-                            WaterDropButton(
+                            Button(
                                 onClick = {
                                     showTranslateDialog = false
                                     uriHandler.openUri("https://poeditor.com/join/project/208BwCVazA")
                                 },
-                                modifier = Modifier.weight(1f),
-                                text = "OK",
-                                colors = listOf(
-                                    Color(0xFF6C5CE7),
-                                    Color(0xFFA463F5),
-                                    Color(0xFFC45AF0)
-                                )
-                            )
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text("OK")
+                            }
                         }
                     }
                 }
@@ -1129,55 +922,38 @@ fun SettingsScreen(
             ModalBottomSheet(
                 onDismissRequest = { showChangelogSheet = false },
                 sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-                containerColor = Color.Transparent,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
                 contentColor = MaterialTheme.colorScheme.onSurface,
                 dragHandle = {
-                    Box(
-                        modifier = Modifier
-                            .padding(vertical = 12.dp)
-                            .width(40.dp)
-                            .height(4.dp)
-                            .clip(RoundedCornerShape(2.dp))
-                            .background(
-                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
-                            )
-                    )
+                    BottomSheetDefaults.DragHandle()
                 }
             ) {
-                GlassCard(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 24.dp, vertical = 12.dp)
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .verticalScroll(rememberScrollState())
-                            .padding(20.dp)
+                    Text(
+                        text = "AirBeats Lite " + stringResource(R.string.Changelog),
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+
+                    ChangelogScreen()
+
+                    Spacer(Modifier.height(24.dp))
+
+                    Button(
+                        onClick = { showChangelogSheet = false },
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(
-                            text = stringResource(R.string.Changelog),
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(bottom = 16.dp)
-                        )
-
-                        ChangelogScreen()
-
-                        Spacer(Modifier.height(24.dp))
-
-                        WaterDropButton(
-                            onClick = { showChangelogSheet = false },
-                            modifier = Modifier.fillMaxWidth(),
-                            text = stringResource(R.string.close),
-                            colors = listOf(
-                                Color(0xFF6C5CE7),
-                                Color(0xFFA463F5),
-                                Color(0xFFC45AF0)
-                            )
-                        )
+                        Text(stringResource(R.string.close))
                     }
+
+                    Spacer(Modifier.height(16.dp))
                 }
             }
         }
@@ -1193,215 +969,142 @@ fun ProfileSection(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 0.dp, bottom = 24.dp),
+            .padding(top = 8.dp, bottom = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (isLoggedIn) {
             var imageLoadError by remember { mutableStateOf(false) }
             var isImageLoading by remember { mutableStateOf(false) }
 
-            // Avatar with glow effect
+            // Avatar container (Material 3 style)
             Box(
+                modifier = Modifier
+                    .size(96.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                    .border(
+                        width = 2.dp,
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = CircleShape
+                    ),
                 contentAlignment = Alignment.Center
             ) {
-                // Outer glow
-                Box(
-                    modifier = Modifier
-                        .size(120.dp)
-                        .clip(CircleShape)
-                        .background(
-                            Brush.radialGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                                    Color.Transparent
-                                )
-                            )
-                        )
-                        .blur(20.dp)
-                )
-
-                // Avatar container
-                Box(
-                    modifier = Modifier
-                        .size(96.dp)
-                        .clip(CircleShape)
-                        .background(
-                            MaterialTheme.colorScheme.surfaceContainer
-                        )
-                        .border(
-                            width = 3.dp,
-                            brush = Brush.linearGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
-                                    MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f)
-                                )
-                            ),
-                            shape = CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    when {
-                        currentSelection is AvatarSelection.Custom && !imageLoadError -> {
-                            AsyncImage(
-                                model = ImageRequest.Builder(LocalContext.current)
-                                    .data((currentSelection as AvatarSelection.Custom).uri.toUri())
-                                    .crossfade(true)
-                                    .listener(
-                                        onStart = { isImageLoading = true },
-                                        onSuccess = { _, _ ->
-                                            isImageLoading = false
-                                            imageLoadError = false
-                                        },
-                                        onError = { _, _ ->
-                                            isImageLoading = false
-                                            imageLoadError = true
-                                        }
-                                    )
-                                    .build(),
-                                contentDescription = "Avatar de $accountName",
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .clip(CircleShape),
-                                contentScale = ContentScale.Crop
-                            )
-
-                            if (isImageLoading) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(
-                                            MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
-                                        ),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(24.dp),
-                                        strokeWidth = 2.dp,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                }
-                            }
-                        }
-
-                        currentSelection is AvatarSelection.DiceBear && !imageLoadError -> {
-                            AsyncImage(
-                                model = ImageRequest.Builder(LocalContext.current)
-                                    .data((currentSelection as AvatarSelection.DiceBear).url)
-                                    .crossfade(true)
-                                    .listener(
-                                        onStart = { isImageLoading = true },
-                                        onSuccess = { _, _ ->
-                                            isImageLoading = false
-                                            imageLoadError = false
-                                        },
-                                        onError = { _, _ ->
-                                            isImageLoading = false
-                                            imageLoadError = true
-                                        }
-                                    )
-                                    .build(),
-                                contentDescription = "Avatar DiceBear de $accountName",
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .clip(CircleShape),
-                                contentScale = ContentScale.Crop
-                            )
-
-                            if (isImageLoading) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(
-                                            MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
-                                        ),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(24.dp),
-                                        strokeWidth = 2.dp,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                }
-                            }
-                        }
-
-                        else -> {
-                            val initials = remember(accountName) {
-                                val cleanName = accountName.replace("@", "").trim()
-                                when {
-                                    cleanName.isEmpty() -> "?"
-                                    cleanName.contains(" ") -> {
-                                        val parts = cleanName.split(" ")
-                                        "${parts.first().firstOrNull()?.uppercase() ?: ""}${
-                                            parts.last().firstOrNull()?.uppercase() ?: ""
-                                        }"
+                when {
+                    currentSelection is AvatarSelection.Custom && !imageLoadError -> {
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data((currentSelection as AvatarSelection.Custom).uri.toUri())
+                                .crossfade(true)
+                                .listener(
+                                    onStart = { isImageLoading = true },
+                                    onSuccess = { _, _ ->
+                                        isImageLoading = false
+                                        imageLoadError = false
+                                    },
+                                    onError = { _, _ ->
+                                        isImageLoading = false
+                                        imageLoadError = true
                                     }
-                                    else -> cleanName.take(2).uppercase()
-                                }
-                            }
+                                )
+                                .build(),
+                            contentDescription = "Avatar",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
 
+                        if (isImageLoading) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(
-                                        brush = Brush.linearGradient(
-                                            colors = listOf(
-                                                MaterialTheme.colorScheme.primary,
-                                                MaterialTheme.colorScheme.tertiary
-                                            ),
-                                            start = Offset(0f, 0f),
-                                            end = Offset(100f, 100f)
-                                        )
-                                    ),
+                                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    text = initials,
-                                    color = MaterialTheme.colorScheme.onPrimary,
-                                    style = MaterialTheme.typography.headlineMedium,
-                                    fontWeight = FontWeight.Bold
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(24.dp),
+                                    strokeWidth = 2.dp,
+                                    color = MaterialTheme.colorScheme.primary
                                 )
                             }
                         }
                     }
-                }
 
-                // Online indicator with pulse animation
-                val infiniteTransition = rememberInfiniteTransition(label = "pulse")
-                val pulseAlpha by infiniteTransition.animateFloat(
-                    initialValue = 0.5f,
-                    targetValue = 1f,
-                    animationSpec = infiniteRepeatable(
-                        animation = tween(1000, easing = FastOutSlowInEasing),
-                        repeatMode = RepeatMode.Reverse
-                    ),
-                    label = "alpha"
-                )
-
-                Box(
-                    modifier = Modifier
-                        .size(24.dp)
-                        .offset(x = 32.dp, y = 32.dp)
-                        .clip(CircleShape)
-                        .background(
-                            brush = Brush.radialGradient(
-                                colors = listOf(
-                                    Color(0xFF00FF00).copy(alpha = pulseAlpha),
-                                    Color(0xFF00FF00).copy(alpha = 0.3f)
+                    currentSelection is AvatarSelection.DiceBear && !imageLoadError -> {
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data((currentSelection as AvatarSelection.DiceBear).url)
+                                .crossfade(true)
+                                .listener(
+                                    onStart = { isImageLoading = true },
+                                    onSuccess = { _, _ ->
+                                        isImageLoading = false
+                                        imageLoadError = false
+                                    },
+                                    onError = { _, _ ->
+                                        isImageLoading = false
+                                        imageLoadError = true
+                                    }
                                 )
+                                .build(),
+                            contentDescription = "Avatar",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+
+                        if (isImageLoading) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(24.dp),
+                                    strokeWidth = 2.dp,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    }
+
+                    else -> {
+                        val initials = remember(accountName) {
+                            val cleanName = accountName.replace("@", "").trim()
+                            when {
+                                cleanName.isEmpty() -> "?"
+                                cleanName.contains(" ") -> {
+                                    val parts = cleanName.split(" ")
+                                    "${parts.first().firstOrNull()?.uppercase() ?: ""}${
+                                        parts.last().firstOrNull()?.uppercase() ?: ""
+                                    }"
+                                }
+                                else -> cleanName.take(2).uppercase()
+                            }
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.primaryContainer),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = initials,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Bold
                             )
-                        )
-                        .border(
-                            width = 2.dp,
-                            color = Color.White,
-                            shape = CircleShape
-                        )
-                )
+                        }
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Username with animation
+            // Username
             AnimatedContent(
                 targetState = accountName.replace("@", "").takeIf { it.isNotBlank() } ?: "",
                 transitionSpec = { fadeIn() togetherWith fadeOut() },
@@ -1409,9 +1112,8 @@ fun ProfileSection(
             ) { name ->
                 Text(
                     text = name,
-                    style = MaterialTheme.typography.headlineSmall.copy(
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 0.5.sp
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold
                     ),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -1419,86 +1121,87 @@ fun ProfileSection(
                 )
             }
 
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = "AirBeats Lite",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+
         } else {
             // Not logged in state
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Logo with glow effect
-                Box(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .clip(CircleShape)
-                        .background(
-                            brush = Brush.radialGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                                    Color.Transparent
-                                )
-                            )
-                        )
-                        .blur(20.dp)
-                )
-
-                Box(
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(CircleShape)
-                        .background(
-                            MaterialTheme.colorScheme.surfaceContainer
-                        )
-                        .border(
-                            width = 1.dp,
-                            brush = Brush.linearGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                                )
-                            ),
-                            shape = CircleShape
-                        )
-                        .padding(20.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.airbeats_monochrome),
-                        contentDescription = "Logo de AirBeats",
-                        modifier = Modifier.fillMaxSize(),
-                        tint = MaterialTheme.colorScheme.primary
+                // Logo
+                Surface(
+                    modifier = Modifier.size(80.dp),
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    border = androidx.compose.foundation.BorderStroke(
+                        1.dp,
+                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                     )
+                ) {
+                    Box(
+                        modifier = Modifier.padding(18.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.airbeats_monochrome),
+                            contentDescription = "AirBeats Lite Logo",
+                            modifier = Modifier.fillMaxSize(),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
 
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Text(
-                        text = buildAnnotatedString {
-                            withStyle(
-                                style = SpanStyle(
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            ) {
-                                append("Air")
-                            }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = buildAnnotatedString {
+                                withStyle(
+                                    style = SpanStyle(
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                ) {
+                                    append("Air")
+                                }
 
-                            withStyle(
-                                style = SpanStyle(
-                                    color = MaterialTheme.colorScheme.tertiary
-                                )
-                            ) {
-                                append("Beats")
-                            }
-                        },
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold
-                    )
+                                withStyle(
+                                    style = SpanStyle(
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                ) {
+                                    append("Beats ")
+                                }
+
+                                withStyle(
+                                    style = SpanStyle(
+                                        color = MaterialTheme.colorScheme.secondary,
+                                        fontWeight = FontWeight.Normal
+                                    )
+                                ) {
+                                    append("Lite")
+                                }
+                            },
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
 
                     Text(
                         text = "Dev By DxV STUDIO 亗",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

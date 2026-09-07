@@ -119,10 +119,6 @@ private fun LogViewerPanel() {
     }
     var levelsMenuExpanded by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        GlobalLog.startRealtimeLogcat()
-    }
-
     val filtered = remember(allLogs, filterMode, selectedLevels) {
         allLogs.filter { entry ->
             val tagMatch = when (filterMode) {
