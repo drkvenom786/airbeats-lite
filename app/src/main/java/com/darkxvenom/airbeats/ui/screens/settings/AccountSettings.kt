@@ -56,7 +56,6 @@ fun AccountSettings(
     val currentDisplayName by nameManager.userName.collectAsState(initial = "")
     val currentGoogleEmail by nameManager.accountEmail.collectAsState(initial = "")
 
-    val backupViewModel: BackupRestoreViewModel = hiltViewModel()
     val avatarManager = remember { AvatarPreferenceManager(context) }
     val currentAvatar by avatarManager.getAvatarSelection.collectAsState(initial = AvatarSelection.Default)
 
@@ -106,42 +105,12 @@ fun AccountSettings(
                     )
                 }
 
-                val backupClient = com.darkxvenom.airbeats.utils.CloudBackupClient()
-                val backupExists = backupClient.checkBackupExists(email)
-
-                if (backupExists) {
-                    Toast.makeText(context, "Restoring cloud backup...", Toast.LENGTH_SHORT).show()
-                    val result = backupViewModel.restoreFromDrive(context, email)
-                    if (result is com.darkxvenom.airbeats.utils.DriveResult.Success) {
-                        Toast.makeText(context, "Cloud backup restored!", Toast.LENGTH_SHORT).show()
-
-                        delay(1500)
-                        context.stopService(android.content.Intent(context, com.darkxvenom.airbeats.playback.MusicService::class.java))
-                        context.startActivity(android.content.Intent(context, com.darkxvenom.airbeats.MainActivity::class.java).apply {
-                            addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                        })
-                        Runtime.getRuntime().exit(0)
-                        return@launch
-                    } else {
-                        Toast.makeText(context, context.getString(R.string.restore_failed), Toast.LENGTH_SHORT).show()
-                    }
-                } else {
-                    Toast.makeText(context, context.getString(R.string.creating_initial_cloud_backup), Toast.LENGTH_SHORT).show()
-                    val result = backupViewModel.backupToDrive(context, email, name)
-                    if (result is com.darkxvenom.airbeats.utils.DriveResult.Success) {
-                        Toast.makeText(context, context.getString(R.string.google_account_linked_backup_created), Toast.LENGTH_LONG).show()
-                    } else {
-                        Toast.makeText(context, context.getString(R.string.backup_create_failed_account_linked), Toast.LENGTH_LONG).show()
-                    }
-                }
+                Toast.makeText(context, "Google account linked successfully!", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 e.printStackTrace()
                 Toast.makeText(
                     context,
-                    context.getString(
-                        R.string.google_account_linked_cloud_sync_failed,
-                        e.message.orEmpty()
-                    ),
+                    "Failed to link Google account: ${e.message.orEmpty()}",
                     Toast.LENGTH_LONG
                 ).show()
             }
@@ -463,7 +432,7 @@ fun AccountSettings(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
-                                        painter = painterResource(R.drawable.restore),
+                                        painter = painterResource(R.drawable.person),
                                         contentDescription = null,
                                         tint = MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.size(20.dp)
@@ -474,7 +443,7 @@ fun AccountSettings(
 
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = "Google Cloud Backup",
+                                        text = "Google Account",
                                         style = MaterialTheme.typography.bodyLarge,
                                         fontWeight = FontWeight.Medium,
                                         color = MaterialTheme.colorScheme.onSurface

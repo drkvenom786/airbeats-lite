@@ -114,9 +114,13 @@ private fun LogViewerPanel() {
 
     var filterMode by remember { mutableStateOf(1) }
     var selectedLevels by remember {
-        mutableStateOf(setOf(Log.INFO, Log.WARN, Log.ERROR))
+        mutableStateOf(setOf(Log.VERBOSE, Log.DEBUG, Log.INFO, Log.WARN, Log.ERROR))
     }
     var levelsMenuExpanded by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        GlobalLog.startRealtimeLogcat()
+    }
 
     val filtered = remember(allLogs, filterMode, selectedLevels) {
         allLogs.filter { entry ->
@@ -131,6 +135,12 @@ private fun LogViewerPanel() {
     }
 
     val listState = rememberLazyListState()
+
+    LaunchedEffect(filtered.size) {
+        if (filtered.isNotEmpty()) {
+            listState.scrollToItem(filtered.size - 1)
+        }
+    }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
