@@ -52,7 +52,7 @@ import com.darkxvenom.airbeats.ui.screens.settings.DiscordSettings
 import com.darkxvenom.airbeats.ui.screens.settings.PlayerSettings
 import com.darkxvenom.airbeats.ui.screens.settings.PrivacySettings
 import com.darkxvenom.airbeats.ui.screens.settings.SettingsScreen
-import com.darkxvenom.airbeats.ui.screens.onboarding.GuestProfileSetupScreen
+import com.darkxvenom.airbeats.ui.screens.settings.DebugSettings
 import com.darkxvenom.airbeats.ui.screens.settings.StorageSettings
 
 private val slideEnterTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition) = {
@@ -549,6 +549,16 @@ fun NavGraphBuilder.navigationBuilder(
         popExitTransition = fadePopExitTransition,
     ) {
         BackupAndRestore(navController, scrollBehavior)
+    }
+
+    composable(
+        route = "settings/experimental",
+        enterTransition = fadeEnterTransition,
+        exitTransition = fadeExitTransition,
+        popEnterTransition = fadePopEnterTransition,
+        popExitTransition = fadePopExitTransition,
+    ) {
+        DebugSettings(navController)
     }
 
     composable(

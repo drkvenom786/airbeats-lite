@@ -398,7 +398,7 @@ fun AvatarSelector(
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(stringResource(id = R.string.custom))
+                    Text("Upload")
                 }
 
                 Button(
