@@ -1,4 +1,4 @@
-﻿/*
+/*
  * AirBeats Project (2026)
  * Arturo254 (github.com/Arturo254)
  * Licensed Under GPL-3.0 | see git history for contributors
@@ -27,8 +27,8 @@ import androidx.media3.session.SessionResult
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
+
 import com.darkxvenom.airbeats.R
-import com.darkxvenom.airbeats.constants.AndroidAutoConstants
 import com.darkxvenom.airbeats.constants.MediaSessionConstants
 import com.darkxvenom.airbeats.constants.SongSortType
 import com.darkxvenom.airbeats.constants.AlbumSortType
@@ -122,36 +122,23 @@ constructor(
         browser: MediaSession.ControllerInfo,
         params: MediaLibraryService.LibraryParams?,
     ): ListenableFuture<LibraryResult<MediaItem>> {
-        val isEnabled = context.dataStore.get(AndroidAutoConstants.AndroidAutoEnabledKey, true)
-        return if (isEnabled) {
-            Futures.immediateFuture(
-                LibraryResult.ofItem(
-                    MediaItem
-                        .Builder()
-                        .setMediaId(MusicService.ROOT)
-                        .setMediaMetadata(
-                            MediaMetadata
-                                .Builder()
-                                .setIsPlayable(false)
-                                .setIsBrowsable(true)
-                                .setMediaType(MediaMetadata.MEDIA_TYPE_FOLDER_MIXED)
-                                .setExtras(browsableExtras())
-                                .build(),
-                        ).build(),
-                    params,
-                ),
-            )
-        } else {
-            Futures.immediateFuture(
-                LibraryResult.ofError(
-                    SessionError(
-                        SessionError.ERROR_NOT_SUPPORTED,
-                        "Android Auto disabled"
-                    ),
-                    params ?: MediaLibraryService.LibraryParams.Builder().build()
-                )
-            )
-        }
+        return Futures.immediateFuture(
+            LibraryResult.ofItem(
+                MediaItem
+                    .Builder()
+                    .setMediaId(MusicService.ROOT)
+                    .setMediaMetadata(
+                        MediaMetadata
+                            .Builder()
+                            .setIsPlayable(false)
+                            .setIsBrowsable(true)
+                            .setMediaType(MediaMetadata.MEDIA_TYPE_FOLDER_MIXED)
+                            .setExtras(browsableExtras())
+                            .build(),
+                    ).build(),
+                params,
+            ),
+        )
     }
 
     override fun onSearch(
@@ -254,19 +241,10 @@ constructor(
         params: MediaLibraryService.LibraryParams?,
     ): ListenableFuture<LibraryResult<ImmutableList<MediaItem>>> =
         scope.future(Dispatchers.IO) {
-            val songSortType =
-                context.dataStore[AndroidAutoConstants.AndroidAutoSongSortTypeKey].toEnum(
-                    SongSortType.CREATE_DATE
-                )
-            val albumSortType =
-                context.dataStore[AndroidAutoConstants.AndroidAutoAlbumSortTypeKey].toEnum(
-                    AlbumSortType.CREATE_DATE
-                )
-            val artistSortType =
-                context.dataStore[AndroidAutoConstants.AndroidAutoArtistSortTypeKey].toEnum(
-                    ArtistSortType.CREATE_DATE
-                )
-            val itemLimit = context.dataStore.get(AndroidAutoConstants.AndroidAutoItemLimitKey, 500)
+            val songSortType = SongSortType.CREATE_DATE
+            val albumSortType = AlbumSortType.CREATE_DATE
+            val artistSortType = ArtistSortType.CREATE_DATE
+            val itemLimit = 500
 
             fun <T> List<T>.limit() = take(itemLimit)
             
@@ -311,8 +289,7 @@ constructor(
                                 )
                             )
 
-                            val showHistory =
-                                context.dataStore.get(AndroidAutoConstants.AndroidAutoShowHistoryKey, true)
+                            val showHistory = true
                             if (showHistory) {
                                 add(
                                     browsableMediaItem(
@@ -361,12 +338,9 @@ constructor(
                             }
 
                     MusicService.PLAYLIST -> {
-                        val showLikedSongs =
-                            context.dataStore.get(AndroidAutoConstants.AndroidAutoShowLikedSongsKey, true)
-                        val showDownloadedSongs =
-                            context.dataStore.get(AndroidAutoConstants.AndroidAutoShowDownloadedKey, true)
-                        val showYouTubePlaylists =
-                            context.dataStore.get(AndroidAutoConstants.AndroidAutoShowYouTubePlaylistsKey, true)
+                        val showLikedSongs = true
+                        val showDownloadedSongs = true
+                        val showYouTubePlaylists = true
                         
                         val likedSongCount = database.likedSongsCount().first()
                         val downloadedSongCount = downloadUtil.downloads.value.size
