@@ -127,6 +127,13 @@ android {
             excludes += "META-INF/LICENSE.md"
             excludes += "META-INF/NOTICE.md"
             excludes += "META-INF/*.md"
+            excludes += "META-INF/*.version"
+            excludes += "META-INF/*.kotlin_module"
+            excludes += "META-INF/DEPENDENCIES"
+            excludes += "META-INF/LICENSE*"
+            excludes += "META-INF/NOTICE*"
+            excludes += "META-INF/AL2.0"
+            excludes += "META-INF/LGPL2.1"
         }
     }
 }
@@ -198,21 +205,6 @@ dependencies {
     implementation("org.jsoup:jsoup:1.18.1")
     implementation("com.github.skydoves:cloudy:0.2.7")
     kapt(libs.hilt.compiler)
-
-    // Google Auth & Drive API
-    implementation("androidx.credentials:credentials:1.3.0-rc01")
-    implementation("androidx.credentials:credentials-play-services-auth:1.3.0-rc01")
-    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
-    implementation("com.google.android.gms:play-services-auth:21.0.0")
-    implementation("com.google.api-client:google-api-client-android:1.33.0") {
-        exclude(group = "org.apache.httpcomponents")
-    }
-    implementation("com.google.apis:google-api-services-drive:v3-rev20220815-2.0.0") {
-        exclude(group = "org.apache.httpcomponents")
-    }
-    implementation("com.google.auth:google-auth-library-oauth2-http:1.16.0") {
-        exclude(group = "org.apache.httpcomponents")
-    }
 
     implementation(projects.innertube)
     implementation(projects.kugou)

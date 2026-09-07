@@ -3,6 +3,7 @@ package com.darkxvenom.airbeats.ui.screens.settings
 import android.content.Intent
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
