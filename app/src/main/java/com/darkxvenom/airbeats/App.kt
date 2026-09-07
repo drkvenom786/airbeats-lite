@@ -71,6 +71,7 @@ class App : LocaleAwareApplication(), ImageLoaderFactory {
             runCatching { dataStore.initializeCache() }
         }
         Timber.plant(com.darkxvenom.airbeats.utils.GlobalLogTree())
+        timber.log.Timber.i("App launch: AirBeats Lite initialized")
 
         try {
             Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
