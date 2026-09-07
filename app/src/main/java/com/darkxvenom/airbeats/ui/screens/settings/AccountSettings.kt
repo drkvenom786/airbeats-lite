@@ -1,8 +1,5 @@
 package com.darkxvenom.airbeats.ui.screens.settings
 
-import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,7 +22,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -33,15 +29,7 @@ import com.darkxvenom.airbeats.LocalPlayerAwareWindowInsets
 import com.darkxvenom.airbeats.R
 import com.darkxvenom.airbeats.ui.component.*
 import com.darkxvenom.airbeats.ui.utils.backToMain
-import com.darkxvenom.airbeats.viewmodels.BackupRestoreViewModel
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes
-import com.google.android.gms.common.api.ApiException
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,126 +42,11 @@ fun AccountSettings(
 
     val nameManager = remember { NamePreferenceManager(context) }
     val currentDisplayName by nameManager.userName.collectAsState(initial = "")
-    val currentGoogleEmail by nameManager.accountEmail.collectAsState(initial = "")
 
     val avatarManager = remember { AvatarPreferenceManager(context) }
     val currentAvatar by avatarManager.getAvatarSelection.collectAsState(initial = AvatarSelection.Default)
 
     var showEditNameDialog by remember { mutableStateOf(false) }
-    var isGoogleSignInOpen by remember { mutableStateOf(false) }
-
-    fun generatedAvatarUrl(name: String, email: String): String {
-        val seed = name.takeIf { it.isNotBlank() } ?: email
-        val encodedSeed = URLEncoder.encode(seed, StandardCharsets.UTF_8.toString())
-        return "https://api.dicebear.com/9.x/initials/svg?seed=$encodedSeed&backgroundType=gradientLinear"
-    }
-
-    fun displayNameFromEmail(email: String): String {
-        return email
-            .substringBefore("@")
-            .replace('.', ' ')
-            .replace('_', ' ')
-            .replace('-', ' ')
-            .split(' ')
-            .filter { it.isNotBlank() }
-            .joinToString(" ") { part ->
-                part.replaceFirstChar { char ->
-                    if (char.isLowerCase()) char.titlecase() else char.toString()
-                }
-            }
-            .ifBlank { "Friend" }
-    }
-
-    fun linkGoogleAccount(name: String, email: String, photoUrl: String?) {
-        scope.launch {
-            try {
-                if (!nameManager.canUseGoogleEmail(email)) {
-                    val lockedEmail = nameManager.previousGoogleEmail.first().ifBlank { "your previous email" }
-                    Toast.makeText(context, nameManager.lockedEmailMessage(lockedEmail), Toast.LENGTH_LONG).show()
-                    return@launch
-                }
-
-                nameManager.saveUserName(name)
-                nameManager.rememberGoogleLoginEmail(email)
-                if (!photoUrl.isNullOrBlank()) {
-                    avatarManager.saveAvatarSelection(
-                        AvatarSelection.Custom(uri = photoUrl, cloudUrl = photoUrl)
-                    )
-                } else {
-                    avatarManager.saveAvatarSelection(
-                        AvatarSelection.DiceBear(generatedAvatarUrl(name, email))
-                    )
-                }
-
-                Toast.makeText(context, "Google account linked successfully!", Toast.LENGTH_SHORT).show()
-            } catch (e: Exception) {
-                e.printStackTrace()
-                Toast.makeText(
-                    context,
-                    "Failed to link Google account: ${e.message.orEmpty()}",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-        }
-    }
-
-    val googleSignInClient = remember {
-        com.darkxvenom.airbeats.utils.GoogleAuthManager(context).getSignInClient()
-    }
-
-    val googleSignInLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        try {
-            val account = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-                .getResult(ApiException::class.java)
-            val email = account.email.orEmpty()
-            if (email.isBlank()) {
-                Toast.makeText(context, context.getString(R.string.google_email_missing), Toast.LENGTH_SHORT).show()
-                return@rememberLauncherForActivityResult
-            }
-            val name = account.displayName
-                ?.takeIf { it.isNotBlank() }
-                ?: account.givenName
-                ?: displayNameFromEmail(email)
-
-            isGoogleSignInOpen = false
-            linkGoogleAccount(name, email, account.photoUrl?.toString())
-        } catch (e: ApiException) {
-            e.printStackTrace()
-            val message = when (e.statusCode) {
-                GoogleSignInStatusCodes.SIGN_IN_CANCELLED ->
-                    context.getString(R.string.google_sign_in_cancelled)
-                GoogleSignInStatusCodes.SIGN_IN_CURRENTLY_IN_PROGRESS ->
-                    context.getString(R.string.google_sign_in_in_progress)
-                GoogleSignInStatusCodes.SIGN_IN_FAILED ->
-                    context.getString(R.string.google_sign_in_failed_oauth)
-                else -> context.getString(
-                    R.string.google_sign_in_failed_with_status,
-                    e.statusCode,
-                    e.message.orEmpty()
-                )
-            }
-            isGoogleSignInOpen = false
-            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            isGoogleSignInOpen = false
-            Toast.makeText(
-                context,
-                context.getString(R.string.google_sign_in_failed_message, e.message.orEmpty()),
-                Toast.LENGTH_LONG
-            ).show()
-        }
-    }
-
-    fun requestGoogleSignIn() {
-        if (isGoogleSignInOpen) return
-        isGoogleSignInOpen = true
-        googleSignInClient.revokeAccess().addOnCompleteListener {
-            googleSignInLauncher.launch(googleSignInClient.signInIntent)
-        }
-    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -326,14 +199,6 @@ fun AccountSettings(
                                 overflow = TextOverflow.Ellipsis,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
-
-                            if (currentGoogleEmail.isNotBlank()) {
-                                Text(
-                                    text = currentGoogleEmail,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
                         }
                     }
                 }
@@ -396,60 +261,6 @@ fun AccountSettings(
                                     )
                                     Text(
                                         text = currentDisplayName.ifBlank { stringResource(R.string.not_set) },
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-
-                                Icon(
-                                    painter = painterResource(R.drawable.arrow_forward),
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
-
-                            HorizontalDivider(
-                                modifier = Modifier.padding(start = 72.dp, end = 16.dp),
-                                thickness = 0.5.dp,
-                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f)
-                            )
-
-                            // Google Account / Cloud Sync
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .clickable { requestGoogleSignIn() }
-                                    .padding(horizontal = 16.dp, vertical = 14.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(40.dp)
-                                        .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.person),
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-
-                                Spacer(modifier = Modifier.width(16.dp))
-
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = "Google Account",
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        fontWeight = FontWeight.Medium,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    Text(
-                                        text = if (currentGoogleEmail.isNotBlank()) currentGoogleEmail else "Link Google Account",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )

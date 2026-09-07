@@ -564,12 +564,6 @@ fun AppearanceSettings(
                             values = availableBackgroundStyles
                         )},
 
-                        {ThumbnailCornerRadiusSelectorButton(
-                            onRadiusSelected = { selectedRadius ->
-                                Timber.tag("Thumbnail").d("Selected radio: $selectedRadius")
-                            }
-                        )},
-
                         {
                             UnifiedShapeSelectorButton(
                                 smallButtonsShape = smallButtonsShapeState.value,
