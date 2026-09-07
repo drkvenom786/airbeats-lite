@@ -151,7 +151,11 @@ fun DynamicIslandSettings(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Enable Switch Card
-            GlassCard(modifier = Modifier.fillMaxWidth()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+            ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     SwitchPreference(
                         title = { Text("Enable Dynamic Island", fontWeight = FontWeight.Bold) },
@@ -186,7 +190,11 @@ fun DynamicIslandSettings(
             AnimatedVisibility(visible = enableDynamicIsland) {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     // Position & Size Card
-                    GlassCard(modifier = Modifier.fillMaxWidth()) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+                    ) {
                         Column(
                             modifier = Modifier.padding(16.dp),
                             verticalArrangement = Arrangement.spacedBy(14.dp)
@@ -321,7 +329,11 @@ fun DynamicIslandSettings(
                     }
 
                     // Styling & Liquid Glass Card
-                    GlassCard(modifier = Modifier.fillMaxWidth()) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+                    ) {
                         Column(
                             modifier = Modifier.padding(16.dp),
                             verticalArrangement = Arrangement.spacedBy(14.dp)

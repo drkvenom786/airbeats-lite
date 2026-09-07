@@ -36,7 +36,6 @@ import com.darkxvenom.airbeats.ui.screens.artist.ArtistScreen
 import com.darkxvenom.airbeats.ui.screens.artist.ArtistSongsScreen
 import com.darkxvenom.airbeats.ui.screens.library.CachePlaylistScreen
 import com.darkxvenom.airbeats.ui.screens.library.LibraryScreen
-import com.darkxvenom.airbeats.ui.screens.library.PlayfulLibraryScreen
 import com.darkxvenom.airbeats.ui.screens.playlist.AutoPlaylistScreen
 import com.darkxvenom.airbeats.ui.screens.playlist.LocalPlaylistScreen
 import com.darkxvenom.airbeats.ui.screens.playlist.OnlinePlaylistScreen
@@ -265,16 +264,6 @@ fun NavGraphBuilder.navigationBuilder(
         popExitTransition = slidePopExitTransition,
     ) {
         ListenTogetherScreen(navController, scrollBehavior)
-    }
-
-    composable(
-        route = com.darkxvenom.airbeats.ui.screens.musicrecognition.MusicRecognitionRoute,
-        enterTransition = slideEnterTransition,
-        exitTransition = slideExitTransition,
-        popEnterTransition = slidePopEnterTransition,
-        popExitTransition = slidePopExitTransition,
-    ) {
-        com.darkxvenom.airbeats.ui.screens.musicrecognition.MusicRecognitionScreen(navController)
     }
 
     composable(

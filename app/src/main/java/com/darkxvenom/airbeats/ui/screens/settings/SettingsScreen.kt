@@ -230,7 +230,7 @@ fun SettingsScreen(
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.arrow_back),
-                            contentDescription = stringResource(R.string.back_button_desc)
+                            contentDescription = stringResource(R.string.back)
                         )
                     }
                 },

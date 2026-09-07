@@ -38,6 +38,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import com.darkxvenom.airbeats.ui.utils.backToMain
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -405,7 +406,7 @@ fun AboutScreen(
                         ) {
                             Icon(
                                 painter = painterResource(R.drawable.arrow_back),
-                                contentDescription = stringResource(R.string.back_button_desc)
+                                contentDescription = stringResource(R.string.back)
                             )
                         }
                     },
