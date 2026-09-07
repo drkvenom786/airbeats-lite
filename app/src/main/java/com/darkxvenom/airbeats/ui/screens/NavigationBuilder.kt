@@ -53,6 +53,7 @@ import com.darkxvenom.airbeats.ui.screens.settings.PlayerSettings
 import com.darkxvenom.airbeats.ui.screens.settings.PrivacySettings
 import com.darkxvenom.airbeats.ui.screens.settings.SettingsScreen
 import com.darkxvenom.airbeats.ui.screens.settings.DebugSettings
+import com.darkxvenom.airbeats.ui.screens.onboarding.GuestProfileSetupScreen
 import com.darkxvenom.airbeats.ui.screens.settings.StorageSettings
 
 private val slideEnterTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition) = {
