@@ -4,10 +4,6 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.ExperimentalFoundationApi
-
-val NeonPurple = com.darkxvenom.airbeats.ui.theme.NeonPurple
-val NeonDarkBg = com.darkxvenom.airbeats.ui.theme.NeonDarkBg
-val NeonCardBg = com.darkxvenom.airbeats.ui.theme.NeonCardBg
 import androidx.compose.foundation.background
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.animateFloat
@@ -155,6 +151,10 @@ import com.darkxvenom.airbeats.ui.component.AvatarPreferenceManager
 import com.darkxvenom.airbeats.ui.component.AvatarSelection
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
+
+val NeonPurple = com.darkxvenom.airbeats.ui.theme.NeonPurple
+val NeonDarkBg = com.darkxvenom.airbeats.ui.theme.NeonDarkBg
+val NeonCardBg = com.darkxvenom.airbeats.ui.theme.NeonCardBg
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
