@@ -1890,8 +1890,8 @@ fun HeadphoneSplashScreen() {
             Spacer(modifier = Modifier.height(14.dp))
 
             Text(
-                text = "AirBeats Lite",
-                fontSize = 42.sp,
+                text = "AirBeats",
+                fontSize = 40.sp,
                 fontWeight = FontWeight.ExtraBold,
                 letterSpacing = 2.sp,
                 style = TextStyle(
@@ -1903,6 +1903,16 @@ fun HeadphoneSplashScreen() {
                         )
                     )
                 )
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = "Lite",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 4.sp,
+                color = MaterialTheme.colorScheme.primary
             )
         }
     }

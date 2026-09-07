@@ -822,52 +822,11 @@ fun SettingsScreen(
     var showTranslateDialog by remember { mutableStateOf(false) }
     var showChangelogSheet by remember { mutableStateOf(false) }
 
-    // Get player connection for album artwork
-    val playerConnection = LocalPlayerConnection.current
-    val mediaMetadata by playerConnection?.mediaMetadata?.collectAsState()
-        ?: remember { mutableStateOf(null) }
-
     Box(modifier = Modifier.fillMaxSize()) {
-        // 🎵 BLUR BACKGROUND
-        val artworkUrl = mediaMetadata?.thumbnailUrl
-
-        artworkUrl?.let { imageUrl ->
-            com.darkxvenom.airbeats.ui.component.BlurredBackground(
-                model = imageUrl
-            )
-
-            val isDarkTheme =
-                MaterialTheme.colorScheme.background.luminance() < 0.5f
-
-            val overlayBrush = if (isDarkTheme) {
-                Brush.verticalGradient(
-                    listOf(
-                        Color.Black.copy(alpha = 0.2f),
-                        Color.Black.copy(alpha = 0.5f),
-                        Color.Black.copy(alpha = 0.85f)
-                    )
-                )
-            } else {
-                Brush.verticalGradient(
-                    listOf(
-                        MaterialTheme.colorScheme.surface.copy(alpha = 0.25f),
-                        MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
-                        MaterialTheme.colorScheme.background.copy(alpha = 0.85f)
-                    )
-                )
-            }
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(overlayBrush)
-            )
-        }
-
         // Main Scaffold with TopAppBar that scrolls
         Scaffold(
             modifier = Modifier.fillMaxSize(),
-            containerColor = Color.Transparent,
+            containerColor = MaterialTheme.colorScheme.background,
             topBar = {
                 // U-Shaped TopAppBar that scrolls with content
                 TopAppBar(
@@ -1043,7 +1002,16 @@ fun SettingsScreen(
                                 },
                                 onClick = { navController.navigate("settings/backup_restore") }
                             ),
-                            
+                            SettingsCategoryItem(
+                                icon = painterResource(R.drawable.bug_report),
+                                title = {
+                                    Text(
+                                        "Experimental Settings",
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                },
+                                onClick = { navController.navigate("settings/experimental") }
+                            )
                         )
                     )
 
