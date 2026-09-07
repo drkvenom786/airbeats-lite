@@ -331,9 +331,7 @@ fun SpotifySearchScreen(
                     val encoded = URLEncoder.encode(q, "UTF-8")
                     navController.navigate("search/$encoded")
                 },
-                onMicClick = {
-                    navController.navigate(com.darkxvenom.airbeats.ui.screens.musicrecognition.MusicRecognitionRoute)
-                }
+                onMicClick = null
             )
         }
         

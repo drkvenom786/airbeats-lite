@@ -735,7 +735,7 @@ fun BottomSheetPlayer(
     }
 
     LaunchedEffect(playbackState, isPlaying) {
-        if (playbackState == STATE_READY || playbackState == STATE_BUFFERING) {
+        if (playbackState == androidx.media3.common.Player.STATE_READY || playbackState == androidx.media3.common.Player.STATE_BUFFERING) {
             while (isActive) {
                 position = playerConnection.player.currentPosition
                 duration = playerConnection.player.duration.coerceAtLeast(0L)

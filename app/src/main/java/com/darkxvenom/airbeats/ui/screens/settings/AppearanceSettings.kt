@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.darkxvenom.airbeats.ui.utils.backToMain
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.darkxvenom.airbeats.LocalPlayerAwareWindowInsets
@@ -358,7 +359,7 @@ fun AppearanceSettings(
                         ) {
                             Icon(
                                 painter = painterResource(R.drawable.arrow_back),
-                                contentDescription = stringResource(R.string.back_button_desc)
+                                contentDescription = stringResource(R.string.back)
                             )
                         }
                     },

@@ -139,14 +139,6 @@ fun NeonSearchScreen(
                                 )
                             }
                         }
-                        IconButton(onClick = { navController.navigate(com.darkxvenom.airbeats.ui.screens.musicrecognition.MusicRecognitionRoute) }) {
-                            Icon(
-                                painter = painterResource(R.drawable.mic),
-                                contentDescription = "Music Recognition",
-                                tint = if (isDarkTheme) Color.Gray else Color.DarkGray,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
                     }
                 },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),

@@ -466,10 +466,14 @@ fun AccountSettings(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 // 🔥 AVATAR SELECTOR
-                GlassCard(
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp)
+                        .padding(vertical = 8.dp),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer
+                    )
                 ) {
                     AvatarSelector(modifier = Modifier.padding(vertical = 8.dp))
                 }
