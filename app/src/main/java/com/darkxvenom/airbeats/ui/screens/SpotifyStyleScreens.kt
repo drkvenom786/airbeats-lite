@@ -330,8 +330,7 @@ fun SpotifySearchScreen(
                 onSearch = { q ->
                     val encoded = URLEncoder.encode(q, "UTF-8")
                     navController.navigate("search/$encoded")
-                },
-                onMicClick = null
+                }
             )
         }
         
@@ -837,8 +836,7 @@ private fun SpotifySearchPill(text: String, onClick: () -> Unit) {
 private fun SpotifySearchInput(
     query: String,
     onQueryChange: (String) -> Unit,
-    onSearch: (String) -> Unit,
-    onMicClick: () -> Unit
+    onSearch: (String) -> Unit
 ) {
     val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
 
@@ -854,15 +852,17 @@ private fun SpotifySearchInput(
             ) 
         },
         leadingIcon = { Icon(painterResource(R.drawable.search), contentDescription = null, tint = Color.Black) },
-        trailingIcon = {
-            androidx.compose.material3.IconButton(onClick = onMicClick) {
-                Icon(
-                    painter = painterResource(R.drawable.mic),
-                    contentDescription = "Music Recognition",
-                    tint = Color.Black
-                )
+        trailingIcon = if (query.isNotEmpty()) {
+            {
+                androidx.compose.material3.IconButton(onClick = { onQueryChange("") }) {
+                    Icon(
+                        painter = painterResource(R.drawable.close),
+                        contentDescription = "Clear",
+                        tint = Color.Black
+                    )
+                }
             }
-        },
+        } else null,
         colors = androidx.compose.material3.TextFieldDefaults.colors(
             focusedContainerColor = Color.White,
             unfocusedContainerColor = Color.White,

@@ -4,6 +4,10 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.ExperimentalFoundationApi
+
+val NeonPurple = com.darkxvenom.airbeats.ui.theme.NeonPurple
+val NeonDarkBg = com.darkxvenom.airbeats.ui.theme.NeonDarkBg
+val NeonCardBg = com.darkxvenom.airbeats.ui.theme.NeonCardBg
 import androidx.compose.foundation.background
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.animateFloat
