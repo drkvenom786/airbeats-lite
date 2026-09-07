@@ -36,14 +36,18 @@ android {
         applicationId = "com.darkxvenom.airbeatslite"
         minSdk = 24
         targetSdk = 35
-        versionCode = 197
-        versionName = "1.2.7"
+        versionCode = 198
+        versionName = "1.2.8"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "GOOGLE_API_KEY", googleApiKey.asBuildConfigString())
         buildConfigField("String", "STATS_API_KEY", statsApiKey.asBuildConfigString())
         buildConfigField("String", "STATS_BASE_URL", statsBaseUrl.asBuildConfigString())
         buildConfigField("String", "AUTH_API_BASE_URL", authBaseUrl.asBuildConfigString())
         
+        ndk {
+            abiFilters.addAll(listOf("arm64-v8a", "armeabi-v7a"))
+        }
+
         // Strip out language resources from libraries that the app doesn't support
         resConfigs("en")
     }
@@ -134,6 +138,8 @@ android {
             excludes += "META-INF/NOTICE*"
             excludes += "META-INF/AL2.0"
             excludes += "META-INF/LGPL2.1"
+            excludes += "org/bouncycastle/**"
+            excludes += "com/itextpdf/**"
         }
     }
 }
@@ -190,7 +196,6 @@ dependencies {
     implementation(libs.work.runtime.ktx)
     implementation(libs.constraintlayout)
     implementation(libs.constraintlayout.compose)
-    implementation(libs.itextg)
     implementation(libs.mpandroidchart)
     implementation(libs.foundation)
     implementation(libs.ui.graphics)
