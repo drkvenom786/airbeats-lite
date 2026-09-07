@@ -343,59 +343,28 @@ fun AppearanceSettings(
             modifier = Modifier.fillMaxSize(),
             containerColor = MaterialTheme.colorScheme.background,
             topBar = {
-                // U-Shaped TopAppBar
                 TopAppBar(
                     title = {
-                        Box(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentAlignment = Alignment.Center
+                        Text(
+                            text = stringResource(R.string.appearance),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(
+                            onClick = { navController.navigateUp() },
+                            onLongClick = { navController.backToMain() }
                         ) {
-                            Text(
-                                text = stringResource(R.string.appearance),
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSurface
+                            Icon(
+                                painter = painterResource(R.drawable.arrow_back),
+                                contentDescription = stringResource(R.string.back_button_desc)
                             )
                         }
                     },
-                    navigationIcon = {
-                        Spacer(modifier = Modifier.width(48.dp))
-                    },
-                    actions = {
-                        Spacer(modifier = Modifier.width(48.dp))
-                    },
-                    modifier = Modifier
-                        .clip(
-                            RoundedCornerShape(
-                                bottomStart = 30.dp,
-                                bottomEnd = 30.dp
-                            )
-                        )
-                        .background(
-                            Brush.verticalGradient(
-                                colors = listOf(
-                                    MaterialTheme.colorScheme.surface.copy(alpha = 0.85f),
-                                    MaterialTheme.colorScheme.surface.copy(alpha = 0.65f)
-                                )
-                            )
-                        )
-                        .border(
-                            width = 0.6.dp,
-                            brush = Brush.horizontalGradient(
-                                colors = listOf(
-                                    Color.White.copy(alpha = 0.3f),
-                                    Color.White.copy(alpha = 0.1f),
-                                    Color.White.copy(alpha = 0.3f)
-                                )
-                            ),
-                            shape = RoundedCornerShape(
-                                bottomStart = 30.dp,
-                                bottomEnd = 30.dp
-                            )
-                        ),
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Transparent,
-                        scrolledContainerColor = Color.Transparent
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
                     ),
                     scrollBehavior = scrollBehavior
                 )

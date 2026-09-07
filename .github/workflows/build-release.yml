@@ -1,4 +1,4 @@
-﻿name: Build Signed Release APK
+name: Build Signed Release APK
 
 on:
   push:
@@ -43,8 +43,8 @@ jobs:
           {
             "project_info": { "project_number": "1234567890", "project_id": "dummy-project" },
             "client": [ 
-              { "client_info": { "mobilesdk_app_id": "1:1234567890:android:abcdef123456", "android_client_info": { "package_name": "com.darkxvenom.airbeats786" } }, "api_key": [ { "current_key": "dummy-key" } ] },
-              { "client_info": { "mobilesdk_app_id": "1:1234567890:android:abcdef123456", "android_client_info": { "package_name": "com.darkxvenom.airbeats786.debug" } }, "api_key": [ { "current_key": "dummy-key" } ] }
+              { "client_info": { "mobilesdk_app_id": "1:1234567890:android:abcdef123456", "android_client_info": { "package_name": "com.darkxvenom.airbeatslite" } }, "api_key": [ { "current_key": "dummy-key" } ] },
+              { "client_info": { "mobilesdk_app_id": "1:1234567890:android:abcdef123456", "android_client_info": { "package_name": "com.darkxvenom.airbeatslite.debug" } }, "api_key": [ { "current_key": "dummy-key" } ] }
             ],
             "configuration_version": "1"
           }

@@ -233,7 +233,13 @@ fun StorageSettings(
         }
 
         TopAppBar(
-            title = { Text(stringResource(R.string.storage)) },
+            title = { 
+                Text(
+                    text = stringResource(R.string.storage),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                ) 
+            },
             navigationIcon = {
                 IconButton(
                     onClick = navController::navigateUp,
@@ -241,10 +247,15 @@ fun StorageSettings(
                 ) {
                     Icon(
                         painterResource(R.drawable.arrow_back),
-                        contentDescription = null,
+                        contentDescription = stringResource(R.string.back),
                     )
                 }
             },
+            colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
+            ),
+            scrollBehavior = scrollBehavior
         )
     }
 

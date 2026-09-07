@@ -97,16 +97,36 @@ fun NavGraphBuilder.navigationBuilder(
     playerBottomSheetState: BottomSheetState,
     onSearchClick: () -> Unit,
 ) {
-    composable(Screens.Home.route) {
+    composable(
+        route = Screens.Home.route,
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
         HomeScreen(navController = navController, onSearchClick = onSearchClick)
     }
 
-    composable(Screens.Library.route) {
+    composable(
+        route = Screens.Library.route,
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
         LibraryScreen(navController)
     }
-    composable(Screens.Explore.route) {
+
+    composable(
+        route = Screens.Explore.route,
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
         ExploreScreen(navController, scrollBehavior)
     }
+
     composable(
         route = Screens.Search.route,
         enterTransition = slideEnterTransition,
@@ -116,6 +136,7 @@ fun NavGraphBuilder.navigationBuilder(
     ) {
         SpotifySearchScreen(navController = navController)
     }
+
     composable(
         route = "search/",
         enterTransition = slideEnterTransition,
@@ -125,30 +146,87 @@ fun NavGraphBuilder.navigationBuilder(
     ) {
         SpotifySearchScreen(navController = navController)
     }
-    composable("history") {
+
+    composable(
+        route = "history",
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
         HistoryScreen(navController)
     }
-    composable("onboarding") {
+
+    composable(
+        route = "onboarding",
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
         HomeScreen(navController = navController, onSearchClick = onSearchClick)
     }
-    composable("guest_profile_setup") {
+
+    composable(
+        route = "guest_profile_setup",
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
         HomeScreen(navController = navController, onSearchClick = onSearchClick)
     }
-    composable("neon_search") {
+
+    composable(
+        route = "neon_search",
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
         com.darkxvenom.airbeats.ui.screens.search.NeonSearchScreen(navController = navController)
     }
-    composable("stats") {
+
+    composable(
+        route = "stats",
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
         StatsScreen(navController)
     }
-    composable("account") {
+
+    composable(
+        route = "account",
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
         AccountScreen(navController, scrollBehavior)
     }
-    composable("spotify_login") {
+
+    composable(
+        route = "spotify_login",
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
         SpotifyLoginScreen(navController)
     }
-    composable("spotify_account") {
+
+    composable(
+        route = "spotify_account",
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
         com.darkxvenom.airbeats.ui.screens.settings.SpotifyAccountScreen(navController)
     }
+
     composable(
         route = "new_release",
         enterTransition = slideEnterTransition,
@@ -158,27 +236,54 @@ fun NavGraphBuilder.navigationBuilder(
     ) {
         NewReleaseScreen(navController, scrollBehavior)
     }
-    composable("insight") {
+
+    composable(
+        route = "insight",
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
         InsightScreen(navController)
     }
-    composable("year_in_music") {
+
+    composable(
+        route = "year_in_music",
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
         YearInMusicScreen(navController)
     }
-    composable("listen_together") {
+
+    composable(
+        route = "listen_together",
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
         ListenTogetherScreen(navController, scrollBehavior)
     }
-    composable(com.darkxvenom.airbeats.ui.screens.musicrecognition.MusicRecognitionRoute) {
+
+    composable(
+        route = com.darkxvenom.airbeats.ui.screens.musicrecognition.MusicRecognitionRoute,
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
         com.darkxvenom.airbeats.ui.screens.musicrecognition.MusicRecognitionScreen(navController)
     }
 
     composable(
         route = "search/{query}",
-        arguments =
-            listOf(
-                navArgument("query") {
-                    type = NavType.StringType
-                },
-            ),
+        arguments = listOf(
+            navArgument("query") {
+                type = NavType.StringType
+            },
+        ),
         enterTransition = slideEnterTransition,
         exitTransition = slideExitTransition,
         popEnterTransition = slidePopEnterTransition,
@@ -186,25 +291,33 @@ fun NavGraphBuilder.navigationBuilder(
     ) {
         OnlineSearchResult(navController = navController)
     }
+
     composable(
         route = "album/{albumId}",
-        arguments =
-            listOf(
-                navArgument("albumId") {
-                    type = NavType.StringType
-                },
-            ),
+        arguments = listOf(
+            navArgument("albumId") {
+                type = NavType.StringType
+            },
+        ),
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
     ) {
         AlbumScreen(navController, scrollBehavior)
     }
+
     composable(
         route = "artist/{artistId}",
-        arguments =
-            listOf(
-                navArgument("artistId") {
-                    type = NavType.StringType
-                },
-            ),
+        arguments = listOf(
+            navArgument("artistId") {
+                type = NavType.StringType
+            },
+        ),
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
     ) { backStackEntry ->
         val artistId = backStackEntry.arguments?.getString("artistId")!!
         if (artistId.startsWith("LA")) {
@@ -213,111 +326,139 @@ fun NavGraphBuilder.navigationBuilder(
             ArtistScreen(navController, scrollBehavior)
         }
     }
+
     composable(
         route = "artist/{artistId}/songs",
-        arguments =
-            listOf(
-                navArgument("artistId") {
-                    type = NavType.StringType
-                },
-            ),
+        arguments = listOf(
+            navArgument("artistId") {
+                type = NavType.StringType
+            },
+        ),
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
     ) {
         ArtistSongsScreen(navController, scrollBehavior)
     }
+
     composable(
         route = "artist/{artistId}/items?browseId={browseId}&params={params}",
-        arguments =
-            listOf(
-                navArgument("artistId") {
-                    type = NavType.StringType
-                },
-                navArgument("browseId") {
-                    type = NavType.StringType
-                    nullable = true
-                },
-                navArgument("params") {
-                    type = NavType.StringType
-                    nullable = true
-                },
-            ),
+        arguments = listOf(
+            navArgument("artistId") {
+                type = NavType.StringType
+            },
+            navArgument("browseId") {
+                type = NavType.StringType
+                nullable = true
+            },
+            navArgument("params") {
+                type = NavType.StringType
+                nullable = true
+            },
+        ),
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
     ) {
         ArtistItemsScreen(navController, scrollBehavior)
     }
+
     composable(
         route = "online_playlist/{playlistId}",
-        arguments =
-            listOf(
-                navArgument("playlistId") {
-                    type = NavType.StringType
-                },
-            ),
+        arguments = listOf(
+            navArgument("playlistId") {
+                type = NavType.StringType
+            },
+        ),
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
     ) {
         OnlinePlaylistScreen(navController, scrollBehavior)
     }
+
     composable(
         route = "local_playlist/{playlistId}",
-        arguments =
-            listOf(
-                navArgument("playlistId") {
-                    type = NavType.StringType
-                },
-            ),
+        arguments = listOf(
+            navArgument("playlistId") {
+                type = NavType.StringType
+            },
+        ),
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
     ) {
         LocalPlaylistScreen(navController, scrollBehavior)
     }
+
     composable(
         route = "auto_playlist/{playlist}",
-        arguments =
-            listOf(
-                navArgument("playlist") {
-                    type = NavType.StringType
-                },
-            ),
+        arguments = listOf(
+            navArgument("playlist") {
+                type = NavType.StringType
+            },
+        ),
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
     ) {
         AutoPlaylistScreen(navController, scrollBehavior)
     }
+
     composable(
         route = "cache_playlist/{playlist}",
-        arguments =
-            listOf(
-                navArgument("playlist") {
-                    type = NavType.StringType
-                },
-            ),
+        arguments = listOf(
+            navArgument("playlist") {
+                type = NavType.StringType
+            },
+        ),
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
     ) {
         CachePlaylistScreen(navController, scrollBehavior)
     }
 
-
-
     composable(
         route = "top_playlist/{top}",
-        arguments =
-            listOf(
-                navArgument("top") {
-                    type = NavType.StringType
-                },
-            ),
+        arguments = listOf(
+            navArgument("top") {
+                type = NavType.StringType
+            },
+        ),
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
     ) {
         TopPlaylistScreen(navController, scrollBehavior)
     }
+
     composable(
         route = "youtube_browse/{browseId}?params={params}",
-        arguments =
-            listOf(
-                navArgument("browseId") {
-                    type = NavType.StringType
-                    nullable = true
-                },
-                navArgument("params") {
-                    type = NavType.StringType
-                    nullable = true
-                },
-            ),
+        arguments = listOf(
+            navArgument("browseId") {
+                type = NavType.StringType
+                nullable = true
+            },
+            navArgument("params") {
+                type = NavType.StringType
+                nullable = true
+            },
+        ),
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
     ) {
         YouTubeBrowseScreen(navController)
     }
-
 
     composable(
         route = "settings",
@@ -329,6 +470,7 @@ fun NavGraphBuilder.navigationBuilder(
         val latestVersion by mutableLongStateOf(BuildConfig.VERSION_CODE.toLong())
         SettingsScreen(latestVersion, navController, scrollBehavior)
     }
+
     composable(
         route = "settings/appearance",
         enterTransition = slideEnterTransition,
@@ -338,6 +480,7 @@ fun NavGraphBuilder.navigationBuilder(
     ) {
         AppearanceSettings(navController, scrollBehavior)
     }
+
     composable(
         route = "settings/dynamic_island",
         enterTransition = slideEnterTransition,
@@ -347,6 +490,7 @@ fun NavGraphBuilder.navigationBuilder(
     ) {
         com.darkxvenom.airbeats.ui.screens.settings.DynamicIslandSettings(navController, scrollBehavior)
     }
+
     composable(
         route = "settings/always_on_display",
         enterTransition = slideEnterTransition,
@@ -356,6 +500,7 @@ fun NavGraphBuilder.navigationBuilder(
     ) {
         AODSettings(navController, scrollBehavior)
     }
+
     composable(
         route = "settings/account",
         enterTransition = slideEnterTransition,
@@ -365,6 +510,7 @@ fun NavGraphBuilder.navigationBuilder(
     ) {
         AccountSettings(navController, scrollBehavior)
     }
+
     composable(
         route = "settings/content",
         enterTransition = slideEnterTransition,
@@ -374,6 +520,7 @@ fun NavGraphBuilder.navigationBuilder(
     ) {
         ContentSettings(navController, scrollBehavior)
     }
+
     composable(
         route = "settings/player",
         enterTransition = slideEnterTransition,
@@ -383,6 +530,7 @@ fun NavGraphBuilder.navigationBuilder(
     ) {
         PlayerSettings(navController, scrollBehavior)
     }
+
     composable(
         route = "settings/storage",
         enterTransition = slideEnterTransition,
@@ -392,6 +540,7 @@ fun NavGraphBuilder.navigationBuilder(
     ) {
         StorageSettings(navController, scrollBehavior)
     }
+
     composable(
         route = "settings/privacy",
         enterTransition = slideEnterTransition,
@@ -401,6 +550,7 @@ fun NavGraphBuilder.navigationBuilder(
     ) {
         PrivacySettings(navController, scrollBehavior)
     }
+
     composable(
         route = "settings/backup_restore",
         enterTransition = slideEnterTransition,
@@ -410,6 +560,7 @@ fun NavGraphBuilder.navigationBuilder(
     ) {
         BackupAndRestore(navController, scrollBehavior)
     }
+
     composable(
         route = "settings/discord",
         enterTransition = slideEnterTransition,
@@ -419,6 +570,7 @@ fun NavGraphBuilder.navigationBuilder(
     ) {
         DiscordSettings(navController, scrollBehavior)
     }
+
     composable(
         route = "settings/about",
         enterTransition = slideEnterTransition,
@@ -428,16 +580,38 @@ fun NavGraphBuilder.navigationBuilder(
     ) {
         AboutScreen(navController, scrollBehavior)
     }
-    composable("login") {
+
+    composable(
+        route = "login",
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
         HomeScreen(navController = navController, onSearchClick = onSearchClick)
     }
-        composable("youtube_login") {
-            YouTubeLoginScreen(navController)
-        }
-    composable("contributor/{username}") { backStackEntry ->
+
+    composable(
+        route = "youtube_login",
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) {
+        YouTubeLoginScreen(navController)
+    }
+
+    composable(
+        route = "contributor/{username}",
+        enterTransition = slideEnterTransition,
+        exitTransition = slideExitTransition,
+        popEnterTransition = slidePopEnterTransition,
+        popExitTransition = slidePopExitTransition,
+    ) { backStackEntry ->
         val username = backStackEntry.arguments?.getString("username") ?: return@composable
         ContributorProfileScreen(navController, username)
     }
+
     dialog(
         route = "always_on_display",
         dialogProperties = DialogProperties(
@@ -448,9 +622,3 @@ fun NavGraphBuilder.navigationBuilder(
         AlwaysOnDisplayScreen(navController)
     }
 }
-
-
-
-
-
-

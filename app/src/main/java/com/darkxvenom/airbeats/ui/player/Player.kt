@@ -734,14 +734,19 @@ fun BottomSheetPlayer(
             .background(textButtonColor)
     }
 
-    LaunchedEffect(playbackState, state.isExpanded) {
-        if (playbackState == STATE_READY && state.isExpanded) {
+    LaunchedEffect(playbackState, isPlaying) {
+        if (playbackState == STATE_READY || playbackState == STATE_BUFFERING) {
             while (isActive) {
                 position = playerConnection.player.currentPosition
-                duration = playerConnection.player.duration
-                delay(250L)
+                duration = playerConnection.player.duration.coerceAtLeast(0L)
+                delay(if (isPlaying) 200L else 800L)
             }
         }
+    }
+
+    LaunchedEffect(mediaMetadata) {
+        position = playerConnection.player.currentPosition
+        duration = playerConnection.player.duration.coerceAtLeast(0L)
     }
 
     val currentFormat by playerConnection.currentFormat.collectAsState(initial = null)

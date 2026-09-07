@@ -44,6 +44,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -293,17 +294,30 @@ fun MiniPlayer(
                         .fillMaxSize()
                         .padding(horizontal = 12.dp, vertical = 8.dp),
                 ) {
+                    val isLoading = playbackState == Player.STATE_BUFFERING
+                    val currentProgress = if (duration > 0) (position.toFloat() / duration.toFloat()).coerceIn(0f, 1f) else 0f
+                    val animatedMiniProgress by animateFloatAsState(
+                        targetValue = currentProgress,
+                        animationSpec = tween(durationMillis = if (isPlaying) 200 else 100, easing = LinearEasing),
+                        label = "miniPlayerProgress"
+                    )
+
                     Box(
                         contentAlignment = Alignment.Center,
-                        modifier = Modifier.size(48.dp)
+                        modifier = Modifier.size(52.dp)
                     ) {
-                        if (duration > 0) {
-                            CircularProgressIndicator(
-                                progress = { (position.toFloat() / duration).coerceIn(0f, 1f) },
-                                modifier = Modifier.size(48.dp),
+                        if (isLoading) {
+                            CircularWavyProgressIndicator(
+                                modifier = Modifier.fillMaxSize(),
                                 color = MaterialTheme.colorScheme.primary,
-                                strokeWidth = 3.dp,
-                                trackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                                trackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
+                            )
+                        } else if (duration > 0) {
+                            CircularWavyProgressIndicator(
+                                progress = { animatedMiniProgress },
+                                modifier = Modifier.fillMaxSize(),
+                                color = MaterialTheme.colorScheme.primary,
+                                trackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
                             )
                         }
 

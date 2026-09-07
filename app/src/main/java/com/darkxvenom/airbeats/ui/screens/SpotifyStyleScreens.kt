@@ -249,7 +249,7 @@ fun SpotifyHomeScreen(
         }
 
         SpotifyHeader(
-            title = "AirBeats",
+            title = "AirBeats Lite",
             subtitle = greeting(accountName),
             isAtTop = isAtTop,
             hazeState = hazeState,
