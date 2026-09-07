@@ -133,7 +133,7 @@ fun NeonHomeScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "AirBeats",
+                        text = "AirBeats Lite",
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         color = textColor

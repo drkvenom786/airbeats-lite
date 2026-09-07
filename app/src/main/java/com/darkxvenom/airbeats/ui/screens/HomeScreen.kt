@@ -1083,55 +1083,39 @@ fun AnimatedBeatsRing(
     if (!isPlaying) return
 
     val infiniteTransition = rememberInfiniteTransition(label = "beats_anim")
-
-    val rotation by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
+    val pulseScale by infiniteTransition.animateFloat(
+        initialValue = 0.95f,
+        targetValue = 1.05f,
         animationSpec = infiniteRepeatable(
-            animation = tween(6000),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "rotation"
-    )
-
-    val barAnim by infiniteTransition.animateFloat(
-        initialValue = 0.4f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(500),
+            animation = tween(1200),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "bar_height"
+        label = "pulse_scale"
+    )
+    val pulseAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.4f,
+        targetValue = 0.85f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulse_alpha"
     )
 
-    Canvas(
+    Box(
         modifier = modifier
             .size(72.dp)
-            .graphicsLayer { rotationZ = rotation }
-    ) {
-        val radius = size.minDimension / 2
-        val barCount = 40
-        val angleStep = 360f / barCount
-
-        for (i in 0 until barCount) {
-
-            val angle = Math.toRadians((i * angleStep).toDouble())
-            val dynamicHeight = radius * barAnim * (0.5f + (i % 5) * 0.1f)
-
-            val startX = center.x + (radius - 12f) * cos(angle).toFloat()
-            val startY = center.y + (radius - 12f) * sin(angle).toFloat()
-
-            val endX = center.x + (radius - 12f + dynamicHeight * 0.25f) * cos(angle).toFloat()
-            val endY = center.y + (radius - 12f + dynamicHeight * 0.25f) * sin(angle).toFloat()
-
-            drawLine(
-                brush = Brush.linearGradient(songColors),
-                start = Offset(startX, startY),
-                end = Offset(endX, endY),
-                strokeWidth = 6f,
-                cap = StrokeCap.Round
+            .graphicsLayer {
+                scaleX = pulseScale
+                scaleY = pulseScale
+                alpha = pulseAlpha
+            }
+            .clip(CircleShape)
+            .border(
+                width = 2.dp,
+                brush = Brush.sweepGradient(songColors),
+                shape = CircleShape
             )
-        }
-    }
+    )
 }
 

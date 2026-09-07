@@ -34,7 +34,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
@@ -97,7 +99,14 @@ fun NewClassicMiniPlayer(
 
     if (mediaMetadata == null) return
 
+    val playbackState by playerConnection.playbackState.collectAsState()
+    val isLoading = playbackState == androidx.media3.common.Player.STATE_BUFFERING
     val progress = if (duration > 0) (position.toFloat() / duration.toFloat()).coerceIn(0f, 1f) else 0f
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = tween(durationMillis = if (isPlaying) 200 else 100, easing = LinearEasing),
+        label = "newClassicMiniPlayerProgress"
+    )
 
     val offsetXAnimatable = remember { Animatable(0f) }
     var dragStartTime by remember { mutableLongStateOf(0L) }
@@ -193,15 +202,22 @@ fun NewClassicMiniPlayer(
                 // 1. Artwork with progress ring
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.size(46.dp)
+                    modifier = Modifier.size(50.dp)
                 ) {
-                    CircularProgressIndicator(
-                        progress = { progress },
-                        modifier = Modifier.fillMaxSize(),
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.18f),
-                        strokeWidth = 2.5.dp
-                    )
+                    if (isLoading) {
+                        CircularWavyProgressIndicator(
+                            modifier = Modifier.fillMaxSize(),
+                            color = MaterialTheme.colorScheme.primary,
+                            trackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.18f),
+                        )
+                    } else if (duration > 0) {
+                        CircularWavyProgressIndicator(
+                            progress = { animatedProgress },
+                            modifier = Modifier.fillMaxSize(),
+                            color = MaterialTheme.colorScheme.primary,
+                            trackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.18f),
+                        )
+                    }
 
                     AsyncImage(
                         model = mediaMetadata?.thumbnailUrl?.highQualityThumbnail(),

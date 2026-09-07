@@ -33,7 +33,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.darkxvenom.airbeats786"
+        applicationId = "com.darkxvenom.airbeatslite"
         minSdk = 26
         targetSdk = 35
         versionCode = 190

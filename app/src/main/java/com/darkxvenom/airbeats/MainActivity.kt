@@ -1930,7 +1930,7 @@ fun HeadphoneSplashScreen() {
             }
 
             Text(
-                text = "AirBeats",
+                text = "AirBeats Lite",
                 fontSize = 42.sp,
                 fontWeight = FontWeight.ExtraBold,
                 letterSpacing = 2.sp,
