@@ -394,7 +394,7 @@ fun AlbumMenu(
                     type = "text/plain"
                     putExtra(
                         Intent.EXTRA_TEXT,
-                        "https://play.airbeats.app/album?id=${album.album.id}"
+                        "https://music.youtube.com/browse/${album.album.id}"
                     )
                 }
             context.startActivity(Intent.createChooser(intent, null))

@@ -30,15 +30,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -55,6 +52,7 @@ import com.darkxvenom.airbeats.ui.component.AvatarPreferenceManager
 import com.darkxvenom.airbeats.ui.component.AvatarSelection
 import com.darkxvenom.airbeats.ui.component.ChangelogScreen
 import com.darkxvenom.airbeats.ui.component.IconButton
+import com.darkxvenom.airbeats.ui.component.NamePreferenceManager
 import com.darkxvenom.airbeats.ui.component.UpdateAvailableDialog
 import com.darkxvenom.airbeats.ui.utils.backToMain
 import com.darkxvenom.airbeats.utils.UpdateInfo
@@ -151,7 +149,6 @@ fun SettingsCategoryItemContent(
                 .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Icon container with Material 3 styling
             Box(
                 modifier = Modifier
                     .size(40.dp)
@@ -171,12 +168,10 @@ fun SettingsCategoryItemContent(
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            // Title
             Box(modifier = Modifier.weight(1f)) {
                 item.title()
             }
 
-            // Trailing content
             if (item.trailingContent != null) {
                 item.trailingContent.invoke()
             } else {
@@ -244,12 +239,10 @@ fun SettingsScreen(
     ) { innerPadding ->
         val context = LocalContext.current
         val avatarManager = remember { AvatarPreferenceManager(context) }
+        val nameManager = remember { NamePreferenceManager(context) }
         val currentSelection by avatarManager.getAvatarSelection.collectAsState(initial = AvatarSelection.Default)
-        val accountName by rememberPreference(AccountNameKey, "")
-        val innerTubeCookie by rememberPreference(InnerTubeCookieKey, "")
-        val isLoggedIn = remember(innerTubeCookie) {
-            "SAPISID" in parseCookieString(innerTubeCookie)
-        }
+        val currentDisplayName by nameManager.userName.collectAsState(initial = "")
+        val currentGoogleEmail by nameManager.accountEmail.collectAsState(initial = "")
 
         LazyColumn(
             state = listState,
@@ -268,11 +261,11 @@ fun SettingsScreen(
             ),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            // Profile Section (Exact same layout, modern M3 design)
-            item(key = "profile_section", contentType = "profile") {
-                ProfileSection(
-                    isLoggedIn = isLoggedIn,
-                    accountName = accountName,
+            // Material 3 Profile Header
+            item(key = "profile_header", contentType = "header") {
+                SettingsProfileHeader(
+                    displayName = currentDisplayName,
+                    email = currentGoogleEmail,
                     currentSelection = currentSelection,
                     onClick = { navController.navigate("settings/account") }
                 )
@@ -294,18 +287,6 @@ fun SettingsScreen(
                                 )
                             },
                             onClick = { navController.navigate("settings/appearance") }
-                        ),
-                        SettingsCategoryItem(
-                            icon = painterResource(R.drawable.schedule),
-                            title = {
-                                Text(
-                                    stringResource(R.string.always_on_display),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.Medium,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            },
-                            onClick = { navController.navigate("settings/always_on_display") }
                         ),
                         SettingsCategoryItem(
                             icon = painterResource(R.drawable.person),
@@ -344,30 +325,6 @@ fun SettingsScreen(
                             onClick = { navController.navigate("settings/player") }
                         ),
                         SettingsCategoryItem(
-                            icon = painterResource(R.drawable.play),
-                            title = {
-                                Text(
-                                    "Android Auto",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.Medium,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            },
-                            onClick = { navController.navigate("settings/android_auto") }
-                        ),
-                        SettingsCategoryItem(
-                            icon = painterResource(R.drawable.group),
-                            title = {
-                                Text(
-                                    stringResource(R.string.listen_together),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.Medium,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            },
-                            onClick = { navController.navigate("listen_together") }
-                        ),
-                        SettingsCategoryItem(
                             icon = painterResource(R.drawable.storage),
                             title = {
                                 Text(
@@ -404,16 +361,16 @@ fun SettingsScreen(
                             onClick = { navController.navigate("settings/backup_restore") }
                         ),
                         SettingsCategoryItem(
-                            icon = painterResource(R.drawable.bug_report),
+                            icon = painterResource(R.drawable.discord),
                             title = {
                                 Text(
-                                    "Experimental Settings",
+                                    "Discord RPC",
                                     style = MaterialTheme.typography.bodyLarge,
                                     fontWeight = FontWeight.Medium,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                             },
-                            onClick = { navController.navigate("settings/experimental") }
+                            onClick = { navController.navigate("settings/discord") }
                         )
                     )
                 )
@@ -469,7 +426,7 @@ fun SettingsScreen(
                 UpdateCard()
             }
 
-            // Version Card (Exact same layout items: Version & Website)
+            // Version Card
             item(key = "version_card", contentType = "card") {
                 VersionCard(uriHandler)
             }
@@ -546,24 +503,34 @@ fun SettingsScreen(
 }
 
 @Composable
-fun ProfileSection(
-    isLoggedIn: Boolean,
-    accountName: String,
+fun SettingsProfileHeader(
+    displayName: String,
+    email: String,
     currentSelection: AvatarSelection,
     onClick: () -> Unit
 ) {
-    Column(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 8.dp, bottom = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.8f)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        if (isLoggedIn) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Avatar
             Box(
                 modifier = Modifier
-                    .size(90.dp)
+                    .size(68.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                    .background(MaterialTheme.colorScheme.surfaceContainerHighest)
                     .border(
                         width = 2.dp,
                         brush = Brush.linearGradient(
@@ -573,8 +540,7 @@ fun ProfileSection(
                             )
                         ),
                         shape = CircleShape
-                    )
-                    .clickable(onClick = onClick),
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 when (currentSelection) {
@@ -601,19 +567,15 @@ fun ProfileSection(
                         )
                     }
                     else -> {
-                        val initials = remember(accountName) {
-                            val cleanName = accountName.replace("@", "").trim()
-                            when {
-                                cleanName.isEmpty() -> "?"
-                                cleanName.contains(" ") -> {
-                                    val parts = cleanName.split(" ")
-                                    "${parts.first().firstOrNull()?.uppercase() ?: ""}${
-                                        parts.last().firstOrNull()?.uppercase() ?: ""
-                                    }"
-                                }
-                                else -> cleanName.take(2).uppercase()
+                        val name = displayName.trim()
+                        val initials = if (name.isNotBlank()) {
+                            if (name.contains(" ")) {
+                                val parts = name.split(" ")
+                                "${parts.first().firstOrNull()?.uppercase() ?: ""}${parts.last().firstOrNull()?.uppercase() ?: ""}"
+                            } else {
+                                name.take(2).uppercase()
                             }
-                        }
+                        } else "AB"
 
                         Box(
                             modifier = Modifier
@@ -639,83 +601,37 @@ fun ProfileSection(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.width(16.dp))
 
-            Text(
-                text = accountName.replace("@", "").takeIf { it.isNotBlank() } ?: "AirBeats Lite User",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 0.5.sp
-                ),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        } else {
-            // Not logged in state
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(3.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(76.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                        .border(
-                            width = 1.dp,
-                            brush = Brush.linearGradient(
-                                listOf(
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
-                                    MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f)
-                                )
-                            ),
-                            shape = CircleShape
-                        )
-                        .clickable(onClick = onClick)
-                        .padding(18.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.airbeats_monochrome),
-                        contentDescription = "Logo de AirBeats Lite",
-                        modifier = Modifier.fillMaxSize(),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
-                    Text(
-                        text = buildAnnotatedString {
-                            withStyle(
-                                style = SpanStyle(
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            ) {
-                                append("Air")
-                            }
-                            withStyle(
-                                style = SpanStyle(
-                                    color = MaterialTheme.colorScheme.tertiary
-                                )
-                            ) {
-                                append("Beats Lite")
-                            }
-                        },
-                        style = MaterialTheme.typography.titleLarge,
+                Text(
+                    text = displayName.ifBlank { "AirBeats Lite" },
+                    style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.Bold
-                    )
+                    ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
 
-                    Text(
-                        text = "Dev By DxV STUDIO 亗",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-                    )
-                }
+                Text(
+                    text = if (email.isNotBlank()) email else "Dev By DxV STUDIO 亗",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
+
+            Icon(
+                painter = painterResource(R.drawable.arrow_forward),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                modifier = Modifier.size(20.dp)
+            )
         }
     }
 }
@@ -748,118 +664,163 @@ fun VersionCard(uriHandler: UriHandler) {
                 modifier = Modifier.padding(vertical = 4.dp)
             ) {
                 // Version item
-                SettingsCategoryItemContent(
-                    item = SettingsCategoryItem(
-                        icon = painterResource(R.drawable.info),
-                        title = {
-                            Column {
-                                Text(
-                                    text = stringResource(R.string.Version),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.Medium,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Text(
-                                    text = appVersion,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    fontFamily = FontFamily.Monospace
-                                )
-                            }
-                        },
-                        onClick = { uriHandler.openUri("https://github.com/drkvenom786/airbeats-lite/releases/latest") }
-                    ),
-                    isLast = false
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.info),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.version),
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = appVersion,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                HorizontalDivider(
+                    modifier = Modifier.padding(start = 72.dp, end = 16.dp),
+                    thickness = 0.5.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f)
                 )
 
                 // Website item
-                SettingsCategoryItemContent(
-                    item = SettingsCategoryItem(
-                        icon = painterResource(R.drawable.resource_public),
-                        title = {
-                            Text(
-                                text = "Official Website",
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        },
-                        onClick = { uriHandler.openUri("https://airbeats.app") }
-                    ),
-                    isLast = true
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .clickable { uriHandler.openUri("https://github.com/drkvenom786/airbeats-lite") }
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.language),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.website),
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "github.com/drkvenom786/airbeats-lite",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    Icon(
+                        painter = painterResource(R.drawable.arrow_forward),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun UpdateCard(latestVersion: String = "") {
-    var showUpdateCard by remember { mutableStateOf(false) }
-    var currentLatestVersion by remember { mutableStateOf(latestVersion) }
-    var updateInfoState by remember { mutableStateOf<UpdateInfo?>(null) }
-    var showDownloadDialog by remember { mutableStateOf(false) }
+fun UpdateCard() {
+    var updateInfo by remember { mutableStateOf<UpdateInfo?>(null) }
+    var isChecking by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
-    LaunchedEffect(Unit) {
-        withContext(Dispatchers.IO) {
-            Updater.getLatestUpdateInfo().onSuccess { info ->
-                if (info.versionName.isNotBlank() && isNewerVersion(info.versionName, BuildConfig.VERSION_NAME)) {
-                    showUpdateCard = true
-                    currentLatestVersion = info.versionName
-                    updateInfoState = info
-                }
-            }.onFailure {
-                val newVersion = checkForUpdates()
-                if (newVersion != null && isNewerVersion(newVersion, BuildConfig.VERSION_NAME)) {
-                    showUpdateCard = true
-                    currentLatestVersion = newVersion
-                    updateInfoState = UpdateInfo(versionName = newVersion)
-                }
-            }
-        }
-    }
-
-    if (showDownloadDialog) {
-        updateInfoState?.let { info ->
-            UpdateAvailableDialog(
-                updateInfo = info,
-                onDismiss = { showDownloadDialog = false }
-            )
-        } ?: UpdateDownloadDialog(
-            latestVersion = currentLatestVersion,
-            onDismiss = { showDownloadDialog = false }
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Updates",
+            modifier = Modifier.padding(start = 16.dp, bottom = 8.dp),
+            style = MaterialTheme.typography.titleSmall.copy(
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 0.5.sp
+            ),
+            color = MaterialTheme.colorScheme.primary
         )
-    }
 
-    if (showUpdateCard) {
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { showDownloadDialog = true },
+            modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.6f)
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f)
             ),
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .clip(RoundedCornerShape(16.dp))
+                    .clickable {
+                        if (!isChecking) {
+                            isChecking = true
+                            scope.launch {
+                                val info = withContext(Dispatchers.IO) {
+                                    checkForUpdates(context)
+                                }
+                                updateInfo = info
+                                isChecking = false
+                                if (info != null && isNewerVersion(info.versionName, BuildConfig.VERSION_NAME)) {
+                                    showDialog = true
+                                }
+                            }
+                        }
+                    }
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)),
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.update),
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.tertiary,
-                        modifier = Modifier.size(22.dp)
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
 
@@ -867,71 +828,40 @@ fun UpdateCard(latestVersion: String = "") {
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = stringResource(R.string.NewVersion) + ": $currentLatestVersion",
+                        text = "Check for Updates",
                         style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onTertiaryContainer
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = stringResource(R.string.tap_to_update),
+                        text = if (isChecking) "Checking..." else "Current: v${BuildConfig.VERSION_NAME}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.8f)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
-                Icon(
-                    painter = painterResource(R.drawable.download),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.tertiary,
-                    modifier = Modifier.size(22.dp)
-                )
+                if (isChecking) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                } else {
+                    Icon(
+                        painter = painterResource(R.drawable.arrow_forward),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
             }
         }
     }
-}
 
-@Composable
-fun UpdateDownloadDialog(
-    latestVersion: String,
-    onDismiss: () -> Unit
-) {
-    val uriHandler = LocalUriHandler.current
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = stringResource(id = R.string.update_version, latestVersion),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-        },
-        text = {
-            Text(
-                text = stringResource(R.string.download_question),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    val downloadUrl = if (BuildConfig.IS_NIGHTLY) {
-                        "https://github.com/drkvenom786/airbeats-lite/releases/download/v${latestVersion}-nightly/Airbeats-v${latestVersion}-Nightly.apk"
-                    } else {
-                        "https://github.com/drkvenom786/airbeats-lite/releases/download/v$latestVersion/AirBeats_v${latestVersion}_signed.apk"
-                    }
-                    uriHandler.openUri(downloadUrl)
-                    onDismiss()
-                }
-            ) {
-                Text(stringResource(R.string.download))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.cancel))
-            }
-        }
-    )
+    if (showDialog && updateInfo != null) {
+        UpdateAvailableDialog(
+            updateInfo = updateInfo!!,
+            onDismiss = { showDialog = false }
+        )
+    }
 }

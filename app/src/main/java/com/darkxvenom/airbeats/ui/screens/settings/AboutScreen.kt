@@ -430,138 +430,126 @@ fun AboutScreen(
                     )
                     .padding(innerPadding) // This pushes content below the top bar
             ) {
-                Column(
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 16.dp), // Add small top padding for spacing
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    shape = RoundedCornerShape(28.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.8f)
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
-                    // Logo with shimmer
-                    Box(
+                    Column(
                         modifier = Modifier
-                            .size(90.dp)
-                            .scale(logoScale)
-                            .clip(CircleShape)
-                            .background(
-                                MaterialTheme.colorScheme.surfaceColorAtElevation(
-                                    NavigationBarDefaults.Elevation
-                                )
-                            )
+                            .fillMaxWidth()
+                            .padding(20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        androidx.compose.foundation.Image(
-                            painter = painterResource(R.drawable.airbeats_monochrome),
-                            contentDescription = null,
-                            colorFilter = ColorFilter.tint(
-                                MaterialTheme.colorScheme.onBackground,
-                                BlendMode.SrcIn
-                            ),
-                            modifier = Modifier
-                                .matchParentSize()
-                                .clickable {
-                                    logoTapCount++
-                                    if (logoTapCount >= 7) {
-                                        android.widget.Toast.makeText(
-                                            context,
-                                            "Built with ❤️ by AirBeats Team",
-                                            android.widget.Toast.LENGTH_LONG
-                                        ).show()
-                                        logoTapCount = 0
-                                    }
-                                }
-                        )
-
+                        // Logo with shimmer & subtle glowing border
                         Box(
                             modifier = Modifier
-                                .matchParentSize()
-                                .background(shimmerBrush)
-                        )
-                    }
-
-                    Spacer(Modifier.height(8.dp))
-
-                    // App Name
-                    Text(
-                        text = buildAnnotatedString {
-                            withStyle(
-                                SpanStyle(color = MaterialTheme.colorScheme.primary)
-                            ) {
-                                append("Air")
-                            }
-                            withStyle(
-                                SpanStyle(color = MaterialTheme.colorScheme.secondary)
-                            ) {
-                                append("Beats Lite")
-                            }
-                        },
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    // Version badges
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = BuildConfig.VERSION_NAME.uppercase(),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier
+                                .size(92.dp)
+                                .scale(logoScale)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
                                 .border(
-                                    width = 1.dp,
-                                    color = MaterialTheme.colorScheme.secondary,
+                                    width = 2.dp,
+                                    brush = Brush.linearGradient(
+                                        listOf(
+                                            MaterialTheme.colorScheme.primary,
+                                            MaterialTheme.colorScheme.tertiary
+                                        )
+                                    ),
                                     shape = CircleShape
                                 )
-                                .padding(horizontal = 8.dp, vertical = 2.dp)
+                        ) {
+                            androidx.compose.foundation.Image(
+                                painter = painterResource(R.drawable.airbeats_monochrome),
+                                contentDescription = null,
+                                colorFilter = ColorFilter.tint(
+                                    MaterialTheme.colorScheme.primary,
+                                    BlendMode.SrcIn
+                                ),
+                                modifier = Modifier
+                                    .matchParentSize()
+                                    .padding(14.dp)
+                                    .clickable {
+                                        logoTapCount++
+                                        if (logoTapCount >= 7) {
+                                            android.widget.Toast.makeText(
+                                                context,
+                                                "Built with ❤️ by DxV STUDIO",
+                                                android.widget.Toast.LENGTH_LONG
+                                            ).show()
+                                            logoTapCount = 0
+                                        }
+                                    }
+                            )
+
+                            Box(
+                                modifier = Modifier
+                                    .matchParentSize()
+                                    .background(shimmerBrush)
+                            )
+                        }
+
+                        Spacer(Modifier.height(12.dp))
+
+                        // App Name
+                        Text(
+                            text = buildAnnotatedString {
+                                withStyle(
+                                    SpanStyle(color = MaterialTheme.colorScheme.primary)
+                                ) {
+                                    append("Air")
+                                }
+                                withStyle(
+                                    SpanStyle(color = MaterialTheme.colorScheme.tertiary)
+                                ) {
+                                    append("Beats Lite")
+                                }
+                            },
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold
                         )
 
-                        if (BuildConfig.BUILD_TYPE == "nightly") {
-                            Spacer(Modifier.width(4.dp))
-                            Text(
-                                text = "NIGHTLY",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.secondary,
-                                modifier = Modifier
-                                    .border(
-                                        color = MaterialTheme.colorScheme.secondary,
-                                        width = 1.dp,
-                                        shape = CircleShape
-                                    )
-                                    .padding(horizontal = 8.dp, vertical = 2.dp)
-                            )
+                        Spacer(Modifier.height(4.dp))
+
+                        // Version badges
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        ) {
+                            Surface(
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f))
+                            ) {
+                                Text(
+                                    text = "v${BuildConfig.VERSION_NAME}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp)
+                                )
+                            }
                         }
 
-                        if (BuildConfig.DEBUG) {
-                            Spacer(Modifier.width(4.dp))
-                            Text(
-                                text = "DEBUG",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.secondary,
-                                modifier = Modifier
-                                    .border(
-                                        width = 1.dp,
-                                        color = MaterialTheme.colorScheme.secondary,
-                                        shape = CircleShape
-                                    )
-                                    .padding(horizontal = 8.dp, vertical = 2.dp)
-                            )
-                        }
+                        Spacer(Modifier.height(4.dp))
+
+                        Text(
+                            text = "Dev By DxV STUDIO 亗",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
+                            modifier = Modifier.padding(bottom = 12.dp)
+                        )
+
+                        // Social Icons
+                        SocialIconRow(uriHandler)
                     }
-
-                    Text(
-                        text = "Dev By DxV STUDIO 亗",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontFamily = FontFamily.Monospace
-                        ),
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-
-                    // Social Icons
-                    SocialIconRow(uriHandler)
-
-                    Spacer(Modifier.height(16.dp))
+                }
 
                     // Contributors Title - LEFT ALIGNED
                     Row(

@@ -7,6 +7,11 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.foundation.Image
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -153,7 +158,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.util.Consumer
 import com.darkxvenom.airbeats.utils.ExternalPlayerUtil
-import com.darkxvenom.airbeats.utils.ListenTogetherSync
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -408,6 +412,15 @@ class MainActivity : ComponentActivity() {
             }
 
             val isNameSet by namePreferenceManager.isNameSet.collectAsState(initial = null)
+            var showSplash by remember { mutableStateOf(true) }
+
+            LaunchedEffect(isNameSet) {
+                if (isNameSet != null) {
+                    delay(1200)
+                    showSplash = false
+                }
+            }
+
             var showFullscreenLyrics by remember { mutableStateOf(false) }
 
             val playerScreenStyle by rememberEnumPreference<PlayerScreenStyle>(PlayerScreenStyleKey, defaultValue = PlayerScreenStyle.CLASSIC)
@@ -479,9 +492,17 @@ class MainActivity : ComponentActivity() {
                 appFont = appFont,
                 themeColor = themeColor,
             ) {
-                NameProvider(
-                    namePreferenceManager = namePreferenceManager
-                ) {
+                Crossfade(
+                    targetState = showSplash,
+                    animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing),
+                    label = "splash_crossfade"
+                ) { isSplash ->
+                    if (isSplash) {
+                        HeadphoneSplashScreen()
+                    } else {
+                        NameProvider(
+                            namePreferenceManager = namePreferenceManager
+                        ) {
                         BoxWithConstraints(
                             modifier =
                                 Modifier
@@ -729,14 +750,7 @@ class MainActivity : ComponentActivity() {
 
                                         val uri = intent.data ?: intent.extras?.getString(Intent.EXTRA_TEXT)
                                             ?.toUri() ?: return@Consumer
-                                        
-                                        if (uri.host == "listentogether.airbeats.app") {
-                                            val code = uri.getQueryParameter("code")
-                                            if (code != null) {
-                                                ListenTogetherSync.joinSession(code)
-                                                return@Consumer
-                                            }
-                                        }
+
                                         when (val path = uri.pathSegments.firstOrNull()) {
                                             "playlist" ->
                                                 (uri.getQueryParameter("id") ?: uri.getQueryParameter("list"))?.let { playlistId ->
@@ -776,8 +790,6 @@ class MainActivity : ComponentActivity() {
                                                 when {
                                                     path == "watch" -> uri.getQueryParameter("v")
                                                     uri.host == "youtu.be" -> path
-                                                    uri.host == "play.airbeats.app" && path == "song" -> uri.getQueryParameter("id")
-                                                    uri.host == "play.airbeats.app" -> path
                                                     else -> null
                                                 }?.let { videoId ->
                                                     coroutineScope.launch {
@@ -832,34 +844,6 @@ class MainActivity : ComponentActivity() {
                             ) {
                                 var showRealNavBar by remember { mutableStateOf(false) }
                                 var playIntroAnimation by remember { mutableStateOf(true) }
-
-                                val aodAutoTimeoutSeconds by rememberPreference(AodAutoActivationKey, 0)
-                                var isAodActive by remember { mutableStateOf(false) }
-                                var lastInteractionTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
-
-                                val resetAodTimer = {
-                                    lastInteractionTime = System.currentTimeMillis()
-                                    if (isAodActive) {
-                                        isAodActive = false
-                                    }
-                                }
-
-                                LaunchedEffect(aodAutoTimeoutSeconds, playerBottomSheetState.isExpanded, lastInteractionTime, isAodActive) {
-                                    if (aodAutoTimeoutSeconds > 0 && playerBottomSheetState.isExpanded && !isAodActive) {
-                                        kotlinx.coroutines.delay(100L)
-                                        while (isActive) {
-                                            kotlinx.coroutines.delay(100L)
-                                            val elapsedSeconds = (System.currentTimeMillis() - lastInteractionTime) / 1000f
-                                            if (elapsedSeconds >= aodAutoTimeoutSeconds) {
-                                                isAodActive = true
-                                                navController.navigate("always_on_display") {
-                                                    launchSingleTop = true
-                                                }
-                                                break
-                                            }
-                                        }
-                                    }
-                                }
 
                                 LaunchedEffect(Unit) {
                                     kotlinx.coroutines.delay(200)
@@ -1402,6 +1386,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
 
     private fun navigateToScreen(
         navController: NavHostController,
@@ -1421,15 +1406,6 @@ class MainActivity : ComponentActivity() {
         when {
             uri.pathSegments.firstOrNull() == "watch" -> uri.getQueryParameter("v")
             uri.host == "youtu.be" -> uri.pathSegments.firstOrNull()
-            uri.host == "play.airbeats.app" -> {
-                if (uri.pathSegments.firstOrNull() == "song") {
-                    uri.getQueryParameter("id")
-                } else if (uri.pathSegments.firstOrNull() == "artist") {
-                    null
-                } else {
-                    uri.pathSegments.firstOrNull()
-                }
-            }
             else -> null
         }?.let { videoId ->
             lifecycleScope.launch {
@@ -1843,6 +1819,100 @@ fun ModernHomeTopBar(
                     CircleIconButton(icon = R.drawable.favorite, onClick = { })
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun HeadphoneSplashScreen() {
+    val infiniteTransition = rememberInfiniteTransition(label = "bg_anim")
+
+    val shift by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(6000, easing = LinearEasing)
+        ),
+        label = "shift"
+    )
+
+    val colors = MaterialTheme.colorScheme
+
+    val animatedBackground = Brush.radialGradient(
+        colors = listOf(
+            colors.primary.copy(alpha = 0.22f),
+            colors.tertiary.copy(alpha = 0.16f),
+            colors.secondary.copy(alpha = 0.10f),
+            colors.background
+        ),
+        center = Offset(shift % 600f, shift % 900f),
+        radius = 1200f
+    )
+
+    var startAnimation by remember { mutableStateOf(false) }
+
+    val scale by animateFloatAsState(
+        targetValue = if (startAnimation) 1f else 0.9f,
+        animationSpec = tween(900, easing = FastOutSlowInEasing),
+        label = "scale"
+    )
+
+    val alpha by animateFloatAsState(
+        targetValue = if (startAnimation) 1f else 0f,
+        animationSpec = tween(900, easing = LinearOutSlowInEasing),
+        label = "alpha"
+    )
+
+    LaunchedEffect(Unit) {
+        startAnimation = true
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(animatedBackground),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+                this.alpha = alpha
+            }
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(220.dp)
+                    .height(145.dp)
+                    .clipToBounds(),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.airbeats_logo),
+                    contentDescription = null,
+                    modifier = Modifier.size(220.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Text(
+                text = "AirBeats Lite",
+                fontSize = 42.sp,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 2.sp,
+                style = TextStyle(
+                    brush = Brush.linearGradient(
+                        colors = listOf(
+                            Color(0xFFE91E63),
+                            Color(0xFFFFC107),
+                            Color(0xFF2196F3)
+                        )
+                    )
+                )
+            )
         }
     }
 }

@@ -1989,7 +1989,7 @@ fun BottomSheetPlayer(
                             type = "text/plain"
                             putExtra(
                                 Intent.EXTRA_TEXT,
-                                "https://play.airbeats.app/song?id=${metadata.id}"
+                                "https://music.youtube.com/watch?v=${metadata.id}"
                             )
                         }
                         context.startActivity(Intent.createChooser(intent, null))

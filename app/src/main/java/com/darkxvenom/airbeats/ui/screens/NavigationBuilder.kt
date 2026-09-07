@@ -42,8 +42,8 @@ import com.darkxvenom.airbeats.ui.screens.playlist.OnlinePlaylistScreen
 import com.darkxvenom.airbeats.ui.screens.playlist.TopPlaylistScreen
 import com.darkxvenom.airbeats.ui.screens.search.OnlineSearchResult
 import com.darkxvenom.airbeats.ui.screens.settings.AboutScreen
+
 import com.darkxvenom.airbeats.ui.screens.settings.AccountSettings
-import com.darkxvenom.airbeats.ui.screens.settings.AODSettings
 import com.darkxvenom.airbeats.ui.screens.settings.AppearanceSettings
 import com.darkxvenom.airbeats.ui.screens.settings.BackupAndRestore
 import com.darkxvenom.airbeats.ui.screens.settings.ContentSettings
@@ -273,15 +273,7 @@ fun NavGraphBuilder.navigationBuilder(
         YearInMusicScreen(navController)
     }
 
-    composable(
-        route = "listen_together",
-        enterTransition = slideEnterTransition,
-        exitTransition = slideExitTransition,
-        popEnterTransition = slidePopEnterTransition,
-        popExitTransition = slidePopExitTransition,
-    ) {
-        ListenTogetherScreen(navController, scrollBehavior)
-    }
+
 
     composable(
         route = "search/{query}",
@@ -497,15 +489,7 @@ fun NavGraphBuilder.navigationBuilder(
         com.darkxvenom.airbeats.ui.screens.settings.DynamicIslandSettings(navController, scrollBehavior)
     }
 
-    composable(
-        route = "settings/always_on_display",
-        enterTransition = fadeEnterTransition,
-        exitTransition = fadeExitTransition,
-        popEnterTransition = fadePopEnterTransition,
-        popExitTransition = fadePopExitTransition,
-    ) {
-        AODSettings(navController, scrollBehavior)
-    }
+
 
     composable(
         route = "settings/account",
@@ -598,16 +582,6 @@ fun NavGraphBuilder.navigationBuilder(
     }
 
     composable(
-        route = "youtube_login",
-        enterTransition = slideEnterTransition,
-        exitTransition = slideExitTransition,
-        popEnterTransition = slidePopEnterTransition,
-        popExitTransition = slidePopExitTransition,
-    ) {
-        YouTubeLoginScreen(navController)
-    }
-
-    composable(
         route = "contributor/{username}",
         enterTransition = slideEnterTransition,
         exitTransition = slideExitTransition,
@@ -616,15 +590,5 @@ fun NavGraphBuilder.navigationBuilder(
     ) { backStackEntry ->
         val username = backStackEntry.arguments?.getString("username") ?: return@composable
         ContributorProfileScreen(navController, username)
-    }
-
-    dialog(
-        route = "always_on_display",
-        dialogProperties = DialogProperties(
-            usePlatformDefaultWidth = false,
-            decorFitsSystemWindows = false
-        )
-    ) {
-        AlwaysOnDisplayScreen(navController)
     }
 }

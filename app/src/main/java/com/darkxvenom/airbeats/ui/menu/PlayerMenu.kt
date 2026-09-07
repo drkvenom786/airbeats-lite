@@ -108,11 +108,6 @@ import com.darkxvenom.airbeats.playback.queues.YouTubeQueue
 import com.darkxvenom.airbeats.ui.component.BottomSheetState
 import com.darkxvenom.airbeats.ui.component.ListDialog
 import com.darkxvenom.airbeats.ui.component.ListItem
-import com.darkxvenom.airbeats.utils.ListenTogetherClient
-import com.darkxvenom.airbeats.utils.ListenTogetherPlaybackState
-import com.darkxvenom.airbeats.utils.ListenTogetherSession
-import com.darkxvenom.airbeats.utils.ListenTogetherStore
-import com.darkxvenom.airbeats.utils.ListenTogetherSync
 import com.darkxvenom.airbeats.utils.joinByBullet
 import com.darkxvenom.airbeats.utils.makeTimeString
 import kotlinx.coroutines.Dispatchers
@@ -276,7 +271,6 @@ fun PlayerMenu(
     var isMuted by remember { mutableStateOf(false) }
     var previousVolume by remember { mutableFloatStateOf(playerVolume.value) }
     var showEqualizerSheet by rememberSaveable { mutableStateOf(false) }
-    var showListenTogetherSheet by rememberSaveable { mutableStateOf(false) }
 
     LazyColumn(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp),
@@ -561,7 +555,7 @@ fun PlayerMenu(
                                         type = "text/plain"
                                         putExtra(
                                             Intent.EXTRA_TEXT,
-                                            "https://play.airbeats.app/song?id=${mediaMetadata.id}"
+                                            "https://music.youtube.com/watch?v=${mediaMetadata.id}"
                                         )
                                     }
                                 context.startActivity(Intent.createChooser(intent, null))
@@ -584,35 +578,11 @@ fun PlayerMenu(
 
                     item {
                         androidx.compose.material3.ListItem(
-                            headlineContent = { Text(stringResource(R.string.always_on_display)) },
-                            leadingContent = { Icon(painterResource(R.drawable.dark_mode), contentDescription = null) },
-                            colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = Color.Transparent),
-                            modifier = Modifier.clickable {
-                                navController.navigate("always_on_display")
-                                playerBottomSheetState.collapseSoft()
-                                onDismiss()
-                            }
-                        )
-                    }
-
-                    item {
-                        androidx.compose.material3.ListItem(
                             headlineContent = { Text(stringResource(R.string.equalizer)) },
                             leadingContent = { Icon(painterResource(R.drawable.equalizer), contentDescription = null) },
                             colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = Color.Transparent),
                             modifier = Modifier.clickable {
                                 showEqualizerSheet = true
-                            }
-                        )
-                    }
-
-                    item {
-                        androidx.compose.material3.ListItem(
-                            headlineContent = { Text(stringResource(R.string.listen_together)) },
-                            leadingContent = { Icon(painterResource(R.drawable.group), contentDescription = null) },
-                            colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = Color.Transparent),
-                            modifier = Modifier.clickable {
-                                showListenTogetherSheet = true
                             }
                         )
                     }
@@ -633,14 +603,6 @@ fun PlayerMenu(
             InAppEqualizerSheet(
                 onDismiss = {
                     showEqualizerSheet = false
-                }
-            )
-        }
-
-        if (showListenTogetherSheet) {
-            InPlayerListenTogetherSheet(
-                onDismiss = {
-                    showListenTogetherSheet = false
                 }
             )
         }
@@ -731,226 +693,6 @@ private fun PlayerMenuActionTile(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun InPlayerListenTogetherSheet(onDismiss: () -> Unit) {
-    val context = LocalContext.current
-    val clipboardManager = LocalClipboardManager.current
-    val playerConnection = LocalPlayerConnection.current ?: return
-    val mediaMetadata by playerConnection.mediaMetadata.collectAsState(initial = null)
-    val session by ListenTogetherSync.session.collectAsState()
-    val isHost by ListenTogetherSync.isHost.collectAsState()
-    val syncMessage by ListenTogetherSync.message.collectAsState()
-    val syncedDisplayName by ListenTogetherSync.displayName.collectAsState()
-    val codeCopiedMessage = stringResource(R.string.session_code_copied)
-    val listenTogetherCodeLabel = stringResource(R.string.listen_together_code)
-
-    var displayName by rememberSaveable { mutableStateOf(syncedDisplayName) }
-    var joinCode by rememberSaveable { mutableStateOf("") }
-    var message by remember { mutableStateOf<String?>(null) }
-
-    LaunchedEffect(syncedDisplayName) {
-        displayName = syncedDisplayName
-    }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false),
-        confirmButton = {},
-        title = {
-            Text(
-                text = stringResource(R.string.listen_together),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold,
-            )
-        },
-        text = {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(14.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 4.dp)
-        ) {
-            ListenTogetherStatusCard(
-                session = session,
-                isHost = isHost,
-                mediaMetadata = mediaMetadata,
-            )
-
-            OutlinedTextField(
-                value = displayName,
-                onValueChange = {
-                    displayName = it
-                    ListenTogetherSync.setDisplayName(it)
-                },
-                label = { Text(stringResource(R.string.display_name)) },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Button(
-                    enabled = mediaMetadata != null,
-                    onClick = {
-                        ListenTogetherSync.setDisplayName(displayName)
-                        ListenTogetherSync.createSession()
-                    },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(stringResource(R.string.create_session))
-                }
-
-                OutlinedButton(
-                    enabled = session?.joinUrl?.isNotBlank() == true,
-                    onClick = {
-                        val activeSession = session ?: return@OutlinedButton
-                        val shareText = "${activeSession.joinUrl}\n$listenTogetherCodeLabel: ${activeSession.code}"
-                        context.startActivity(
-                            Intent.createChooser(
-                                Intent(Intent.ACTION_SEND).apply {
-                                    type = "text/plain"
-                                    putExtra(Intent.EXTRA_TEXT, shareText)
-                                },
-                                null
-                            )
-                        )
-                    },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(stringResource(R.string.share))
-                }
-            }
-
-            OutlinedTextField(
-                value = joinCode,
-                onValueChange = { joinCode = it.uppercase() },
-                label = { Text(stringResource(R.string.session_code)) },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Button(
-                enabled = joinCode.isNotBlank(),
-                onClick = {
-                    ListenTogetherSync.setDisplayName(displayName)
-                    ListenTogetherSync.joinSession(joinCode)
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringResource(R.string.join_session))
-            }
-
-            session?.let { activeSession ->
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    OutlinedButton(
-                        onClick = {
-                            clipboardManager.setText(AnnotatedString(activeSession.code))
-                            message = codeCopiedMessage
-                        },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(stringResource(R.string.copy_session_code))
-                    }
-                    OutlinedButton(
-                        onClick = {
-                            ListenTogetherSync.leaveSession()
-                        },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(stringResource(R.string.leave_session))
-                    }
-                }
-
-                PopupParticipantsSection(activeSession)
-            }
-
-            message?.let {
-                Text(
-                    text = it,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            }
-            syncMessage?.let {
-                Text(
-                    text = it,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            }
-        }
-        }
-    )
-}
-
-@Composable
-private fun PopupParticipantsSection(session: ListenTogetherSession) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(
-            text = stringResource(R.string.session_users),
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.SemiBold,
-        )
-        session.participantList.forEach { participant ->
-            Text(
-                text = if (participant.isHost) {
-                    stringResource(R.string.created_by_name, participant.name)
-                } else {
-                    participant.name
-                },
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-    }
-}
-
-@Composable
-private fun ListenTogetherStatusCard(
-    session: ListenTogetherSession?,
-    isHost: Boolean,
-    mediaMetadata: MediaMetadata?,
-) {
-    Surface(
-        shape = RoundedCornerShape(18.dp),
-        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.45f),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = Modifier.padding(14.dp)
-        ) {
-            Text(
-                text = when {
-                    session == null -> stringResource(R.string.no_active_session)
-                    isHost -> stringResource(R.string.hosting_session, session.code)
-                    else -> stringResource(R.string.joined_session_with_code, session.code)
-                },
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-            )
-            Text(
-                text = mediaMetadata?.title ?: session?.state?.title ?: stringResource(R.string.play_song_first),
-                style = MaterialTheme.typography.bodyMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            session?.let {
-                Text(
-                    text = "${it.participants} listeners",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
         }
     }
 }

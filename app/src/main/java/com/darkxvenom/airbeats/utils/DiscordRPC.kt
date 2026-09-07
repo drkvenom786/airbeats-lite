@@ -29,14 +29,14 @@ class DiscordRPC(
             name = context.getString(R.string.app_name).removeSuffix(" Debug"),
             details = songTitleWithRate,
             state = song.artists.joinToString { it.name },
-            detailsUrl = "https://play.airbeats.app/song?id=${song.song.id}",
+            detailsUrl = "https://music.youtube.com/watch?v=${song.song.id}",
             largeImage = song.song.thumbnailUrl?.let { RpcImage.ExternalImage(it) },
             smallImage = song.artists.firstOrNull()?.thumbnailUrl?.let { RpcImage.ExternalImage(it) },
             largeText = song.album?.title,
             smallText = song.artists.firstOrNull()?.name,
             buttons = listOf(
-                "Listen on YouTube Music" to "https://play.airbeats.app/song?id=${song.song.id}",
-                "Visit AirBeats" to "https://github.com/darkxvenom/airbeats"
+                "Listen on YouTube Music" to "https://music.youtube.com/watch?v=${song.song.id}",
+                "Visit AirBeats" to "https://github.com/drkvenom786/airbeats-lite"
             ),
             type = Type.LISTENING,
             statusDisplayType = if (useDetails) StatusDisplayType.DETAILS else StatusDisplayType.STATE,
