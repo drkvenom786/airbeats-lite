@@ -322,7 +322,7 @@ fun SocialIconRow(uriHandler: UriHandler) {
                 )
             }
             IconButton(
-                onClick = { uriHandler.openUri("https://github.com/d0x-dev") }
+                onClick = { uriHandler.openUri("https://github.com/drkvenom786/airbeats-lite") }
             ) {
                 Icon(
                     modifier = Modifier.size(20.dp),
@@ -342,7 +342,7 @@ fun SocialIconRow(uriHandler: UriHandler) {
                 )
             }
             IconButton(
-                onClick = { uriHandler.openUri("https://AirBeats.stormx.pw/") }
+                onClick = { uriHandler.openUri("https://d0x-dev.github.io/Air-Beats") }
             ) {
                 Icon(
                     modifier = Modifier.size(22.dp),
@@ -644,7 +644,7 @@ fun AboutScreen(
                             imageUrl = "https://avatars.githubusercontent.com/u/218248866",
                             name = "Darkboy",
                             role = "Lead Developer",
-                            commits = founderCommits["d0x-dev"],
+                            commits = founderCommits["d0x-dev"] ?: 0,
                             githubUrl = "https://github.com/d0x-dev",
                             telegramUrl = "https://t.me/songpy",
                             instagramUrl = "https://instagram.com/dark__336",
@@ -657,7 +657,7 @@ fun AboutScreen(
                             imageUrl = "https://avatars.githubusercontent.com/u/241423835",
                             name = "Venom",
                             role = "UI/UX Specialist",
-                            commits = founderCommits["drkvenom786"],
+                            commits = founderCommits["drkvenom786"] ?: 0,
                             githubUrl = "https://github.com/drkvenom786",
                             websiteUrl = "https://venomx.pro",
                             modifier = Modifier.weight(1f),

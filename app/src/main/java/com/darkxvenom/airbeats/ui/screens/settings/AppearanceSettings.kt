@@ -116,7 +116,6 @@ fun AppearanceSettings(
     )
     val (lyricsClick, onLyricsClickChange) = rememberPreference(LyricsClickKey, defaultValue = true)
     val (enableNewLyricsScreen, onEnableNewLyricsScreenChange) = rememberPreference(EnableNewLyricsScreenKey, defaultValue = true)
-    val (enableNewQueueScreen, onEnableNewQueueScreenChange) = rememberPreference(EnableNewQueueScreenKey, defaultValue = true)
     val (sliderStyle, onSliderStyleChange) = rememberEnumPreference(
         SliderStyleKey,
         defaultValue = SliderStyle.SQUIGGLY
@@ -124,10 +123,6 @@ fun AppearanceSettings(
     val (swipeThumbnail, onSwipeThumbnailChange) = rememberPreference(
         SwipeThumbnailKey,
         defaultValue = true
-    )
-    val (gridItemSize, onGridItemSizeChange) = rememberEnumPreference(
-        GridItemsSizeKey,
-        defaultValue = GridItemSize.BIG
     )
     val (animateLyrics, onAnimateLyricsChange) = rememberPreference(
         AnimateLyricsKey,
@@ -683,14 +678,6 @@ fun AppearanceSettings(
                             description = stringResource(R.string.enable_new_lyrics_screen_desc),
                             checked = enableNewLyricsScreen,
                             onCheckedChange = onEnableNewLyricsScreenChange
-                        )},
-
-                        {SwitchPreference(
-                            title = { Text(stringResource(R.string.new_queue_screen)) },
-                            icon = { Icon(painterResource(R.drawable.music_note), null) },
-                            description = "Use AirBeats's queue screen",
-                            checked = enableNewQueueScreen,
-                            onCheckedChange = onEnableNewQueueScreenChange
                         )}
                     )
                 )
@@ -734,20 +721,7 @@ fun AppearanceSettings(
                                 }
                             },
                             onValueSelected = onDefaultChipChange,
-                        )},
-
-                        {EnumListPreference(
-                            title = { Text(stringResource(R.string.grid_cell_size)) },
-                            icon = { Icon(painterResource(R.drawable.grid_view), null) },
-                            selectedValue = gridItemSize,
-                            onValueSelected = onGridItemSizeChange,
-                            valueText = {
-                                when (it) {
-                                    GridItemSize.SMALL -> stringResource(R.string.small)
-                                    GridItemSize.BIG -> stringResource(R.string.big)
-                                }
-                            },
-                        )},
+                        )}
                     )
                 )
 
