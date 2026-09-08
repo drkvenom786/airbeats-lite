@@ -229,7 +229,7 @@ fun AlternateQueue(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 24.dp, top = 20.dp, bottom = 12.dp),
+                        .padding(start = 24.dp, end = 24.dp, top = 20.dp, bottom = 12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -357,7 +357,7 @@ fun AlternateQueue(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 24.dp, top = 16.dp, bottom = 8.dp),
+                        .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -408,7 +408,7 @@ fun AlternateQueue(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 24.dp, top = 12.dp, bottom = 6.dp),
+                        .padding(start = 24.dp, end = 24.dp, top = 12.dp, bottom = 6.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
