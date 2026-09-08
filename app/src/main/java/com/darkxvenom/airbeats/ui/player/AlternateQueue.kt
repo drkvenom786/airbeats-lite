@@ -290,7 +290,7 @@ fun AlternateQueue(
                         .padding(horizontal = 16.dp, vertical = 4.dp),
                     shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.65f)
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                     )
                 ) {
                     Row(
@@ -371,7 +371,8 @@ fun AlternateQueue(
                             color = onBackgroundColor
                         )
                         Spacer(modifier = Modifier.height(2.dp))
-                        val mixTitle = if (mediaMetadata != null) "${mediaMetadata?.title} Mix" else "Similar tracks"
+                        val songTitle = mediaMetadata?.title
+                        val mixTitle = if (!songTitle.isNullOrBlank()) "$songTitle Mix" else "Similar tracks"
                         Text(
                             text = mixTitle,
                             style = MaterialTheme.typography.bodySmall.copy(
@@ -398,7 +399,6 @@ fun AlternateQueue(
                             checked = infiniteQueueEnabled,
                             onCheckedChange = {
                                 infiniteQueueEnabled = it
-                                playerConnection.service.autoLoadMore = it
                             }
                         )
                     }
@@ -454,7 +454,7 @@ fun AlternateQueue(
                             val trackMetadata = window.mediaItem.metadata ?: return@ReorderableItem
 
                             val dismissBoxState = rememberSwipeToDismissBoxState(
-                                positionalThreshold = { totalDistance -> totalDistance * 0.5f }
+                                positionalThreshold = { totalDistance -> totalDistance }
                             )
 
                             var processedDismiss by remember { mutableStateOf(false) }
