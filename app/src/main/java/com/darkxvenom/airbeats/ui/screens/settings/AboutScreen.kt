@@ -659,7 +659,7 @@ fun AboutScreen(
                             role = "UI/UX Specialist",
                             commits = founderCommits["drkvenom786"] ?: 0,
                             githubUrl = "https://github.com/drkvenom786",
-                            websiteUrl = "https://venomx.pro",
+                            websiteUrl = "https://drkvenom786.github.io/webpage/",
                             modifier = Modifier.weight(1f),
                             onClick = { navController.navigate("contributor/drkvenom786") }
                         )
