@@ -40,6 +40,7 @@ import coil.compose.AsyncImage
 import com.darkxvenom.airbeats.LocalPlayerConnection
 import com.darkxvenom.airbeats.R
 import com.darkxvenom.airbeats.models.LocalSong
+import com.darkxvenom.airbeats.playback.queues.ListQueue
 import com.darkxvenom.airbeats.viewmodels.LocalSongsViewModel
 
 @Composable
@@ -193,9 +194,13 @@ fun LocalSongsScreen(
                                 onClick = {
                                     playerConnection?.let { pc ->
                                         val mediaItems = songs.map { it.toMediaItem() }
-                                        pc.player.setMediaItems(mediaItems, index, 0L)
-                                        pc.player.prepare()
-                                        pc.player.play()
+                                        pc.playQueue(
+                                            ListQueue(
+                                                title = context.getString(R.string.local_songs),
+                                                items = mediaItems,
+                                                startIndex = index
+                                            )
+                                        )
                                     }
                                 },
                             )

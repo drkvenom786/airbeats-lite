@@ -283,6 +283,7 @@ class MusicService :
     val automixItems = MutableStateFlow<List<MediaItem>>(emptyList())
 
     private var consecutivePlaybackErr = 0
+    private var infiniteQueueLoadJob: Job? = null
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate() {
@@ -856,6 +857,88 @@ class MusicService :
                 }
                 player.setShuffleOrder(DefaultShuffleOrder(shuffledIndices, System.currentTimeMillis()))
             }
+            // Si la cola tiene 1 sola canción y Endless Queue está activo, precargar canciones relacionadas
+            if (dataStore.get(AutoLoadMoreKey, true) && !currentQueue.hasNextPage() && player.mediaItemCount <= 1) {
+                val seedId = player.currentMediaItem?.mediaId
+                if (!seedId.isNullOrBlank()) {
+                    extendInfiniteQueue(seedId)
+                }
+            }
+        }
+    }
+
+    fun extendInfiniteQueue(seedId: String, autoPlayIfEnded: Boolean = false) {
+        if (infiniteQueueLoadJob?.isActive == true) return
+        infiniteQueueLoadJob = scope.launch(SilentHandler) {
+            var newMediaItems: List<MediaItem> = emptyList()
+
+            // 1. Si hay conexión a internet y no es un archivo local/content, buscar canciones relacionadas en YouTube
+            if (isNetworkConnected.value && !seedId.startsWith("local:") && !seedId.startsWith("content:")) {
+                try {
+                    val endpoint = withContext(Dispatchers.IO) {
+                        YouTube.next(WatchEndpoint(videoId = seedId)).getOrNull()?.relatedEndpoint
+                    }
+                    if (endpoint != null) {
+                        val relatedSongs = withContext(Dispatchers.IO) {
+                            YouTube.related(endpoint).getOrNull()?.songs.orEmpty()
+                        }
+                        val existingIds = player.mediaItems.map { it.mediaId }.toHashSet()
+                        newMediaItems = relatedSongs
+                            .map { it.toMediaItem() }
+                            .filter { it.mediaId.isNotBlank() && existingIds.add(it.mediaId) }
+                            .take(10)
+                    }
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to load YouTube related songs for $seedId", e)
+                }
+            }
+
+            // 2. Si no se obtuvieron canciones online (modo offline, canción local, o error de red):
+            if (newMediaItems.isEmpty()) {
+                try {
+                    val existingIds = player.mediaItems.map { it.mediaId }.toHashSet()
+                    val allDbSongs = withContext(Dispatchers.IO) {
+                        database.allSongs().first()
+                    }
+                    val cachedKeys = (playerCache.keys.map { it.toString() } + downloadCache.keys.map { it.toString() }).toSet()
+                    val availableSongs = if (cachedKeys.isNotEmpty()) {
+                        val filtered = allDbSongs.filter { it.id in cachedKeys }
+                        if (filtered.isNotEmpty()) filtered else allDbSongs
+                    } else {
+                        allDbSongs
+                    }
+
+                    val unusedSongs = availableSongs.filter { existingIds.add(it.id) }
+                    if (unusedSongs.isNotEmpty()) {
+                        newMediaItems = unusedSongs.shuffled().take(10).map { it.toMediaItem() }
+                    } else if (availableSongs.isNotEmpty()) {
+                        // Todas las canciones estaban en la cola, volver a agregar para ciclar
+                        newMediaItems = availableSongs.filter { it.id != seedId }.shuffled().take(10).map { it.toMediaItem() }
+                        if (newMediaItems.isEmpty()) {
+                            newMediaItems = availableSongs.take(1).map { it.toMediaItem() }
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to load offline/cached songs for infinite queue", e)
+                }
+            }
+
+            if (newMediaItems.isNotEmpty() && player.playbackState != STATE_IDLE) {
+                val previousCount = player.mediaItemCount
+                player.addMediaItems(newMediaItems)
+                if (autoPlayIfEnded || player.playbackState == Player.STATE_ENDED) {
+                    player.seekToDefaultPosition(previousCount)
+                    player.prepare()
+                    player.play()
+                }
+            } else if (player.playbackState == Player.STATE_ENDED) {
+                // Si no hay más canciones disponibles, reiniciar desde el principio
+                if (player.mediaItemCount > 0) {
+                    player.seekToDefaultPosition(0)
+                    player.prepare()
+                    player.play()
+                }
+            }
         }
     }
 
@@ -1273,18 +1356,25 @@ class MusicService :
         // Resetear errores consecutivos cuando hay transición exitosa
         consecutivePlaybackErr = 0
 
-        // Auto cargar más canciones
-        if (dataStore.get(AutoLoadMoreKey, true) &&
-            reason != Player.MEDIA_ITEM_TRANSITION_REASON_REPEAT &&
-            player.mediaItemCount - player.currentMediaItemIndex <= 5 &&
-            currentQueue.hasNextPage() &&
-            !(dataStore.get(DisableLoadMoreWhenRepeatAllKey, false) && player.repeatMode == REPEAT_MODE_ALL)
-        ) {
-            scope.launch(SilentHandler) {
-                val mediaItems =
-                    currentQueue.nextPage().filterExplicit(dataStore.get(HideExplicitKey, false))
-                if (player.playbackState != STATE_IDLE) {
-                    player.addMediaItems(mediaItems.drop(1))
+        // Auto cargar más canciones / Endless Queue
+        val shouldExtendQueue =
+            dataStore.get(AutoLoadMoreKey, true) &&
+                reason != Player.MEDIA_ITEM_TRANSITION_REASON_REPEAT &&
+                player.mediaItemCount - player.currentMediaItemIndex <= 5 &&
+                !(dataStore.get(DisableLoadMoreWhenRepeatAllKey, false) && player.repeatMode == REPEAT_MODE_ALL)
+
+        if (shouldExtendQueue) {
+            if (currentQueue.hasNextPage()) {
+                scope.launch(SilentHandler) {
+                    val mediaItems =
+                        currentQueue.nextPage().filterExplicit(dataStore.get(HideExplicitKey, false))
+                    if (player.playbackState != STATE_IDLE && mediaItems.isNotEmpty()) {
+                        player.addMediaItems(mediaItems)
+                    }
+                }
+            } else {
+                mediaItem?.mediaId?.takeIf { it.isNotBlank() }?.let { seedId ->
+                    extendInfiniteQueue(seedId)
                 }
             }
         }
@@ -1309,12 +1399,50 @@ class MusicService :
             }
         }
 
-        // Cuando termina la reproducción, ocultar notificación si la cola está vacía
+        // Manejar cuando termina la reproducción para que nunca se detenga inesperadamente
         if (playbackState == Player.STATE_ENDED) {
+            // 1. Si el modo de repetición es REPEAT_MODE_ONE, reiniciar la misma canción
+            if (player.repeatMode == Player.REPEAT_MODE_ONE) {
+                player.seekTo(0)
+                player.prepare()
+                player.play()
+                return
+            }
+
+            // 2. Si el modo de repetición es REPEAT_MODE_ALL, volver al inicio de la cola
+            if (player.repeatMode == Player.REPEAT_MODE_ALL) {
+                if (player.mediaItemCount > 0) {
+                    player.seekToDefaultPosition(0)
+                    player.prepare()
+                    player.play()
+                    return
+                }
+            }
+
+            // 3. Si el modo aleatorio está activado, mezclar y reiniciar desde el inicio
+            if (player.shuffleModeEnabled && player.mediaItemCount > 0) {
+                val shuffledIndices = IntArray(player.mediaItemCount) { it }
+                shuffledIndices.shuffle()
+                player.setShuffleOrder(DefaultShuffleOrder(shuffledIndices, System.currentTimeMillis()))
+                player.seekToDefaultPosition(0)
+                player.prepare()
+                player.play()
+                return
+            }
+
+            // 4. Si Endless Queue (AutoLoadMore) está activado, cargar más canciones y continuar
+            if (dataStore.get(AutoLoadMoreKey, true)) {
+                val currentSeedId = player.currentMediaItem?.mediaId
+                if (!currentSeedId.isNullOrBlank()) {
+                    extendInfiniteQueue(currentSeedId, autoPlayIfEnded = true)
+                    return
+                }
+            }
+
+            // 5. Ocultar notificación si la cola está vacía
             scope.launch {
                 delay(1000)
                 if (!player.isPlaying && player.mediaItemCount == 0) {
-                    // Limpiar metadata para forzar actualización de notificación
                     currentMediaMetadata.value = null
                 }
             }

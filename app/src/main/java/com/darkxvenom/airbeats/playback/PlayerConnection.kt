@@ -401,6 +401,21 @@ class PlayerConnection(
                 player.seekToNext()
                 player.prepare()
                 player.playWhenReady = true
+            } else if (player.mediaItemCount > 0) {
+                if (player.repeatMode == Player.REPEAT_MODE_ALL || player.shuffleModeEnabled) {
+                    player.seekToDefaultPosition(0)
+                    player.prepare()
+                    player.playWhenReady = true
+                } else if (player.repeatMode == Player.REPEAT_MODE_ONE) {
+                    player.seekTo(0)
+                    player.prepare()
+                    player.playWhenReady = true
+                } else {
+                    val seedId = player.currentMediaItem?.mediaId
+                    if (!seedId.isNullOrBlank()) {
+                        service.extendInfiniteQueue(seedId, autoPlayIfEnded = true)
+                    }
+                }
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error seeking to next", e)
@@ -411,8 +426,16 @@ class PlayerConnection(
     fun seekToPrevious() {
         try {
             Log.d(TAG, "Seeking to previous track")
-            if (player.hasPreviousMediaItem()) {
+            if (player.hasPreviousMediaItem() && player.currentPosition < 3000) {
                 player.seekToPreviousMediaItem()
+                player.prepare()
+                player.playWhenReady = true
+            } else if (player.currentPosition > 3000) {
+                player.seekTo(0)
+                player.prepare()
+                player.playWhenReady = true
+            } else if (player.repeatMode == Player.REPEAT_MODE_ALL && player.mediaItemCount > 0) {
+                player.seekToDefaultPosition(player.mediaItemCount - 1)
                 player.prepare()
                 player.playWhenReady = true
             } else {
@@ -615,10 +638,14 @@ class PlayerConnection(
                 val canPrevious = player.isCommandAvailable(COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM) ||
                         !window.isLive ||
                         player.isCommandAvailable(COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM) ||
-                        player.currentPosition > 3000
+                        player.currentPosition > 3000 ||
+                        player.repeatMode == Player.REPEAT_MODE_ALL
 
                 val canNext = (window.isLive && window.isDynamic) ||
-                        player.isCommandAvailable(COMMAND_SEEK_TO_NEXT_MEDIA_ITEM)
+                        player.isCommandAvailable(COMMAND_SEEK_TO_NEXT_MEDIA_ITEM) ||
+                        player.repeatMode != Player.REPEAT_MODE_OFF ||
+                        player.mediaItemCount > 1 ||
+                        player.shuffleModeEnabled
 
                 _canSkipPrevious.value = canPrevious
                 _canSkipNext.value = canNext
