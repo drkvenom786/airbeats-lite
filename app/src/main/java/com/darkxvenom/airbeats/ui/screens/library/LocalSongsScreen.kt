@@ -196,7 +196,7 @@ fun LocalSongsScreen(
                                         val mediaItems = songs.map { it.toMediaItem() }
                                         pc.playQueue(
                                             ListQueue(
-                                                title = context.getString(R.string.local_songs),
+                                                title = context.getString(R.string.queue_all_songs),
                                                 items = mediaItems,
                                                 startIndex = index
                                             )
