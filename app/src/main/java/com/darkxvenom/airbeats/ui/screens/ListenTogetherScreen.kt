@@ -38,9 +38,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -52,7 +49,6 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -74,18 +70,13 @@ import coil.compose.AsyncImage
 import com.darkxvenom.airbeats.LocalPlayerAwareWindowInsets
 import com.darkxvenom.airbeats.LocalPlayerConnection
 import com.darkxvenom.airbeats.R
-import com.darkxvenom.airbeats.ui.component.BlurredBackground
 import com.darkxvenom.airbeats.ui.component.SettingsGlassCard
 import com.darkxvenom.airbeats.ui.component.SettingsTopAppBar
 import com.darkxvenom.airbeats.utils.LanTogetherClient
 import com.darkxvenom.airbeats.utils.LanTogetherServer
-import com.darkxvenom.airbeats.utils.ListenTogetherClient
-import com.darkxvenom.airbeats.utils.ListenTogetherConnectionMode
-import com.darkxvenom.airbeats.utils.ListenTogetherPlaybackState
 import com.darkxvenom.airbeats.utils.ListenTogetherSession
 import com.darkxvenom.airbeats.utils.ListenTogetherStore
 import com.darkxvenom.airbeats.utils.ListenTogetherSync
-import com.darkxvenom.airbeats.utils.joinByBullet
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -105,9 +96,7 @@ fun ListenTogetherScreen(
         ?: remember { mutableLongStateOf(0L) }
     val scope = rememberCoroutineScope()
 
-    var selectedMode by remember { mutableStateOf(ListenTogetherConnectionMode.ONLINE) }
     var displayName by remember { mutableStateOf(ListenTogetherStore.defaultName()) }
-    var joinCode by remember { mutableStateOf("") }
     var lanHostInput by remember { mutableStateOf("") }
     var lanPortInput by remember { mutableStateOf("8765") }
     var session by remember { mutableStateOf<ListenTogetherSession?>(null) }
@@ -119,13 +108,10 @@ fun ListenTogetherScreen(
 
     val syncedSession by ListenTogetherSync.session.collectAsState()
     val syncedIsHost by ListenTogetherSync.isHost.collectAsState()
-    val currentConnectionMode by ListenTogetherSync.connectionMode.collectAsState()
     val syncMessage by ListenTogetherSync.message.collectAsState()
 
     var localIp by remember { mutableStateOf<String?>(null) }
 
-    val sessionCreatedMessage = stringResource(R.string.session_created)
-    val joinedSessionMessage = stringResource(R.string.joined_session)
     val leftSessionMessage = stringResource(R.string.left_session)
     val listenTogetherCodeLabel = stringResource(R.string.listen_together_code)
 
@@ -134,13 +120,7 @@ fun ListenTogetherScreen(
         val savedSession = ListenTogetherStore.load(context) ?: return@LaunchedEffect
         displayName = savedSession.displayName
         isHost = savedSession.isHost
-        if (savedSession.isLan) {
-            selectedMode = ListenTogetherConnectionMode.LAN
-            lanHostInput = savedSession.hostAddress ?: savedSession.code
-        } else {
-            selectedMode = ListenTogetherConnectionMode.ONLINE
-            joinCode = savedSession.code
-        }
+        lanHostInput = savedSession.hostAddress ?: savedSession.code
     }
 
     LaunchedEffect(syncedSession, syncedIsHost) {
@@ -150,253 +130,54 @@ fun ListenTogetherScreen(
         }
     }
 
-    LaunchedEffect(currentConnectionMode) {
-        if (session != null) {
-            selectedMode = currentConnectionMode
-        }
-    }
-
     LaunchedEffect(syncMessage) {
         syncMessage?.let { message = it }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        BlurredBackground(
-            model = mediaMetadata?.thumbnailUrl
-        )
-
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            containerColor = Color.Transparent,
-            topBar = {
-                SettingsTopAppBar(
-                    title = stringResource(R.string.listen_together),
-                    navController = navController,
-                    scrollBehavior = scrollBehavior
-                )
-            }
-        ) { paddingValues ->
-            Column(
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .windowInsetsPadding(
-                        LocalPlayerAwareWindowInsets.current.only(
-                            WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom
-                        )
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            SettingsTopAppBar(
+                title = stringResource(R.string.listen_together),
+                navController = navController,
+                scrollBehavior = scrollBehavior
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .windowInsetsPadding(
+                    LocalPlayerAwareWindowInsets.current.only(
+                        WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom
                     )
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-            ) {
-                // Mode Selector: Online vs LAN / Wi-Fi
-                SingleChoiceSegmentedButtonRow(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    SegmentedButton(
-                        selected = selectedMode == ListenTogetherConnectionMode.ONLINE,
-                        onClick = { selectedMode = ListenTogetherConnectionMode.ONLINE },
-                        shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
-                        icon = {
-                            Icon(
-                                painter = painterResource(R.drawable.search),
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-                    ) {
-                        Text(stringResource(R.string.together_online))
-                    }
-
-                    SegmentedButton(
-                        selected = selectedMode == ListenTogetherConnectionMode.LAN,
-                        onClick = {
-                            selectedMode = ListenTogetherConnectionMode.LAN
-                            if (localIp.isNullOrBlank()) {
-                                localIp = LanTogetherServer.getLocalIpAddress(context)
-                            }
-                        },
-                        shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
-                        icon = {
-                            Icon(
-                                painter = painterResource(R.drawable.wifi_proxy),
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-                    ) {
-                        Text(stringResource(R.string.together_lan))
-                    }
-                }
-
-                Text(
-                    text = if (selectedMode == ListenTogetherConnectionMode.LAN) {
-                        stringResource(R.string.together_lan_description)
-                    } else {
-                        stringResource(R.string.listen_together_description)
-                    },
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 4.dp)
                 )
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.together_lan_description),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 4.dp)
+            )
 
-                // Active Session Card
-                CurrentSessionCard(
-                    session = session,
-                    isHost = isHost,
-                    isLan = currentConnectionMode == ListenTogetherConnectionMode.LAN,
-                    songTitle = mediaMetadata?.title ?: session?.state?.title,
-                    subtitle = mediaMetadata?.artists?.joinToString { it.name }
-                        ?: session?.state?.artists?.joinToString(),
-                    thumbnailUrl = mediaMetadata?.thumbnailUrl ?: session?.state?.thumbnailUrl,
-                    isPlaying = isPlaying,
-                )
+            // Active Session Card
+            CurrentSessionCard(
+                session = session,
+                isHost = isHost,
+                isLan = true,
+                songTitle = mediaMetadata?.title ?: session?.state?.title,
+                subtitle = mediaMetadata?.artists?.joinToString { it.name }
+                    ?: session?.state?.artists?.joinToString(),
+                thumbnailUrl = mediaMetadata?.thumbnailUrl ?: session?.state?.thumbnailUrl,
+                isPlaying = isPlaying,
+            )
 
-                if (selectedMode == ListenTogetherConnectionMode.ONLINE) {
-                    // ONLINE: Host Card
-                    SettingsGlassCard(modifier = Modifier.fillMaxWidth()) {
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                            modifier = Modifier.padding(18.dp)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.create_session),
-                                style = MaterialTheme.typography.titleSmall.copy(
-                                    fontWeight = FontWeight.SemiBold,
-                                    letterSpacing = 0.5.sp
-                                ),
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
-                            )
-
-                            OutlinedTextField(
-                                value = displayName,
-                                onValueChange = { displayName = it },
-                                label = { Text(stringResource(R.string.display_name)) },
-                                singleLine = true,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-
-                            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                                Button(
-                                    enabled = !isLoading && mediaMetadata != null,
-                                    onClick = {
-                                        val metadata = mediaMetadata ?: return@Button
-                                        isLoading = true
-                                        scope.launch {
-                                            try {
-                                                session = ListenTogetherClient.createSession(
-                                                    displayName = displayName,
-                                                    state = ListenTogetherPlaybackState(
-                                                        songId = metadata.id,
-                                                        title = metadata.title,
-                                                        artists = metadata.artists.map { it.name },
-                                                        thumbnailUrl = metadata.thumbnailUrl,
-                                                        positionMs = currentPosition,
-                                                        isPlaying = isPlaying,
-                                                    )
-                                                )
-                                                isHost = true
-                                                session?.let {
-                                                    ListenTogetherSync.adoptSession(
-                                                        context = context,
-                                                        session = it,
-                                                        displayName = displayName,
-                                                        isHost = true,
-                                                        isLan = false
-                                                    )
-                                                }
-                                                message = sessionCreatedMessage
-                                            } catch (e: Exception) {
-                                                message = e.message
-                                            } finally {
-                                                isLoading = false
-                                            }
-                                        }
-                                    },
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Text(stringResource(R.string.create_session))
-                                }
-
-                                OutlinedButton(
-                                    enabled = session?.joinUrl?.isNotBlank() == true,
-                                    onClick = {
-                                        val shareText = session?.joinUrl?.takeIf { it.isNotBlank() } ?: session?.code.orEmpty()
-                                        context.startActivity(
-                                            Intent.createChooser(
-                                                Intent(Intent.ACTION_SEND).apply {
-                                                    type = "text/plain"
-                                                    putExtra(Intent.EXTRA_TEXT, shareText)
-                                                },
-                                                null
-                                            )
-                                        )
-                                    },
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Text(stringResource(R.string.share))
-                                }
-                            }
-                        }
-                    }
-
-                    // ONLINE: Join Card
-                    SettingsGlassCard(modifier = Modifier.fillMaxWidth()) {
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                            modifier = Modifier.padding(18.dp)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.join_session),
-                                style = MaterialTheme.typography.titleSmall.copy(
-                                    fontWeight = FontWeight.SemiBold,
-                                    letterSpacing = 0.5.sp
-                                ),
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
-                            )
-
-                            OutlinedTextField(
-                                value = joinCode,
-                                onValueChange = { joinCode = it.uppercase() },
-                                label = { Text(stringResource(R.string.session_code)) },
-                                singleLine = true,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-
-                            Button(
-                                enabled = !isLoading && joinCode.isNotBlank(),
-                                onClick = {
-                                    isLoading = true
-                                    scope.launch {
-                                        try {
-                                            session = ListenTogetherClient.joinSession(joinCode, displayName)
-                                            isHost = false
-                                            session?.let {
-                                                ListenTogetherSync.adoptSession(
-                                                    context = context,
-                                                    session = it,
-                                                    displayName = displayName,
-                                                    isHost = false,
-                                                    isLan = false
-                                                )
-                                            }
-                                            message = joinedSessionMessage
-                                        } catch (e: Exception) {
-                                            message = e.message
-                                        } finally {
-                                            isLoading = false
-                                        }
-                                    }
-                                },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(stringResource(R.string.join_session))
-                            }
-                        }
-                    }
-                } else {
-                    // LAN / Wi-Fi: Host Card
-                    SettingsGlassCard(modifier = Modifier.fillMaxWidth()) {
+            // LAN / Wi-Fi: Host Card
+            SettingsGlassCard(modifier = Modifier.fillMaxWidth()) {
                         Column(
                             verticalArrangement = Arrangement.spacedBy(12.dp),
                             modifier = Modifier.padding(18.dp)
@@ -485,210 +266,206 @@ fun ListenTogetherScreen(
                         }
                     }
 
-                    // LAN / Wi-Fi: Join Card
-                    SettingsGlassCard(modifier = Modifier.fillMaxWidth()) {
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                            modifier = Modifier.padding(18.dp)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.together_join_lan),
-                                style = MaterialTheme.typography.titleSmall.copy(
-                                    fontWeight = FontWeight.SemiBold,
-                                    letterSpacing = 0.5.sp
-                                ),
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
-                            )
+            // LAN / Wi-Fi: Join Card
+            SettingsGlassCard(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.padding(18.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.together_join_lan),
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = 0.5.sp
+                        ),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
+                    )
 
-                            OutlinedTextField(
-                                value = lanHostInput,
-                                onValueChange = { lanHostInput = it },
-                                label = { Text(stringResource(R.string.together_host_ip)) },
-                                placeholder = { Text(stringResource(R.string.together_host_ip_hint)) },
-                                singleLine = true,
-                                modifier = Modifier.fillMaxWidth()
-                            )
+                    OutlinedTextField(
+                        value = lanHostInput,
+                        onValueChange = { lanHostInput = it },
+                        label = { Text(stringResource(R.string.together_host_ip)) },
+                        placeholder = { Text(stringResource(R.string.together_host_ip_hint)) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
-                            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                                OutlinedButton(
-                                    enabled = !isScanningLan,
-                                    onClick = {
-                                        isScanningLan = true
-                                        scope.launch {
-                                            try {
-                                                val ip = localIp ?: LanTogetherServer.getLocalIpAddress(context)
-                                                if (ip.isNullOrBlank()) {
-                                                    message = "Connect to Wi-Fi first"
-                                                    return@launch
-                                                }
-                                                message = context.getString(R.string.together_searching_lan)
-                                                val found = LanTogetherClient.scanLocalNetwork(localIp = ip, port = 8765, context = context)
-                                                discoveredHosts = found
-                                                if (found.isNotEmpty()) {
-                                                    lanHostInput = found.first().address
-                                                    message = "Found ${found.size} host(s) on Wi-Fi"
-                                                } else {
-                                                    message = context.getString(R.string.together_no_hosts_found)
-                                                }
-                                            } catch (e: Exception) {
-                                                message = e.message
-                                            } finally {
-                                                isScanningLan = false
-                                            }
-                                        }
-                                    },
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    if (isScanningLan) {
-                                        CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
-                                    } else {
-                                        Text(stringResource(R.string.together_scan_lan))
-                                    }
-                                }
-
-                                Button(
-                                    enabled = !isLoading && lanHostInput.isNotBlank(),
-                                    onClick = {
-                                        isLoading = true
-                                        ListenTogetherSync.setDisplayName(displayName)
-                                        ListenTogetherSync.joinLanSession(lanHostInput)
-                                        isLoading = false
-                                    },
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Text(stringResource(R.string.together_join_lan))
-                                }
-                            }
-
-                            // Discovered Hosts List
-                            AnimatedVisibility(visible = discoveredHosts.isNotEmpty()) {
-                                Column(
-                                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Text(
-                                        text = "AVAILABLE HOSTS (${discoveredHosts.size})",
-                                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                    discoveredHosts.forEach { host ->
-                                        Surface(
-                                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                            shape = RoundedCornerShape(12.dp),
-                                            modifier = Modifier.fillMaxWidth()
-                                        ) {
-                                            Row(
-                                                modifier = Modifier.padding(12.dp),
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.SpaceBetween
-                                            ) {
-                                                Row(
-                                                    verticalAlignment = Alignment.CenterVertically,
-                                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                                    modifier = Modifier.weight(1f)
-                                                ) {
-                                                    Surface(
-                                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                                                        shape = CircleShape,
-                                                        modifier = Modifier.size(36.dp)
-                                                    ) {
-                                                        Box(contentAlignment = Alignment.Center) {
-                                                            Icon(
-                                                                painter = painterResource(R.drawable.wifi_proxy),
-                                                                contentDescription = null,
-                                                                modifier = Modifier.size(18.dp),
-                                                                tint = MaterialTheme.colorScheme.primary
-                                                            )
-                                                        }
-                                                    }
-                                                    Column {
-                                                        Text(
-                                                            text = host.hostName,
-                                                            style = MaterialTheme.typography.bodyMedium,
-                                                            fontWeight = FontWeight.SemiBold,
-                                                            maxLines = 1,
-                                                            overflow = TextOverflow.Ellipsis
-                                                        )
-                                                        Text(
-                                                            text = "${host.address} • ${host.participants} in room",
-                                                            style = MaterialTheme.typography.labelSmall,
-                                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                        )
-                                                    }
-                                                }
-                                                Button(
-                                                    onClick = {
-                                                        lanHostInput = host.address
-                                                        isLoading = true
-                                                        ListenTogetherSync.setDisplayName(displayName)
-                                                        ListenTogetherSync.joinLanSession(host.address)
-                                                        isLoading = false
-                                                    },
-                                                    shape = RoundedCornerShape(8.dp)
-                                                ) {
-                                                    Text("Join")
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // Active Session Controls
-                session?.let { activeSession ->
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         OutlinedButton(
+                            enabled = !isScanningLan,
                             onClick = {
-                                clipboardManager.setText(AnnotatedString(activeSession.code))
-                                message = context.getString(R.string.session_code_copied)
-                            },
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text(stringResource(R.string.copy_session_code))
-                        }
-                        OutlinedButton(
-                            onClick = {
-                                ListenTogetherSync.leaveSession()
-                                session = null
-                                isHost = false
-                                message = leftSessionMessage
-                            },
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text(stringResource(R.string.leave_session))
-                        }
-                    }
-
-                    if (currentConnectionMode == ListenTogetherConnectionMode.LAN) {
-                        OutlinedButton(
-                            onClick = {
-                                runCatching {
-                                    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("http://${activeSession.code}"))
-                                    context.startActivity(browserIntent)
-                                }.onFailure {
-                                    message = "Could not open browser: ${it.message}"
+                                isScanningLan = true
+                                scope.launch {
+                                    try {
+                                        val ip = localIp ?: LanTogetherServer.getLocalIpAddress(context)
+                                        if (ip.isNullOrBlank()) {
+                                            message = "Connect to Wi-Fi first"
+                                            return@launch
+                                        }
+                                        message = context.getString(R.string.together_searching_lan)
+                                        val found = LanTogetherClient.scanLocalNetwork(localIp = ip, port = 8765, context = context)
+                                        discoveredHosts = found
+                                        if (found.isNotEmpty()) {
+                                            lanHostInput = found.first().address
+                                            message = "Found ${found.size} host(s) on Wi-Fi"
+                                        } else {
+                                            message = context.getString(R.string.together_no_hosts_found)
+                                        }
+                                    } catch (e: Exception) {
+                                        message = e.message
+                                    } finally {
+                                        isScanningLan = false
+                                    }
                                 }
                             },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.weight(1f)
                         ) {
-                            Text("Open Web Player (http://${activeSession.code})")
+                            if (isScanningLan) {
+                                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                            } else {
+                                Text(stringResource(R.string.together_scan_lan))
+                            }
+                        }
+
+                        Button(
+                            enabled = !isLoading && lanHostInput.isNotBlank(),
+                            onClick = {
+                                isLoading = true
+                                ListenTogetherSync.setDisplayName(displayName)
+                                ListenTogetherSync.joinLanSession(lanHostInput)
+                                isLoading = false
+                            },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(stringResource(R.string.together_join_lan))
                         }
                     }
 
-                    ParticipantsSection(activeSession)
+                    // Discovered Hosts List
+                    AnimatedVisibility(visible = discoveredHosts.isNotEmpty()) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = "AVAILABLE HOSTS (${discoveredHosts.size})",
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            discoveredHosts.forEach { host ->
+                                Surface(
+                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                    shape = RoundedCornerShape(12.dp),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(12.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                            modifier = Modifier.weight(1f)
+                                        ) {
+                                            Surface(
+                                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                                                shape = CircleShape,
+                                                modifier = Modifier.size(36.dp)
+                                            ) {
+                                                Box(contentAlignment = Alignment.Center) {
+                                                    Icon(
+                                                        painter = painterResource(R.drawable.wifi_proxy),
+                                                        contentDescription = null,
+                                                        modifier = Modifier.size(18.dp),
+                                                        tint = MaterialTheme.colorScheme.primary
+                                                    )
+                                                }
+                                            }
+                                            Column {
+                                                Text(
+                                                    text = host.hostName,
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    fontWeight = FontWeight.SemiBold,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                                Text(
+                                                    text = "${host.address} • ${host.participants} in room",
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                        }
+                                        Button(
+                                            onClick = {
+                                                lanHostInput = host.address
+                                                isLoading = true
+                                                ListenTogetherSync.setDisplayName(displayName)
+                                                ListenTogetherSync.joinLanSession(host.address)
+                                                isLoading = false
+                                            },
+                                            shape = RoundedCornerShape(8.dp)
+                                        ) {
+                                            Text("Join")
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Active Session Controls
+            session?.let { activeSession ->
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OutlinedButton(
+                        onClick = {
+                            clipboardManager.setText(AnnotatedString(activeSession.code))
+                            message = context.getString(R.string.session_code_copied)
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(stringResource(R.string.copy_session_code))
+                    }
+                    OutlinedButton(
+                        onClick = {
+                            ListenTogetherSync.leaveSession()
+                            session = null
+                            isHost = false
+                            message = leftSessionMessage
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(stringResource(R.string.leave_session))
+                    }
                 }
 
-                message?.let {
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(horizontal = 4.dp)
-                    )
+                OutlinedButton(
+                    onClick = {
+                        runCatching {
+                            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("http://${activeSession.code}"))
+                            context.startActivity(browserIntent)
+                        }.onFailure {
+                            message = "Could not open browser: ${it.message}"
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Open Web Player (http://${activeSession.code})")
                 }
+
+                ParticipantsSection(activeSession)
+            }
+
+            message?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(horizontal = 4.dp)
+                )
             }
         }
     }
@@ -833,13 +610,13 @@ private fun CurrentSessionCard(
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         ) {
                             Icon(
-                                painter = painterResource(if (isLan) R.drawable.wifi_proxy else R.drawable.search),
+                                painter = painterResource(R.drawable.wifi_proxy),
                                 contentDescription = null,
                                 modifier = Modifier.size(12.dp),
                                 tint = MaterialTheme.colorScheme.primary
                             )
                             Text(
-                                text = if (isLan) "LAN / Wi-Fi" else "Online",
+                                text = "LAN / Wi-Fi",
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary

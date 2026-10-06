@@ -932,6 +932,7 @@
     <string name="together_join_lan">Join Wi-Fi Session</string>
     <string name="together_host_ip">Host IP Address</string>
     <string name="together_host_ip_hint">e.g. 192.168.1.5</string>
+    <string name="together_local_ip">Your Local IP: %1$s</string>
     <string name="together_searching_lan">Searching for nearby hosts…</string>
     <string name="together_no_hosts_found">No nearby hosts found</string>
     <string name="together_scan_lan">Scan Network</string>

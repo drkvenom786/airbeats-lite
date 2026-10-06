@@ -498,7 +498,7 @@ private fun SuccessContent(
                                 overflow = TextOverflow.Ellipsis
                             )
                             Text(
-                                text = candidate.artists.joinToString(", "),
+                                text = candidate.artist,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 1,

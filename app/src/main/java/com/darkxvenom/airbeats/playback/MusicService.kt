@@ -1825,7 +1825,7 @@ class MusicService :
         val spotifyMatchCache = HashMap<String, String>()
         
         return ResolvingDataSource.Factory(createCacheDataSource()) { dataSpec ->
-            if (dataSpec.uri.scheme == "content" || dataSpec.uri.scheme == "file") {
+            if (dataSpec.uri.scheme == "content" || dataSpec.uri.scheme == "file" || dataSpec.uri.scheme == "http" || dataSpec.uri.scheme == "https") {
                 return@Factory dataSpec
             }
             
@@ -2218,6 +2218,79 @@ class MusicService :
             instance = null
         }
         super.onDestroy()
+    }
+
+    suspend fun resolveAudioStreamForCast(mediaId: String): com.darkxvenom.airbeats.utils.ResolvedCastStream? {
+        val localUri = withContext(Dispatchers.Main) {
+            player.currentMediaItem?.takeIf { it.mediaId == mediaId }?.localConfiguration?.uri
+                ?: (0 until player.mediaItemCount).map { player.getMediaItemAt(it) }
+                    .find { it.mediaId == mediaId }?.localConfiguration?.uri
+        }
+        if (localUri != null && (localUri.scheme == "content" || localUri.scheme == "file")) {
+            val detectedMime = runCatching {
+                if (localUri.scheme == "content") contentResolver.getType(localUri)
+                else null
+            }.getOrNull()?.takeIf { it.isNotBlank() } ?: "audio/mpeg"
+            return com.darkxvenom.airbeats.utils.ResolvedCastStream(
+                url = localUri.toString(),
+                mimeType = detectedMime
+            )
+        }
+        if (mediaId.startsWith("content://") || mediaId.startsWith("file://")) {
+            val uri = android.net.Uri.parse(mediaId)
+            val detectedMime = runCatching {
+                if (uri.scheme == "content") contentResolver.getType(uri)
+                else null
+            }.getOrNull()?.takeIf { it.isNotBlank() } ?: "audio/mpeg"
+            return com.darkxvenom.airbeats.utils.ResolvedCastStream(
+                url = mediaId,
+                mimeType = detectedMime
+            )
+        }
+
+        var actualMediaId = mediaId
+
+        if (mediaId.startsWith("JS:")) {
+            try {
+                val streamUrl = withContext(Dispatchers.IO) {
+                    com.darkxvenom.airbeats.jiosaavn.JioSaavnApi.getStreamUrl(mediaId)
+                }
+                if (streamUrl != null) {
+                    return com.darkxvenom.airbeats.utils.ResolvedCastStream(url = streamUrl, mimeType = "audio/mp4")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Cast: JioSaavn stream fetching error for $mediaId", e)
+            }
+        }
+
+        try {
+            val playbackData = withContext(Dispatchers.IO) {
+                com.darkxvenom.airbeats.utils.YTPlayerUtils.playerResponseForPlayback(
+                    actualMediaId,
+                    audioQuality = audioQuality,
+                    connectivityManager = connectivityManager
+                )
+            }.getOrNull()
+
+            if (playbackData != null) {
+                val clientParam = android.net.Uri.parse(playbackData.streamUrl).getQueryParameter("c")?.trim().orEmpty()
+                val userAgent = com.darkxvenom.airbeats.utils.StreamClientUtils.resolveUserAgent(clientParam)
+                val originReferer = com.darkxvenom.airbeats.utils.StreamClientUtils.resolveOriginReferer(clientParam)
+                val headers = mutableMapOf<String, String>("User-Agent" to userAgent)
+                originReferer.origin?.let { headers["Origin"] = it }
+                originReferer.referer?.let { headers["Referer"] = it }
+
+                return com.darkxvenom.airbeats.utils.ResolvedCastStream(
+                    url = playbackData.streamUrl,
+                    mimeType = playbackData.format.mimeType.split(";")[0],
+                    requestHeaders = headers
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Cast: YouTube playback resolution failed for $mediaId", e)
+        }
+
+        return null
     }
 
     override fun onBind(intent: Intent?) = super.onBind(intent) ?: binder

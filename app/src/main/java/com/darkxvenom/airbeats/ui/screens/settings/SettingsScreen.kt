@@ -767,8 +767,16 @@ fun SettingsScreen(
                                 },
                                 onClick = { navController.navigate("settings/player") }
                             ),
-                            
-                            
+                            SettingsCategoryItem(
+                                icon = painterResource(R.drawable.group),
+                                title = {
+                                    Text(
+                                        stringResource(R.string.listen_together),
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                },
+                                onClick = { navController.navigate("listen_together") }
+                            ),
                             SettingsCategoryItem(
                                 icon = painterResource(R.drawable.storage),
                                 title = {

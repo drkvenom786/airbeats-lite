@@ -513,7 +513,7 @@ class MainActivity : ComponentActivity() {
                             val (previousTab) = rememberSaveable { mutableStateOf("home") }
 
                             val navigationItems = remember { 
-                                listOf(Screens.Home, Screens.Explore, Screens.Library)
+                                listOf(Screens.Home, Screens.Search, Screens.Explore, Screens.Library)
                             }
                             val (slimNav) = rememberPreference(SlimNavBarKey, defaultValue = false)
                             val defaultOpenTab by rememberEnumPreference(
@@ -532,6 +532,7 @@ class MainActivity : ComponentActivity() {
                             val topLevelScreens =
                                 listOf(
                                     Screens.Home.route,
+                                    Screens.Search.route,
                                     Screens.Explore.route,
                                     Screens.Library.route,
                                 )
@@ -1314,7 +1315,7 @@ class MainActivity : ComponentActivity() {
                                             ) searchBarScrollBehavior else topAppBarScrollBehavior,
                                             latestVersionName = latestVersionName,
                                             playerBottomSheetState = playerBottomSheetState,
-                                            onSearchClick = { navController.navigate("search/") }
+                                            onSearchClick = { navController.navigate(Screens.Search.route) }
                                         )
                                     }
                                     }

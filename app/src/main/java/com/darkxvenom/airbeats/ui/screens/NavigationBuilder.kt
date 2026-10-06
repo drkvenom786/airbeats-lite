@@ -151,7 +151,7 @@ fun NavGraphBuilder.navigationBuilder(
         popEnterTransition = fadePopEnterTransition,
         popExitTransition = fadePopExitTransition,
     ) {
-        SpotifySearchScreen(navController = navController)
+        com.darkxvenom.airbeats.ui.screens.material.MaterialSearchScreen(navController = navController)
     }
 
     composable(
@@ -161,7 +161,7 @@ fun NavGraphBuilder.navigationBuilder(
         popEnterTransition = fadePopEnterTransition,
         popExitTransition = fadePopExitTransition,
     ) {
-        SpotifySearchScreen(navController = navController)
+        com.darkxvenom.airbeats.ui.screens.material.MaterialSearchScreen(navController = navController)
     }
 
     composable(

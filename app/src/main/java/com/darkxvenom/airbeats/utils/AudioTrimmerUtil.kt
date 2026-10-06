@@ -113,6 +113,7 @@ object AudioTrimmerUtil {
             val artistName = mediaMetadata.artists.firstOrNull()?.name.orEmpty()
             if (resolvedStreamUrl == null) {
                 val isJioSaavnTrack = mediaMetadata.id.startsWith("JS:")
+                val isYouTubeTrack = !isJioSaavnTrack && !mediaMetadata.id.startsWith("sp:") && !mediaMetadata.id.startsWith("spotify:")
 
                 suspend fun tryJioSaavn(): String? {
                     return if (isJioSaavnTrack) {

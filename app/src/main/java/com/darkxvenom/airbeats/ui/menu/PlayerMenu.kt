@@ -84,12 +84,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.graphics.rememberGraphicsLayer
-import com.darkxvenom.airbeats.ui.component.LocalBackdrop
-import com.darkxvenom.airbeats.ui.component.drawBackdropCustomShape
-import com.darkxvenom.airbeats.constants.LiquidGlassKey
-import com.darkxvenom.airbeats.utils.rememberPreference
-import androidx.compose.animation.core.Animatable
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.net.toUri
@@ -114,6 +108,8 @@ import com.darkxvenom.airbeats.playback.queues.YouTubeQueue
 import com.darkxvenom.airbeats.ui.component.BottomSheetState
 import com.darkxvenom.airbeats.ui.component.ListDialog
 import com.darkxvenom.airbeats.ui.component.ListItem
+import androidx.compose.material3.FilterChip
+import com.darkxvenom.airbeats.utils.LanTogetherServer
 import com.darkxvenom.airbeats.utils.ListenTogetherClient
 import com.darkxvenom.airbeats.utils.ListenTogetherPlaybackState
 import com.darkxvenom.airbeats.utils.ListenTogetherSession
@@ -643,7 +639,9 @@ fun PlayerMenu(
                             leadingContent = { Icon(painterResource(R.drawable.group), contentDescription = null) },
                             colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = Color.Transparent),
                             modifier = Modifier.clickable {
-                                showListenTogetherSheet = true
+                                navController.navigate("listen_together")
+                                playerBottomSheetState.collapseSoft()
+                                onDismiss()
                             }
                         )
                     }
@@ -799,6 +797,8 @@ private fun InPlayerListenTogetherSheet(onDismiss: () -> Unit) {
 
     var displayName by rememberSaveable { mutableStateOf(syncedDisplayName) }
     var joinCode by rememberSaveable { mutableStateOf("") }
+    var lanHostInput by rememberSaveable { mutableStateOf("") }
+    var isLanMode by rememberSaveable { mutableStateOf(false) }
     var message by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(syncedDisplayName) {
@@ -829,6 +829,24 @@ private fun InPlayerListenTogetherSheet(onDismiss: () -> Unit) {
                 mediaMetadata = mediaMetadata,
             )
 
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FilterChip(
+                    selected = !isLanMode,
+                    onClick = { isLanMode = false },
+                    label = { Text(stringResource(R.string.together_online)) },
+                    modifier = Modifier.weight(1f)
+                )
+                FilterChip(
+                    selected = isLanMode,
+                    onClick = { isLanMode = true },
+                    label = { Text(stringResource(R.string.together_lan)) },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
             OutlinedTextField(
                 value = displayName,
                 onValueChange = {
@@ -840,56 +858,120 @@ private fun InPlayerListenTogetherSheet(onDismiss: () -> Unit) {
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            if (isLanMode) {
+                val localIp = remember { LanTogetherServer.getLocalIpAddress(context) }
+                if (!localIp.isNullOrBlank()) {
+                    Text(
+                        text = stringResource(R.string.together_local_ip, localIp),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Button(
+                        enabled = mediaMetadata != null,
+                        onClick = {
+                            ListenTogetherSync.setDisplayName(displayName)
+                            ListenTogetherSync.startLanHost()
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(stringResource(R.string.together_host_lan))
+                    }
+
+                    OutlinedButton(
+                        enabled = session?.joinUrl?.isNotBlank() == true,
+                        onClick = {
+                            val activeSession = session ?: return@OutlinedButton
+                            val shareText = "http://${activeSession.code}"
+                            context.startActivity(
+                                Intent.createChooser(
+                                    Intent(Intent.ACTION_SEND).apply {
+                                        type = "text/plain"
+                                        putExtra(Intent.EXTRA_TEXT, shareText)
+                                    },
+                                    null
+                                )
+                            )
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(stringResource(R.string.share))
+                    }
+                }
+
+                OutlinedTextField(
+                    value = lanHostInput,
+                    onValueChange = { lanHostInput = it },
+                    label = { Text(stringResource(R.string.together_host_ip)) },
+                    placeholder = { Text(stringResource(R.string.together_host_ip_hint)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
                 Button(
-                    enabled = mediaMetadata != null,
+                    enabled = lanHostInput.isNotBlank(),
                     onClick = {
                         ListenTogetherSync.setDisplayName(displayName)
-                        ListenTogetherSync.createSession()
+                        ListenTogetherSync.joinLanSession(lanHostInput)
                     },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(stringResource(R.string.create_session))
+                    Text(stringResource(R.string.together_join_lan))
                 }
+            } else {
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Button(
+                        enabled = mediaMetadata != null,
+                        onClick = {
+                            ListenTogetherSync.setDisplayName(displayName)
+                            ListenTogetherSync.createSession()
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(stringResource(R.string.create_session))
+                    }
 
-                OutlinedButton(
-                    enabled = session?.joinUrl?.isNotBlank() == true,
-                    onClick = {
-                        val activeSession = session ?: return@OutlinedButton
-                        val shareText = "${activeSession.joinUrl}\n$listenTogetherCodeLabel: ${activeSession.code}"
-                        context.startActivity(
-                            Intent.createChooser(
-                                Intent(Intent.ACTION_SEND).apply {
-                                    type = "text/plain"
-                                    putExtra(Intent.EXTRA_TEXT, shareText)
-                                },
-                                null
+                    OutlinedButton(
+                        enabled = session?.joinUrl?.isNotBlank() == true,
+                        onClick = {
+                            val activeSession = session ?: return@OutlinedButton
+                            val shareText = "${activeSession.joinUrl}\n$listenTogetherCodeLabel: ${activeSession.code}"
+                            context.startActivity(
+                                Intent.createChooser(
+                                    Intent(Intent.ACTION_SEND).apply {
+                                        type = "text/plain"
+                                        putExtra(Intent.EXTRA_TEXT, shareText)
+                                    },
+                                    null
+                                )
                             )
-                        )
-                    },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(stringResource(R.string.share))
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(stringResource(R.string.share))
+                    }
                 }
-            }
 
-            OutlinedTextField(
-                value = joinCode,
-                onValueChange = { joinCode = it.uppercase() },
-                label = { Text(stringResource(R.string.session_code)) },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
-            )
+                OutlinedTextField(
+                    value = joinCode,
+                    onValueChange = { joinCode = it.uppercase() },
+                    label = { Text(stringResource(R.string.session_code)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-            Button(
-                enabled = joinCode.isNotBlank(),
-                onClick = {
-                    ListenTogetherSync.setDisplayName(displayName)
-                    ListenTogetherSync.joinSession(joinCode)
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringResource(R.string.join_session))
+                Button(
+                    enabled = joinCode.isNotBlank(),
+                    onClick = {
+                        ListenTogetherSync.setDisplayName(displayName)
+                        ListenTogetherSync.joinSession(joinCode)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.join_session))
+                }
             }
 
             session?.let { activeSession ->
@@ -1008,10 +1090,6 @@ private fun ListenTogetherStatusCard(
 internal fun InAppEqualizerSheet(onDismiss: () -> Unit) {
     val playerConnection = LocalPlayerConnection.current ?: return
     val equalizerState by playerConnection.service.equalizerState.collectAsState()
-    val (enableLiquidGlass) = rememberPreference(LiquidGlassKey, false)
-    val backdrop = LocalBackdrop.current
-    val layer = rememberGraphicsLayer()
-    val luminanceAnimation = remember { Animatable(0.3f) }
 
     LaunchedEffect(Unit) {
         playerConnection.service.ensureEqualizer()
@@ -1020,8 +1098,6 @@ internal fun InAppEqualizerSheet(onDismiss: () -> Unit) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = if (enableLiquidGlass && backdrop != null) Color.Transparent else MaterialTheme.colorScheme.surface,
-        modifier = Modifier.then(if (enableLiquidGlass && backdrop != null) { Modifier.drawBackdropCustomShape(backdrop = backdrop, layer = layer, luminanceAnimation = luminanceAnimation.value, shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)) } else Modifier),
         dragHandle = {
             Box(
                 modifier = Modifier
