@@ -370,6 +370,15 @@ class PlayerConnection(
         }
     }
 
+    fun removeSongFromQueue(songId: String) {
+        try {
+            service.removeSongFromQueue(songId)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error removing song from queue: $songId", e)
+            reportException(e)
+        }
+    }
+
     fun toggleLike() {
         try {
             Timber.tag(TAG).d("Toggling like for current track. Current state: ${_isLiked.value}")
@@ -561,6 +570,12 @@ class PlayerConnection(
         _mediaMetadata.value = mediaItem?.metadata
         _currentMediaItemIndex.value = player.currentMediaItemIndex
         _currentWindowIndex.value = player.getCurrentQueueIndex()
+        _currentPosition.value = 0L
+        val dur = mediaItem?.metadata?.duration?.times(1000L) ?: 0L
+        if (dur > 0) {
+            _duration.value = dur
+        }
+        lastPosition = 0L
 
         // Actualizar estado de like cuando cambia la canción
         CoroutineScope(Dispatchers.IO).launch {

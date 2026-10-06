@@ -697,7 +697,8 @@ fun SettingsScreen(
             )
 
             {
-                // Add a small top padding to separate from header
+                // Add top padding to send content below header/title
+                Spacer(modifier = Modifier.height(28.dp))
 
                 val context = LocalContext.current
                 val avatarManager = remember { AvatarPreferenceManager(context) }
@@ -977,7 +978,7 @@ fun ProfileSection(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 8.dp, bottom = 24.dp),
+            .padding(top = 16.dp, bottom = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (isLoggedIn) {

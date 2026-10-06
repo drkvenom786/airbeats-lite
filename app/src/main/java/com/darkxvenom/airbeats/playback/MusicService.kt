@@ -291,6 +291,7 @@ class MusicService :
     private var mediaController: MediaController? = null
 
     val automixItems = MutableStateFlow<List<MediaItem>>(emptyList())
+    val spotifyMatchCache = java.util.concurrent.ConcurrentHashMap<String, String>()
 
     private var consecutivePlaybackErr = 0
     private var infiniteQueueLoadJob: Job? = null
@@ -1129,6 +1130,32 @@ class MusicService :
         player.prepare()
     }
 
+    fun removeSongFromQueue(songId: String) {
+        val count = player.mediaItemCount
+        if (count == 0) return
+
+        val currentIndex = player.currentMediaItemIndex
+        val isCurrentPlaying = (currentIndex in 0 until count) && player.getMediaItemAt(currentIndex).mediaId == songId
+
+        for (i in count - 1 downTo 0) {
+            if (player.getMediaItemAt(i).mediaId == songId) {
+                player.removeMediaItem(i)
+            }
+        }
+
+        automixItems.value = automixItems.value.filter { it.mediaId != songId }
+
+        if (isCurrentPlaying) {
+            if (player.mediaItemCount > 0) {
+                player.prepare()
+                player.play()
+            } else {
+                player.stop()
+                player.clearMediaItems()
+            }
+        }
+    }
+
     private fun toggleLibrary() {
         database.query {
             currentSong.value?.let {
@@ -1822,7 +1849,6 @@ class MusicService :
         }
 
         val songUrlCache = HashMap<String, CachedSongUrl>()
-        val spotifyMatchCache = HashMap<String, String>()
         
         return ResolvingDataSource.Factory(createCacheDataSource()) { dataSpec ->
             if (dataSpec.uri.scheme == "content" || dataSpec.uri.scheme == "file" || dataSpec.uri.scheme == "http" || dataSpec.uri.scheme == "https") {
@@ -2220,6 +2246,109 @@ class MusicService :
         super.onDestroy()
     }
 
+    private val cachedPlaybackLocks = java.util.concurrent.ConcurrentHashMap<String, Any>()
+
+    fun getCachedPlaybackFile(mediaId: String): java.io.File? {
+        if (mediaId.isBlank()) return null
+        val lock = cachedPlaybackLocks.computeIfAbsent(mediaId) { Any() }
+        synchronized(lock) {
+            try {
+                val playbackCacheDir = java.io.File(cacheDir, "cached_playback").apply { mkdirs() }
+                val safeFileName = mediaId.replace(Regex("[^a-zA-Z0-9_-]"), "_")
+
+                if (!downloadCache.isFullyCached(mediaId)) {
+                    playbackCacheDir.listFiles { _, name ->
+                        name.startsWith("cached_${safeFileName}.")
+                    }?.forEach { it.delete() }
+                    return null
+                }
+
+                val totalCachedBytes = downloadCache.getCachedBytes(mediaId, 0L, Long.MAX_VALUE)
+                if (totalCachedBytes < 300_000L) {
+                    return null
+                }
+
+                val existingFiles = playbackCacheDir.listFiles { _, name ->
+                    name.startsWith("cached_${safeFileName}.") && !name.endsWith(".tmp")
+                }
+
+                if (!existingFiles.isNullOrEmpty()) {
+                    val existing = existingFiles.first()
+                    if (existing.length() >= totalCachedBytes) {
+                        return existing
+                    } else {
+                        existing.delete()
+                    }
+                }
+
+                val spans = downloadCache.getCachedSpans(mediaId).sortedBy { it.position }
+                if (spans.isEmpty() || spans.first().position != 0L) {
+                    return null
+                }
+
+                var contiguousLength = 0L
+                for (span in spans) {
+                    if (span.position <= contiguousLength) {
+                        contiguousLength = maxOf(contiguousLength, span.position + span.length)
+                    } else {
+                        break
+                    }
+                }
+
+                if (contiguousLength < totalCachedBytes) {
+                    return null
+                }
+
+                val firstSpanFile = spans.first().file ?: return null
+                val headerBytes = ByteArray(32)
+                val bytesRead = runCatching {
+                    firstSpanFile.inputStream().use { it.read(headerBytes) }
+                }.getOrDefault(0)
+                if (bytesRead < 8) return null
+
+                val ext = com.darkxvenom.airbeats.utils.SaveToStorageUtil.detectExtension(headerBytes)
+                val targetFile = java.io.File(playbackCacheDir, "cached_${safeFileName}.$ext")
+                val tempFile = java.io.File(playbackCacheDir, "cached_${safeFileName}.$ext.tmp")
+
+                tempFile.outputStream().use { out ->
+                    var written = 0L
+                    for (span in spans) {
+                        if (span.position <= written) {
+                            val file = span.file ?: continue
+                            val skip = written - span.position
+                            file.inputStream().use { input ->
+                                if (skip > 0) input.skip(skip)
+                                val toCopy = (span.position + span.length) - written
+                                if (toCopy > 0) {
+                                    var remaining = toCopy
+                                    val buffer = ByteArray(8192)
+                                    while (remaining > 0) {
+                                        val r = input.read(buffer, 0, minOf(buffer.size.toLong(), remaining).toInt())
+                                        if (r == -1) break
+                                        out.write(buffer, 0, r)
+                                        remaining -= r
+                                        written += r
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (tempFile.exists() && tempFile.length() >= totalCachedBytes) {
+                    if (targetFile.exists()) targetFile.delete()
+                    if (tempFile.renameTo(targetFile)) {
+                        return targetFile
+                    }
+                }
+                tempFile.delete()
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed assembling cached playback file for $mediaId: ${e.message}")
+            }
+            return null
+        }
+    }
+
     suspend fun resolveAudioStreamForCast(mediaId: String): com.darkxvenom.airbeats.utils.ResolvedCastStream? {
         val localUri = withContext(Dispatchers.Main) {
             player.currentMediaItem?.takeIf { it.mediaId == mediaId }?.localConfiguration?.uri
@@ -2246,6 +2375,29 @@ class MusicService :
                 url = mediaId,
                 mimeType = detectedMime
             )
+        }
+
+        // Check if the song is available locally in downloadCache or playerCache (offline playback)
+        val candidateIds = if (mediaId.startsWith("sp:")) {
+            listOfNotNull(mediaId, spotifyMatchCache[mediaId])
+        } else {
+            listOf(mediaId)
+        }
+        for (candidateId in candidateIds) {
+            val cachedFile = getCachedPlaybackFile(candidateId)
+            if (cachedFile != null && cachedFile.length() > 0) {
+                val mimeType = when (cachedFile.extension) {
+                    "m4a", "mp4" -> "audio/mp4"
+                    "opus", "ogg" -> "audio/ogg"
+                    "flac" -> "audio/flac"
+                    "wav" -> "audio/wav"
+                    else -> "audio/mpeg"
+                }
+                return com.darkxvenom.airbeats.utils.ResolvedCastStream(
+                    url = android.net.Uri.fromFile(cachedFile).toString(),
+                    mimeType = mimeType
+                )
+            }
         }
 
         var actualMediaId = mediaId

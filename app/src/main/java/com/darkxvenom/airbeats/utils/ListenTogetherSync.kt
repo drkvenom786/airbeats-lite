@@ -1,10 +1,6 @@
 package com.darkxvenom.airbeats.utils
 
 import android.content.Context
-import android.net.ConnectivityManager
-import android.util.Log
-import androidx.core.content.getSystemService
-import com.darkxvenom.airbeats.constants.AudioQuality
 import com.darkxvenom.airbeats.innertube.models.WatchEndpoint
 import com.darkxvenom.airbeats.playback.PlayerConnection
 import com.darkxvenom.airbeats.playback.queues.YouTubeQueue
@@ -18,7 +14,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.math.abs
 
 enum class ListenTogetherConnectionMode {
@@ -214,7 +209,6 @@ object ListenTogetherSync {
                     hostDisplayName = _displayName.value,
                     audioStreamResolver = { songId ->
                         playerConnection?.service?.resolveAudioStreamForCast(songId)
-                            ?: resolveStreamDirectly(context, songId)
                     }
                 )
                 server.playbackState = ListenTogetherPlaybackState(
@@ -415,7 +409,7 @@ object ListenTogetherSync {
         }
     }
 
-    private suspend fun syncOnceLan(
+    private fun syncOnceLan(
         connection: PlayerConnection,
         session: ListenTogetherSession,
     ) {
@@ -453,27 +447,29 @@ object ListenTogetherSync {
         }
 
         val host = lanHostAddress ?: return
-        runCatching {
-            LanTogetherClient.getSession(host, session.participantId)
-        }.onSuccess { remoteSession ->
-            val keptSession = remoteSession.copy(participantId = session.participantId)
-            _session.value = keptSession
-            val remoteState = remoteSession.state ?: return@onSuccess
-            val now = System.currentTimeMillis()
+        scope.launch {
+            runCatching {
+                LanTogetherClient.getSession(host, session.participantId)
+            }.onSuccess { remoteSession ->
+                val keptSession = remoteSession.copy(participantId = session.participantId)
+                _session.value = keptSession
+                val remoteState = remoteSession.state ?: return@onSuccess
+                val now = System.currentTimeMillis()
 
-            if (remoteSession.stateVersion > lastAppliedVersion) {
-                applyRemoteState(connection, remoteSession)
-                lastAppliedVersion = remoteSession.stateVersion
-                return@onSuccess
-            }
+                if (remoteSession.stateVersion > lastAppliedVersion) {
+                    applyRemoteState(connection, remoteSession)
+                    lastAppliedVersion = remoteSession.stateVersion
+                    return@onSuccess
+                }
 
-            if (now > suppressLocalPublishUntil && localUserChangedPlayback(connection, remoteSession)) {
-                publishLocalStateLan(connection, host, keptSession)
-            } else {
-                softCorrectPosition(connection, remoteSession)
+                if (now > suppressLocalPublishUntil && localUserChangedPlayback(connection, remoteSession)) {
+                    publishLocalStateLan(connection, host, keptSession)
+                } else {
+                    softCorrectPosition(connection, remoteSession)
+                }
+            }.onFailure {
+                _message.value = it.message
             }
-        }.onFailure {
-            _message.value = it.message
         }
     }
 
@@ -622,50 +618,5 @@ object ListenTogetherSync {
         } else {
             state.positionMs
         }.coerceAtLeast(0)
-    }
-
-    private suspend fun resolveStreamDirectly(context: Context, songId: String): ResolvedCastStream? = withContext(Dispatchers.IO) {
-        try {
-            if (songId.startsWith("content://") || songId.startsWith("file://")) {
-                val uri = android.net.Uri.parse(songId)
-                val detectedMime = runCatching {
-                    if (uri.scheme == "content") context.contentResolver.getType(uri)
-                    else null
-                }.getOrNull()?.takeIf { it.isNotBlank() } ?: "audio/mpeg"
-                return@withContext ResolvedCastStream(url = songId, mimeType = detectedMime)
-            }
-
-            if (songId.startsWith("JS:")) {
-                val streamUrl = com.darkxvenom.airbeats.jiosaavn.JioSaavnApi.getStreamUrl(songId)
-                if (streamUrl != null) {
-                    return@withContext ResolvedCastStream(url = streamUrl, mimeType = "audio/mp4")
-                }
-            }
-
-            val connectivityManager = context.getSystemService<ConnectivityManager>() ?: return@withContext null
-            val playbackData = YTPlayerUtils.playerResponseForPlayback(
-                videoId = songId,
-                audioQuality = AudioQuality.AUTO,
-                connectivityManager = connectivityManager
-            ).getOrNull()
-
-            if (playbackData != null) {
-                val clientParam = android.net.Uri.parse(playbackData.streamUrl).getQueryParameter("c")?.trim().orEmpty()
-                val userAgent = StreamClientUtils.resolveUserAgent(clientParam)
-                val originReferer = StreamClientUtils.resolveOriginReferer(clientParam)
-                val headers = mutableMapOf<String, String>("User-Agent" to userAgent)
-                originReferer.origin?.let { headers["Origin"] = it }
-                originReferer.referer?.let { headers["Referer"] = it }
-
-                return@withContext ResolvedCastStream(
-                    url = playbackData.streamUrl,
-                    mimeType = playbackData.format.mimeType.split(";")[0],
-                    requestHeaders = headers
-                )
-            }
-        } catch (e: Exception) {
-            Log.e("ListenTogetherSync", "resolveStreamDirectly failed for $songId", e)
-        }
-        null
     }
 }

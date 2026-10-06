@@ -453,7 +453,10 @@ class LanTogetherServer(
     ).apply { if (total >= 0) addHeader("Content-Range", "bytes */$total") }
 
     private fun cors(response: Response): Response = response.apply {
-        applyCors(this)
+        addHeader("Access-Control-Allow-Origin", "*")
+        addHeader("Access-Control-Allow-Headers", "Range, Origin, Accept, Content-Type")
+        addHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS")
+        addHeader("Access-Control-Expose-Headers", "Content-Range, Accept-Ranges, Content-Length")
     }
 
     fun buildSessionSnapshot(participantId: String): ListenTogetherSession {
