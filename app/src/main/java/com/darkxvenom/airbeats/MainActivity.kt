@@ -277,7 +277,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.darkxvenom.airbeats.viewmodels.StatsViewModel
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.ui.input.pointer.pointerInput
-import com.darkxvenom.airbeats.constants.AodAutoActivationKey
 import kotlinx.coroutines.isActive
 
 @Suppress("DEPRECATION", "ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
@@ -1193,7 +1192,15 @@ class MainActivity : ComponentActivity() {
                                                     }
 
                                                     val selectedIndex = navigationItems.indexOfFirst { screen ->
-                                                        navBackStackEntry?.destination?.hierarchy?.any { it.route == screen.route } == true
+                                                        val currentRoute = navBackStackEntry?.destination?.route
+                                                        if (screen == Screens.Search) {
+                                                            currentRoute == Screens.Search.route ||
+                                                                    currentRoute == "search/" ||
+                                                                    currentRoute?.startsWith("search/") == true ||
+                                                                    currentRoute == "neon_search"
+                                                        } else {
+                                                            navBackStackEntry?.destination?.hierarchy?.any { it.route == screen.route } == true
+                                                        }
                                                     }.takeIf { it >= 0 } ?: 0
 
                                                     val onItemSelectedAction: (Int) -> Unit = { index ->
@@ -1201,9 +1208,13 @@ class MainActivity : ComponentActivity() {
                                                         val isSelected = index == selectedIndex
 
                                                         if (isSelected) {
-                                                            navController.currentBackStackEntry?.savedStateHandle?.set("scrollToTop", true)
-                                                            coroutineScope.launch {
-                                                                searchBarScrollBehavior.state.resetHeightOffset()
+                                                            if (screen == Screens.Search && navBackStackEntry?.destination?.route != Screens.Search.route) {
+                                                                navController.popBackStack(Screens.Search.route, inclusive = false)
+                                                            } else {
+                                                                navController.currentBackStackEntry?.savedStateHandle?.set("scrollToTop", true)
+                                                                coroutineScope.launch {
+                                                                    searchBarScrollBehavior.state.resetHeightOffset()
+                                                                }
                                                             }
                                                         } else {
                                                             navigateToScreen(navController, screen)
@@ -1407,8 +1418,16 @@ class MainActivity : ComponentActivity() {
         navController: NavHostController,
         screen: Screens
     ) {
+        if (screen == Screens.Home) {
+            if (!navController.popBackStack(Screens.Home.route, inclusive = false)) {
+                navController.navigate(Screens.Home.route) {
+                    launchSingleTop = true
+                }
+            }
+            return
+        }
         navController.navigate(screen.route) {
-            popUpTo(navController.graph.startDestinationId) {
+            popUpTo(Screens.Home.route) {
                 saveState = true
             }
             launchSingleTop = true

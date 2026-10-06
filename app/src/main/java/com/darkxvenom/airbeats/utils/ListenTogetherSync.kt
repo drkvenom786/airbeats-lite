@@ -415,7 +415,7 @@ object ListenTogetherSync {
         }
     }
 
-    private fun syncOnceLan(
+    private suspend fun syncOnceLan(
         connection: PlayerConnection,
         session: ListenTogetherSession,
     ) {
@@ -453,29 +453,27 @@ object ListenTogetherSync {
         }
 
         val host = lanHostAddress ?: return
-        scope.launch {
-            runCatching {
-                LanTogetherClient.getSession(host, session.participantId)
-            }.onSuccess { remoteSession ->
-                val keptSession = remoteSession.copy(participantId = session.participantId)
-                _session.value = keptSession
-                val remoteState = remoteSession.state ?: return@onSuccess
-                val now = System.currentTimeMillis()
+        runCatching {
+            LanTogetherClient.getSession(host, session.participantId)
+        }.onSuccess { remoteSession ->
+            val keptSession = remoteSession.copy(participantId = session.participantId)
+            _session.value = keptSession
+            val remoteState = remoteSession.state ?: return@onSuccess
+            val now = System.currentTimeMillis()
 
-                if (remoteSession.stateVersion > lastAppliedVersion) {
-                    applyRemoteState(connection, remoteSession)
-                    lastAppliedVersion = remoteSession.stateVersion
-                    return@onSuccess
-                }
-
-                if (now > suppressLocalPublishUntil && localUserChangedPlayback(connection, remoteSession)) {
-                    publishLocalStateLan(connection, host, keptSession)
-                } else {
-                    softCorrectPosition(connection, remoteSession)
-                }
-            }.onFailure {
-                _message.value = it.message
+            if (remoteSession.stateVersion > lastAppliedVersion) {
+                applyRemoteState(connection, remoteSession)
+                lastAppliedVersion = remoteSession.stateVersion
+                return@onSuccess
             }
+
+            if (now > suppressLocalPublishUntil && localUserChangedPlayback(connection, remoteSession)) {
+                publishLocalStateLan(connection, host, keptSession)
+            } else {
+                softCorrectPosition(connection, remoteSession)
+            }
+        }.onFailure {
+            _message.value = it.message
         }
     }
 

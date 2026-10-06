@@ -609,18 +609,6 @@ fun PlayerMenu(
                         )
                     }
 
-                    item {
-                        androidx.compose.material3.ListItem(
-                            headlineContent = { Text(stringResource(R.string.always_on_display)) },
-                            leadingContent = { Icon(painterResource(R.drawable.dark_mode), contentDescription = null) },
-                            colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = Color.Transparent),
-                            modifier = Modifier.clickable {
-                                navController.navigate("always_on_display")
-                                playerBottomSheetState.collapseSoft()
-                                onDismiss()
-                            }
-                        )
-                    }
 
                     item {
                         androidx.compose.material3.ListItem(

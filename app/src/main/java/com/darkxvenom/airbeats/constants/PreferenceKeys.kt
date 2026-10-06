@@ -583,36 +583,6 @@ val CountryCodeToName =
         "ZW" to "Zimbabwe",
     )
 
-enum class AodStyle {
-    CLASSIC, BACKGROUND, MINIMAL, LARGE, SPOTLIGHT
-}
-
-enum class AodArtShape {
-    ROUNDED, CIRCLE, SQUIRCLE, DIAMOND, HEXAGON, STAR, ARCH, PETAL
-}
-
-enum class AodControlStyle {
-    ROUNDED, SQUARE, ACCENT, MINIMAL_FLAT
-}
-
-val AodStyleKey = stringPreferencesKey("aod_style")
-val AodArtShapeKey = stringPreferencesKey("aod_art_shape")
-val AodDarknessKey = floatPreferencesKey("aod_darkness")
-val AodArtSizeKey = floatPreferencesKey("aod_art_size")
-val AodShowTitleKey = booleanPreferencesKey("aod_show_title")
-val AodShowArtistKey = booleanPreferencesKey("aod_show_artist")
-val AodShowTimeKey = booleanPreferencesKey("aod_show_time_labels")
-val AodShowProgressKey = booleanPreferencesKey("aod_show_progress")
-val AodShowControlsKey = booleanPreferencesKey("aod_show_controls")
-val AodAutoActivationKey = intPreferencesKey("aod_auto_activation_seconds")
-val AodFullscreenKey = booleanPreferencesKey("aod_fullscreen_mode")
-val AodSpotlightIntensityKey = floatPreferencesKey("aod_spotlight_intensity")
-val AodSpotlightPulseKey = booleanPreferencesKey("aod_spotlight_pulse")
-val AodTransitionDurationKey = intPreferencesKey("aod_transition_duration")
-val AodControlStyleKey = stringPreferencesKey("aod_control_style")
-val AodTextScaleKey = floatPreferencesKey("aod_text_scale")
-val AodShowClockKey = booleanPreferencesKey("aod_show_clock")
-val AodClockFormatKey = booleanPreferencesKey("aod_clock_24h")
 val DisableBlurKey = booleanPreferencesKey("disableBlur")
 
 enum class LyricsScreenStyle {

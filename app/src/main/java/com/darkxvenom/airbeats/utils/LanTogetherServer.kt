@@ -406,6 +406,7 @@ class LanTogetherServer(
             return cors(response)
         } catch (error: Exception) {
             input?.close()
+            cachedResolvedStream = null
             Timber.e(error, "LanTogetherServer: error streaming audio for $targetSongId")
             return cors(newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "text/plain", "Stream unavailable"))
         } finally {
@@ -452,10 +453,7 @@ class LanTogetherServer(
     ).apply { if (total >= 0) addHeader("Content-Range", "bytes */$total") }
 
     private fun cors(response: Response): Response = response.apply {
-        addHeader("Access-Control-Allow-Origin", "*")
-        addHeader("Access-Control-Allow-Headers", "Range, Origin, Accept, Content-Type")
-        addHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS")
-        addHeader("Access-Control-Expose-Headers", "Content-Range, Accept-Ranges, Content-Length")
+        applyCors(this)
     }
 
     fun buildSessionSnapshot(participantId: String): ListenTogetherSession {
@@ -1955,6 +1953,9 @@ class LanTogetherServer(
         if (heroPlayIcon) heroPlayIcon.innerHTML = playSvg;
         if (heroPlayText) heroPlayText.innerText = 'Start Listening';
         if (waveAnim) waveAnim.style.display = 'none';
+        if (statusTag) {
+          statusTag.innerText = (lastServerState && lastServerState.songId) ? 'Ready' : 'Connected';
+        }
       } else if (audio.paused) {
         if (heroPlayIcon) heroPlayIcon.innerHTML = playSvg;
         if (heroPlayText) heroPlayText.innerText = 'Resume Audio';
@@ -2477,11 +2478,42 @@ Listen along: ' + window.location.href;
           } catch (e) {}
         }
       };
+      xhr.ontimeout = function() {
+        if (statusTag) statusTag.innerText = 'Reconnecting...';
+        if (waveAnim) waveAnim.style.display = 'none';
+      };
       xhr.onerror = function() {
         if (statusTag) statusTag.innerText = 'Reconnecting...';
         if (waveAnim) waveAnim.style.display = 'none';
       };
       xhr.send();
+    }
+
+    if (audio) {
+      audio.addEventListener('loadstart', function() {
+        if (isAudioActivated && statusTag) statusTag.innerText = 'Connecting audio...';
+      });
+      audio.addEventListener('waiting', function() {
+        if (isAudioActivated && statusTag) statusTag.innerText = 'Buffering...';
+      });
+      audio.addEventListener('playing', function() {
+        if (isAudioActivated) {
+          if (statusTag) statusTag.innerText = 'Playing';
+          if (waveAnim) waveAnim.style.display = 'inline-flex';
+        }
+      });
+      audio.addEventListener('pause', function() {
+        if (isAudioActivated) {
+          if (statusTag) statusTag.innerText = isUserPaused ? 'Paused Locally' : 'Paused by Host';
+          if (waveAnim) waveAnim.style.display = 'none';
+        }
+      });
+      audio.addEventListener('error', function() {
+        if (isAudioActivated) {
+          if (statusTag) statusTag.innerText = 'Stream error';
+          if (waveAnim) waveAnim.style.display = 'none';
+        }
+      });
     }
 
     setInterval(fetchState, 1200);
@@ -2513,8 +2545,8 @@ Listen along: ' + window.location.href;
                 }
             }
 
-            // 2. Fallback: NetworkInterface for Wi-Fi / Mobile Hotspot (e.g. 192.168.43.1)
-            return runCatching {
+            // 2. Fallback: NetworkInterface for Wi-Fi / Mobile Hotspot / Ethernet / VPS interfaces
+            val fromInterface = runCatching {
                 NetworkInterface.getNetworkInterfaces().toList()
                     .asSequence()
                     .filter { it.isUp && !it.isLoopback }
@@ -2523,6 +2555,8 @@ Listen along: ' + window.location.href;
                     .map { it.hostAddress }
                     .firstOrNull { !it.isNullOrBlank() && it != "127.0.0.1" }
             }.getOrNull()
+
+            return if (!fromInterface.isNullOrBlank()) fromInterface else "127.0.0.1"
         }
     }
 }
