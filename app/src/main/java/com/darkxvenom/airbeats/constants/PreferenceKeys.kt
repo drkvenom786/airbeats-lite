@@ -615,4 +615,11 @@ val AodShowClockKey = booleanPreferencesKey("aod_show_clock")
 val AodClockFormatKey = booleanPreferencesKey("aod_clock_24h")
 val DisableBlurKey = booleanPreferencesKey("disableBlur")
 
+enum class LyricsScreenStyle {
+    LYRICS_1,
+    LYRICS_2
+}
+
+val LyricsScreenStyleKey = stringPreferencesKey("lyrics_screen_style")
+
 

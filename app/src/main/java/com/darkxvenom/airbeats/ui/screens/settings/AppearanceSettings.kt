@@ -116,6 +116,10 @@ fun AppearanceSettings(
     )
     val (lyricsClick, onLyricsClickChange) = rememberPreference(LyricsClickKey, defaultValue = true)
     val (enableNewLyricsScreen, onEnableNewLyricsScreenChange) = rememberPreference(EnableNewLyricsScreenKey, defaultValue = true)
+    val (lyricsScreenStyle, onLyricsScreenStyleChange) = rememberEnumPreference(
+        LyricsScreenStyleKey,
+        defaultValue = LyricsScreenStyle.LYRICS_2
+    )
     val (sliderStyle, onSliderStyleChange) = rememberEnumPreference(
         SliderStyleKey,
         defaultValue = SliderStyle.SQUIGGLY
@@ -678,6 +682,19 @@ fun AppearanceSettings(
                             description = stringResource(R.string.enable_new_lyrics_screen_desc),
                             checked = enableNewLyricsScreen,
                             onCheckedChange = onEnableNewLyricsScreenChange
+                        )},
+
+                        {EnumListPreference(
+                            title = { Text("Lyrics Screen Style") },
+                            icon = { Icon(painterResource(R.drawable.lyrics), null) },
+                            selectedValue = lyricsScreenStyle,
+                            onValueSelected = onLyricsScreenStyleChange,
+                            valueText = {
+                                when (it) {
+                                    LyricsScreenStyle.LYRICS_1 -> "Lyrics 1 (Classic)"
+                                    LyricsScreenStyle.LYRICS_2 -> "Lyrics 2 (Modern / Apple Style)"
+                                }
+                            }
                         )}
                     )
                 )
